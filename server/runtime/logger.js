@@ -9,6 +9,8 @@ var filelogger;
 var logDir = '';
 
 const env = process.env.NODE_ENV || 'development';
+const logFileName = 'fuxa.log';
+const errorFileName = 'fuxa-err.log';
 
 var log = module.exports = {
 
@@ -34,17 +36,17 @@ var log = module.exports = {
                 // }),                
                 new (transports.File)({
                     level: 'info',
-                    filename: `${logDir}/fuxa.log`,
-                    maxsize:  5242880, // 5MB
+                    filename: `${logDir}/${logFileName}`,
+                    maxsize: 1048576, // 1MB
                     maxFiles: 5,
                     json: false
                 }),
                 new (transports.File)({
                     level: 'error',
-                    filename: `${logDir}/fuxa-err.log`,
-                    maxsize: 5242880, // 5MB
+                    filename: `${logDir}/${errorFileName}`,
+                    maxsize: 1048576,//5242880, // 1MB
                     maxFiles: 5,
-                    json: false                  
+                    json: false
                 })
             ]
         });
@@ -53,7 +55,7 @@ var log = module.exports = {
 
     debug: function (str, flag) {
         //	debug color: Cyan
-        console.log("\x1B[36m"  + new Date().toISOString() + ' [DBG]  ' + "\t" + processInput(str) + "\x1B[39m");
+        console.log("\x1B[36m" + new Date().toISOString() + ' [DBG]  ' + "\t" + processInput(str) + "\x1B[39m");
         if (initialized && (null == flag || true === flag)) {
             filelogger.debug(str);
         }
@@ -87,6 +89,15 @@ var log = module.exports = {
         if (initialized && (null == flag || true === flag)) {
             filelogger.error(str);
         }
+    },
+    logDir: function () {
+        return logDir;
+    },
+    logFile: function () {
+        return `${logDir}/${logFileName}`;
+    },
+    errorFile: function () {
+        return `${logDir}/${errorFileName}`;
     }
 }
 

@@ -217,8 +217,8 @@ export class GaugesManager {
      */
     emitBindedSignals(domViewId: string) {
         this.hmiService.emitMappedSignalsGauge(domViewId);
-    }
-    
+    }    
+
     /**
      * called from fuxa-view, bind dom view, gauge with signal (for animation) and event
      * @param gaugekey

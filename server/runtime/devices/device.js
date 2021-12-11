@@ -11,6 +11,7 @@ var HTTPclient = require('./httprequest');
 var MQTTclient = require('./mqtt');
 var AzIoTclient = require('./azure');
 var INMATIONclient = require('./inmation');
+var EthernetIPclient = require('./ethernetip');
 // var TEMPLATEclient = require('./template');
 
 var deviceCloseTimeout = 1000;
@@ -71,6 +72,11 @@ function Device(data, runtime) {
             return null;
         }
         comm = INMATIONclient.create(data, logger, events, manager);     
+    } else if (data.type === DeviceEnum.EthernetIP) {
+        if (!EthernetIPclient) {
+            return null;
+        }
+        comm = EthernetIPclient.create(data, logger, events, manager);     
     }
     // else if (data.type === DeviceEnum.Template) {
     //     if (!TEMPLATEclient) {
@@ -351,6 +357,8 @@ function loadPlugin(type, module) {
         AzIoTclient = require(module);
     } else if (type === DeviceEnum.inmation) {
         INMATIONclient = require(module);
+    } else if (type === DeviceEnum.EthernetIP) {
+        EthernetIPclient = require(module);
     }
 }
 
@@ -378,6 +386,7 @@ var DeviceEnum = {
     WebAPI: 'WebAPI',
     MQTTclient: 'MQTTclient',
     AzIoTclient: 'AzIoTclient',
+    EthernetIP: 'EthernetIP',
     inmation: 'inmation'
     // Template: 'template'
 }
