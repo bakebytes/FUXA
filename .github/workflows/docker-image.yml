@@ -3,8 +3,6 @@ name: Docker Image CI
 on:
   push:
     branches: [ bakebytes ]
-  pull_request:
-    branches: [ bakebytes ]
 
 env:
   REGISTRY: ghcr.io
