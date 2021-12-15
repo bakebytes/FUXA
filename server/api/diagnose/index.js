@@ -33,9 +33,6 @@ module.exports = {
             var groups = checkGroupsFnc(req);
             if (res.statusCode === 403) {
                 runtime.logger.error("api get logsdir: Tocken Expired");
-            } else if (authJwt.adminGroups.indexOf(groups) === -1) {
-                res.status(401).json({ error: "unauthorized_error", message: "Unauthorized!" });
-                runtime.logger.error("api get logsdir: Unauthorized!");
             } else {
                 try {
                     var logPath = runtime.logger.logDir();
@@ -62,9 +59,6 @@ module.exports = {
             var groups = checkGroupsFnc(req);
             if (res.statusCode === 403) {
                 runtime.logger.error("api get logs: Tocken Expired");
-            } else if (authJwt.adminGroups.indexOf(groups) === -1) {
-                res.status(401).json({ error: "unauthorized_error", message: "Unauthorized!" });
-                runtime.logger.error("api get logs: Unauthorized!");
             } else {
                 try {
                     var logFileName = req.query.file || 'fuxa.log';
