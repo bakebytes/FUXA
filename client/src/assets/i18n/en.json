@@ -390,8 +390,8 @@
     "shapes.event-onsetinput": "Set from Input",
     "shapes.event-onclose": "Close",
     "shapes.event-setvalue-set": "set",
-    "shapes.event-setvalue-add": "add",
-    "shapes.event-setvalue-remove": "remove",
+    "shapes.event-setvalue-add": "increase",
+    "shapes.event-setvalue-remove": "decrease",
     
     "pipe.property-props": "Property",
     "pipe.property-border-width": "Outline weight",
