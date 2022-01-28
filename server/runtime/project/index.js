@@ -98,7 +98,7 @@ function load() {
                             }).catch(function (err) {
                                 logger.error(`project.prjstorage-failed-to-load! '${prjstorage.TableType.ALARMS}' ${err}`);
                                 callback(err);
-                            }); 
+                            });
                         },
                         // step 3 get notifications
                         function (callback) {
@@ -168,6 +168,10 @@ function setProjectData(cmd, value) {
                 section.table = prjstorage.TableType.GENERAL;
                 section.name = cmd;
                 setCharts(value);
+            } else if (cmd === ProjectDataCmdType.Graphs) {
+                section.table = prjstorage.TableType.GENERAL;
+                section.name = cmd;
+                setGraphs(value);
             } else if (cmd === ProjectDataCmdType.SetText) {
                 section.table = prjstorage.TableType.TEXTS;
                 section.name = value.name;
@@ -282,6 +286,14 @@ function setHmiLayout(layout) {
  */
 function setCharts(charts) {
     data.charts = charts;
+}
+
+/**
+ * Set Graphs  
+ * @param {*} graphs 
+ */
+ function setGraphs(graphs) {
+    data.graphs = graphs;
 }
 
 /**
@@ -471,9 +483,9 @@ function setProject(prjcontent) {
                             for (var i = 0; i < notifications.length; i++) {
                                 scs.push({ table: prjstorage.TableType.NOTIFICATIONS, name: notifications[i].id, value: notifications[i] });
                             }
-                        }                        
+                        }     
                     } else {
-                        // charts, version
+                        // charts, graphs, version
                         scs.push({ table: prjstorage.TableType.GENERAL, name: key, value: prjcontent[key] });
                     }
                 });
@@ -529,7 +541,7 @@ function getTexts() {
     return new Promise(function (resolve, reject) {
         prjstorage.getSection(prjstorage.TableType.TEXTS).then(drows => {
             if (drows.length > 0) {
-                var texts = []
+                var texts = [];
                 for (var id = 0; id < drows.length; id++) {
                     texts.push(JSON.parse(drows[id].value));
                 }
@@ -551,7 +563,7 @@ function getAlarms() {
     return new Promise(function (resolve, reject) {
         prjstorage.getSection(prjstorage.TableType.ALARMS).then(drows => {
             if (drows.length > 0) {
-                var alarms = []
+                var alarms = [];
                 for (var id = 0; id < drows.length; id++) {
                     alarms.push(JSON.parse(drows[id].value));
                 }
@@ -569,11 +581,11 @@ function getAlarms() {
 /**
  * Get the notifications 
  */
-function getNotifications() {
+ function getNotifications() {
     return new Promise(function (resolve, reject) {
         prjstorage.getSection(prjstorage.TableType.NOTIFICATIONS).then(drows => {
             if (drows.length > 0) {
-                var notifications = []
+                var notifications = [];
                 for (var id = 0; id < drows.length; id++) {
                     notifications.push(JSON.parse(drows[id].value));
                 }
@@ -671,6 +683,7 @@ const ProjectDataCmdType = {
     DelView: 'del-view',
     HmiLayout: 'layout',
     Charts: 'charts',
+    Graphs: 'graphs',
     SetText: 'set-text',
     SetText: 'set-text',
     DelText: 'del-text',
@@ -685,6 +698,7 @@ module.exports = {
     load: load,
     getDevices: getDevices,
     getAlarms: getAlarms,
+    getNotifications: getNotifications,
     getDeviceProperty: getDeviceProperty,
     setDeviceProperty: setDeviceProperty,
     setProjectData: setProjectData,

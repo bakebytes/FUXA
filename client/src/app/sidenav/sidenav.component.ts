@@ -2,7 +2,7 @@ import { Component, AfterViewInit, Input, Output, EventEmitter, ChangeDetectorRe
 import { Router } from '@angular/router';
 import { MatSidenav } from '@angular/material';
 
-import { LayoutSettings, NaviItem, NaviModeType, NavigationSettings } from '../_models/hmi';
+import { LayoutSettings, NaviItem, NaviModeType, NavigationSettings, LinkType } from '../_models/hmi';
 
 @Component({
     selector: 'app-sidenav',
@@ -14,6 +14,9 @@ export class SidenavComponent implements AfterViewInit, AfterContentChecked {
     @Input() sidenav: MatSidenav;
     @Output() goToPage: EventEmitter<string> = new EventEmitter();
     @Output() goToLink: EventEmitter<string> = new EventEmitter();
+
+    viewAsLink = LinkType.address;
+    viewAsAlarms = LinkType.alarms;
 
     layout = null;
     showSidenav = false;
@@ -31,10 +34,10 @@ export class SidenavComponent implements AfterViewInit, AfterContentChecked {
     }
 
     onGoTo(item: NaviItem) {
-        if (item.view) {
-            this.goToPage.emit(item.view);
-        } else if (item.link) {
+        if (item.link && item.view === this.viewAsLink) {
             this.goToLink.emit(item.link);
+        } else if (item.view ) {
+            this.goToPage.emit(item.view);
         }
     }
 

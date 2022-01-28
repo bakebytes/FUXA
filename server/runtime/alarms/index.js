@@ -88,27 +88,38 @@ function AlarmsManager(_runtime) {
     }
 
     /**
-     * Return the alarms value (active/passive alarms count), { highhigh: <count>, high: <count>, low: <count>, info: <count> } 
+     * Return the current active alarms values
      */
     this.getAlarmsValues = function () {
-        return new Promise(function (resolve, reject) {
-            var result = [];
-            Object.keys(alarms).forEach(alrkey => {
-                alarms[alrkey].forEach(alr => {
-                    if (alr.status && alr.type !== AlarmsTypes.ACTION) {
-                        var alritem = { name: alr.getId(), type: alr.type, ontime: alr.ontime, offtime: alr.offtime, acktime: alr.acktime, 
-                            status: alr.status, text: alr.subproperty.text, group: alr.subproperty.group, 
-                            bkcolor: alr.subproperty.bkcolor, color: alr.subproperty.color, toack: alr.isToAck() };
-                        result.push(alritem);
-                    }
-                });
+        var result = [];
+        Object.keys(alarms).forEach(alrkey => {
+            alarms[alrkey].forEach(alr => {
+                if (alr.status && alr.type !== AlarmsTypes.ACTION) {
+                    var alritem = { name: alr.getId(), type: alr.type, ontime: alr.ontime, offtime: alr.offtime, acktime: alr.acktime, 
+                        status: alr.status, text: alr.subproperty.text, group: alr.subproperty.group, 
+                        bkcolor: alr.subproperty.bkcolor, color: alr.subproperty.color, toack: alr.isToAck() };
+                    result.push(alritem);
+                }
             });
-            resolve(result);
         });
+        return result;
+    }
+
+    this.getAlarmsString = function (type) {
+        var result = '';
+        Object.keys(alarms).forEach(alrkey => {
+            alarms[alrkey].forEach(alr => {
+                if (alr.status && alr.type === type && alr.ontime) {
+                    var ontime = new Date(alr.ontime);
+                    result += `${ontime.toLocaleString()} - ${alr.type} - ${alr.subproperty.text || ''} - ${alr.status} - ${alr.subproperty.group || ''}\n`;
+                }
+            });
+        });
+        return result;
     }
 
     /**
-     * Return the alarms hitory
+     * Return the alarms history
      */
     this.getAlarmsHistory = function (from, to) {
         return new Promise(function (resolve, reject) {
@@ -213,7 +224,7 @@ function AlarmsManager(_runtime) {
             if (_checkWorking(true)) {
                 _checkAlarms().then(function (changed) {
                     if (changed) {
-                        _emitAlarmsChanged();
+                        _emitAlarmsChanged(true);
                     }
                     _checkWorking(false);
                 }).catch(function (err) {
@@ -310,7 +321,7 @@ function AlarmsManager(_runtime) {
                                 alarmsFound++;
                             }
                             if (_isAlarmEnabled(alr.info)) {
-                                var alarm = new Alarm(alr.name, AlarmsTypes.LOW, alr.info, alr.property);
+                                var alarm = new Alarm(alr.name, AlarmsTypes.INFO, alr.info, alr.property);
                                 alarms[alr.property.variableId].push(alarm);
                                 alarmsFound++;
                             }

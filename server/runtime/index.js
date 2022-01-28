@@ -119,7 +119,7 @@ function init(_io, _api, _settings, _log, eventsMain) {
                     }
                 } else if (message.cmd === 'set' && message.var) {
                     devices.setDeviceValue(message.var.source, message.var.id, message.var.value, message.fnc);
-                    logger.info(`${Events.IoEventTypes.DEVICE_VALUES}: ${message.var.source} ${message.var.id} = ${message.var.value}`);
+                    // logger.info(`${Events.IoEventTypes.DEVICE_VALUES}: ${message.var.source} ${message.var.id} = ${message.var.value}`);
                 }
             } catch (err) {
                 logger.error(`${Events.IoEventTypes.DEVICE_VALUES}: ${err}`);
@@ -259,12 +259,12 @@ function start() {
                 reject();
             });
             // start notificator manager
-            // notificatorMgr.start().then(function () {
-            //     resolve(true);
-            // }).catch(function (err) {
-            //     logger.error('runtime.failed-to-start-notificator: ' + err);
-            //     reject();
-            // });
+            notificatorMgr.start().then(function () {
+                resolve(true);
+            }).catch(function (err) {
+                logger.error('runtime.failed-to-start-notificator: ' + err);
+                reject();
+            });
         }).catch(function (err) {
             logger.error('runtime.failed-to-start: ' + err);
             reject();
@@ -282,6 +282,10 @@ function stop() {
         }).catch(function (err) {
             logger.error('runtime.failed-to-stop-alarms: ' + err);
         });
+        notificatorMgr.stop().then(function () {
+        }).catch(function (err) {
+            logger.error('runtime.failed-to-stop-notificatorMgr: ' + err);
+        });
         resolve(true);
     });
 }
@@ -297,6 +301,8 @@ function update(cmd, data) {
                 alarmsMgr.reset();
             } else if (cmd === project.ProjectDataCmdType.SetAlarm || cmd === project.ProjectDataCmdType.DelAlarm) {
                 alarmsMgr.reset();
+                notificatorMgr.reset();
+            } else if (cmd === project.ProjectDataCmdType.SetNotification || cmd === project.ProjectDataCmdType.DelNotification) {
                 notificatorMgr.reset();
             }
             resolve(true);
@@ -317,6 +323,7 @@ function restart(clear) {
             stop().then(function () {
                 if (clear) {
                     alarmsMgr.clear();
+                    notificatorMgr.clear();
                 }
                 logger.info('runtime.update-project: stopped!', true);
                 start().then(function () {
@@ -394,6 +401,7 @@ function updateAlarmsStatus() {
             }
         });
     } catch (err) {
+        logger.error('runtime.failed-to-update-alarms: ' + err);
     }
 }
 

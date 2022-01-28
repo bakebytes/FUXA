@@ -7,6 +7,7 @@ import { environment } from '../../environments/environment';
 import { ProjectData, ProjectDataCmdType } from '../_models/project';
 import { Hmi, View, LayoutSettings } from '../_models/hmi';
 import { Chart } from '../_models/chart';
+import { Graph } from '../_models/graph';
 import { Alarm, AlarmQuery } from '../_models/alarm';
 import { Notification } from '../_models/notification';
 import { Text } from '../_models/text';
@@ -387,6 +388,42 @@ export class ProjectService {
     }
     //#endregion
 
+    //#region Graph resource
+    /**
+     * get graphs list
+     * @returns 
+     */
+    getGraphs(): Graph[] {
+        return (this.projectData) ? (this.projectData.graphs) ? this.projectData.graphs : [] : null;
+    }
+
+    /**
+     * get the graph of id
+     * @param id 
+     * @returns 
+     */
+    getGraph(id: string) {
+        for (let i = 0; i < this.projectData.graphs.length; i++) {
+            if (this.projectData.graphs[i].id === id) {
+                return this.projectData.graphs[i];
+            }
+        }
+    }
+
+    /**
+     * save the graphs to project
+     * @param graphs
+     */
+    setGraphs(graphs: Graph[]) {
+        this.projectData.graphs = graphs;
+        this.storage.setServerProjectData(ProjectDataCmdType.Graphs, graphs, this.projectData).subscribe(result => {
+        }, err => {
+            console.error(err);
+            this.notifySaveError(err);
+        });
+    }
+    //#endregion
+
     //#region Alarms resource    
     /**
      * get alarms resource
@@ -467,7 +504,7 @@ export class ProjectService {
     }
     //#endregion
 
-        //#region Notifications resource    
+    //#region Notifications resource
     /**
      * get notifications resource
      */
