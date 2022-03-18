@@ -3,11 +3,13 @@ import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 import { TranslateService } from '@ngx-translate/core';
 
 import { SelOptionsComponent } from '../../gui-helpers/sel-options/sel-options.component';
+import { ProjectService } from '../../_services/project.service';
 
 import { LayoutSettings, NaviModeType, NaviItem, NaviItemType, NotificationModeType, ZoomModeType, InputModeType, HeaderBarModeType, LinkType } from '../../_models/hmi';
 import { Define } from '../../_helpers/define';
 import { UserGroups } from '../../_models/user';
 import { Utils } from '../../_helpers/utils';
+import { UploadFile } from '../../_models/project';
 
 @Component({
     selector: 'app-layout-property',
@@ -86,6 +88,7 @@ export class LayoutPropertyComponent implements OnInit {
             if (result) {
                 if (item) {
                     item.icon = result.item.icon;
+                    item.image = result.item.image;
                     item.text = result.item.text;
                     item.view = result.item.view;
                     item.link = result.item.link;
@@ -93,6 +96,7 @@ export class LayoutPropertyComponent implements OnInit {
                 } else {
                     let nitem = new NaviItem();
                     nitem.icon = result.item.icon;
+                    nitem.image = result.item.image;
                     nitem.text = result.item.text;
                     nitem.view = result.item.view;
                     nitem.link = result.item.link;
@@ -121,6 +125,7 @@ export class LayoutPropertyComponent implements OnInit {
         this.draggableListLeft.forEach(item => {
             let nitem = new NaviItem();
             nitem.icon = item.icon;
+            nitem.image = item.image;
             nitem.text = item.text;
             nitem.view = item.view;
             nitem.link = item.link;
@@ -160,7 +165,7 @@ export class DialogMenuItem {
     
     @ViewChild(SelOptionsComponent) seloptions: SelOptionsComponent;
 
-    constructor(
+    constructor(public projectService: ProjectService,
         public dialogRef: MatDialogRef<DialogMenuItem>,
         @Inject(MAT_DIALOG_DATA) public data: any) { 
             this.selectedGroups = UserGroups.ValueToGroups(this.data.permission);
@@ -173,5 +178,33 @@ export class DialogMenuItem {
     onOkClick(): void {
 		this.data.permission = UserGroups.GroupsToValue(this.seloptions.selected);
         this.dialogRef.close(this.data);
+    }
+
+    /**
+     * add image to view
+     * @param event selected file
+     */
+    onSetImage(event) {
+        if (event.target.files) {
+            let filename = event.target.files[0].name;
+            let fileToUpload = { type: filename.split('.').pop().toLowerCase(), name: filename.split('/').pop(), data: null };
+            let reader = new FileReader();
+            reader.onload = () => {
+                try {
+                    fileToUpload.data = reader.result;
+                    this.projectService.uploadFile(fileToUpload).subscribe((result: UploadFile) => {
+                        this.data.item.image = result.location;
+                        this.data.item.icon = null;
+                    });
+                } catch (err) {
+                    console.error(err);
+                }
+            }
+            if (fileToUpload.type === 'svg') {
+                reader.readAsText(event.target.files[0]);
+            } else {
+                reader.readAsDataURL(event.target.files[0]);
+            }
+        }
     }
 }

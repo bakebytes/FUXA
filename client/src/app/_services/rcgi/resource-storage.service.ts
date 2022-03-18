@@ -4,8 +4,9 @@ import { Observable } from 'rxjs';
 
 import { ResWebApiService } from './reswebapi.service';
 import { Device } from '../../_models/device';
-import { ProjectData, ProjectDataCmdType } from '../../_models/project';
+import { ProjectData, ProjectDataCmdType, UploadFile } from '../../_models/project';
 import { AlarmQuery } from '../../_models/alarm';
+import { DaqQuery } from '../../_models/hmi';
 
 @Injectable()
 export abstract class ResourceStorageService {
@@ -23,7 +24,9 @@ export abstract class ResourceStorageService {
     public abstract setServerProject(prj: ProjectData);
 
     public abstract setServerProjectData(cmd: ProjectDataCmdType, data: any, prj: ProjectData);
-    
+
+    public abstract uploadFile(file: any): Observable<UploadFile>;
+
     public abstract getDeviceSecurity(id: string): Observable<any>;
 
     public abstract setDeviceSecurity(id: string, value: string): Observable<any>;
@@ -37,6 +40,8 @@ export abstract class ResourceStorageService {
     public abstract checkServer(): Observable<any>;
 
     public abstract getAppId(): string;
+
+    public abstract getDaqValues(query: DaqQuery): Observable<any>;
     
     public static defileProject(source: ProjectData): ProjectData {
         if (!source) return source;

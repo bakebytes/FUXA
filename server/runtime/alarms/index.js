@@ -90,7 +90,7 @@ function AlarmsManager(_runtime) {
     /**
      * Return the current active alarms values
      */
-    this.getAlarmsValues = function () {
+    this.getAlarmsValues = function (query, groups) {
         var result = [];
         Object.keys(alarms).forEach(alrkey => {
             alarms[alrkey].forEach(alr => {
@@ -98,7 +98,20 @@ function AlarmsManager(_runtime) {
                     var alritem = { name: alr.getId(), type: alr.type, ontime: alr.ontime, offtime: alr.offtime, acktime: alr.acktime, 
                         status: alr.status, text: alr.subproperty.text, group: alr.subproperty.group, 
                         bkcolor: alr.subproperty.bkcolor, color: alr.subproperty.color, toack: alr.isToAck() };
-                    result.push(alritem);
+                    var toshow = true;
+                    var canack = true;
+                    if (alr.tagproperty && alr.tagproperty.permission) {
+                        var mask = (alr.tagproperty.permission >> 8);
+                        toshow = (mask) ? mask & groups : 1;
+                        mask = (alr.tagproperty.permission & 255);
+                        canack = (mask) ? mask & groups : 1;
+                    }
+                    if (toshow) {
+                        if (!canack) {
+                            alritem.toack = 0;
+                        }
+                        result.push(alritem);
+                    }
                 }
             });
         });
@@ -121,10 +134,10 @@ function AlarmsManager(_runtime) {
     /**
      * Return the alarms history
      */
-    this.getAlarmsHistory = function (from, to) {
+    this.getAlarmsHistory = function (query, groups) {
         return new Promise(function (resolve, reject) {
             var history = [];
-            alarmstorage.getAlarmsHistory(from, to).then(result => {
+            alarmstorage.getAlarmsHistory(query.from, query.to).then(result => {
                 for (var i = 0; i < result.length; i++) {
                     var alr = new AlarmHistory(result[i].nametype);
                     alr.status = result[i].status;
@@ -135,7 +148,14 @@ function AlarmsManager(_runtime) {
                     alr.userack = result[i].userack;
                     alr.group = result[i].grp;
                     if (alr.ontime) {
-                        history.push(alr);
+                        var toshow = true;
+                        if (alarmsProperty[alr.name] && alarmsProperty[alr.name].property) {
+                            var mask = (alarmsProperty[alr.name].property.permission >> 8);
+                            var toshow = (mask) ? mask & groups : 1;    
+                        }
+                        if (toshow) {
+                            history.push(alr);
+                        }
                     }
                     // add action or defined colors
                     if (alr.type === AlarmsTypes.ACTION) {
@@ -159,25 +179,36 @@ function AlarmsManager(_runtime) {
      * @param {*} alarmname 
      * @returns 
      */
-    this.setAlarmAck = function (alarmname) {
+    this.setAlarmAck = function (alarmname, userId, groups) {
         return new Promise(function (resolve, reject) {
             var changed = [];
+            var authError = false;
             Object.keys(alarms).forEach(alrkey => {
                 alarms[alrkey].forEach(alr => {
                     if (alr.getId() === alarmname) {
-                        alr.setAck();
-                        changed.push(alr);
+                        var mask = ((alr.tagproperty.permission >> 8) & 255);
+                        var canack = (mask) ? mask & groups : 1;
+                        if (canack) {
+                            alr.setAck(userId);
+                            changed.push(alr);
+                        } else {
+                            authError = true;
+                        }
                     }
                 });
             });
-            if (changed.length) {
-                alarmstorage.setAlarms(changed).then(function (result) {
-                    resolve(true);
-                }).catch(function (err) {
-                    reject(err);
-                });
+            if (authError) {
+                reject({code: 401, error:"unauthorized_error", message: "Unauthorized!"});
             } else {
-                resolve(false);
+                if (changed.length) {
+                    alarmstorage.setAlarms(changed).then(function (result) {
+                        resolve(true);
+                    }).catch(function (err) {
+                        reject(err);
+                    });
+                } else {
+                    resolve(false);
+                }
             }
         });
     }
@@ -299,7 +330,7 @@ function AlarmsManager(_runtime) {
                         if (alr.property && alr.property.variableId) {
                             if (!alarms[alr.property.variableId]) {
                                 alarms[alr.property.variableId] = [];
-                                var deviceId = devices.getDeviceIdForomTag(alr.property.variableId);
+                                var deviceId = devices.getDeviceIdFromTag(alr.property.variableId);
                                 if (deviceId) {
                                     // help for a fast get value
                                     alarms[alr.property.variableId]['variableSource'] = deviceId;
@@ -388,7 +419,7 @@ function AlarmsManager(_runtime) {
         for (var i = 0; i < alarms.length; i++) {
             if (alarms[i].type === AlarmsTypes.ACTION && alarms[i].subproperty && !alarms[i].offtime) {
                 if (alarms[i].subproperty.type === ActionsTypes.SET_VALUE) {
-                    var deviceId = devices.getDeviceIdForomTag(alarms[i].subproperty.variableId);
+                    var deviceId = devices.getDeviceIdFromTag(alarms[i].subproperty.variableId);
                     if (deviceId) {
                         devices.setDeviceValue(deviceId, alarms[i].subproperty.variableId, alarms[i].subproperty.actparam);
                     } else {
@@ -516,6 +547,7 @@ function Alarm(name, type, subprop, tagprop) {
                     this.acktime = 0;
 					this.offtime = 0;
                     this.ontime = time;
+                    this.userack = '';
                     return true;
                 }
                 // remove if acknowledged
@@ -544,15 +576,19 @@ function Alarm(name, type, subprop, tagprop) {
         this.acktime = 0;
         this.status = AlarmStatusEnum.VOID;
         this.lastcheck = 0;
+        this.userack = '';
     }
 
     this.toRemove = function () {
         this.toremove = true;
     }
 
-    this.setAck = function () {
-        this.acktime = new Date().getTime();
-        this.lastcheck = 0;
+    this.setAck = function (user) {
+        if (!this.acktime) {
+            this.acktime = new Date().getTime();
+            this.lastcheck = 0;
+            this.userack = user;
+        }
     }
 
     this.isToAck = function () {

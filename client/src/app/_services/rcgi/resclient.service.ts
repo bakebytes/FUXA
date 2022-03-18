@@ -3,11 +3,12 @@ import { Injectable, EventEmitter } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-import { ProjectData, ProjectDataCmdType } from '../../_models/project';
+import { ProjectData, ProjectDataCmdType, UploadFile } from '../../_models/project';
 import { Device } from '../../_models/device';
 import { ResourceStorageService } from './resource-storage.service';
 import { Utils } from '../../_helpers/utils';
 import { AlarmQuery } from '../../_models/alarm';
+import { DaqQuery } from '../../_models/hmi';
 
 @Injectable()
 export class ResClientService implements ResourceStorageService {
@@ -100,6 +101,12 @@ export class ResClientService implements ResourceStorageService {
         });
     }
     
+    uploadFile(file: any): Observable<UploadFile> {
+        return new Observable((observer) => {
+            observer.error('Not supported!');
+        });
+    }
+
     private isDataCmdForDevice(cmd: ProjectDataCmdType): boolean {
         return (cmd === ProjectDataCmdType.DelDevice || cmd === ProjectDataCmdType.SetDevice);
     }
@@ -148,5 +155,11 @@ export class ResClientService implements ResourceStorageService {
 
     getAppId() {
         return ResourceStorageService.prjresource;
+    }
+
+    getDaqValues(query: DaqQuery): Observable<any> {
+        return new Observable((observer) => {
+            observer.error('Not supported!');
+        });
     }
 }

@@ -4,12 +4,13 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../environments/environment';
-import { ProjectData, ProjectDataCmdType } from '../_models/project';
-import { Hmi, View, LayoutSettings } from '../_models/hmi';
+import { ProjectData, ProjectDataCmdType, UploadFile } from '../_models/project';
+import { Hmi, View, LayoutSettings, DaqQuery } from '../_models/hmi';
 import { Chart } from '../_models/chart';
 import { Graph } from '../_models/graph';
 import { Alarm, AlarmQuery } from '../_models/alarm';
 import { Notification } from '../_models/notification';
+import { Script } from '../_models/script';
 import { Text } from '../_models/text';
 import { Device, DeviceType, DeviceNetProperty, DEVICE_PREFIX } from '../_models/device';
 import { EndPointApi } from '../_helpers/endpointapi';
@@ -43,11 +44,11 @@ export class ProjectService {
         private resDemoService: ResDemoService,
         private resClientService: ResClientService,
         private appService: AppService,
-        private translateService: TranslateService,        
+        private translateService: TranslateService,
         private toastr: ToastrService) {
 
         this.storage = resewbApiService;
-        if (appService.isDemoApp) {
+        if (!environment.serverEnabled || appService.isDemoApp) {
             this.storage = resDemoService;
         } else if (appService.isClientApp) {
             this.storage = resClientService;
@@ -56,7 +57,7 @@ export class ProjectService {
         this.storage.getAppId = () => { return this.getAppId(); }
         this.storage.onRefreshProject = (): boolean => { return this.onRefreshProject() };
         this.storage.checkServer().subscribe(result => {
-            if (result) {
+            if (!environment.serverEnabled || result) {
                 this.serverSettings = result;
                 this.load();
             }
@@ -72,7 +73,7 @@ export class ProjectService {
     }
 
     init(bridge?: any) {
-        this.storage.init(bridge);            
+        this.storage.init(bridge);
         if (this.appService.isClientApp) {
         }
         this.reload();
@@ -217,7 +218,7 @@ export class ProjectService {
                 }, err => {
                     console.error(err);
                     this.notifySaveError(err);
-                });                
+                });
             }, err => {
                 console.error(err);
                 this.notifySaveError(err);
@@ -231,7 +232,7 @@ export class ProjectService {
         }, err => {
             console.error(err);
             this.notifySaveError(err);
-        });                
+        });
     }
 
     /**
@@ -336,7 +337,7 @@ export class ProjectService {
         this.saveLayout();
     }
 
-    
+
     setLayoutTheme(theme: string) {
         this.projectData.hmi.layout.theme = theme;
         this.saveLayout();
@@ -494,7 +495,7 @@ export class ProjectService {
     getAlarmsValues(): Observable<any> {
         return this.storage.getAlarmsValues();
     }
-    
+
     getAlarmsHistory(query: AlarmQuery): Observable<any> {
         return this.storage.getAlarmsHistory(query);
     }
@@ -504,11 +505,11 @@ export class ProjectService {
     }
     //#endregion
 
-    //#region Notifications resource
+    //#region Notifications resource    
     /**
      * get notifications resource
      */
-     getNotifications() {
+    getNotifications() {
         return (this.projectData) ? (this.projectData.notifications) ? this.projectData.notifications : [] : null;
     }
 
@@ -553,7 +554,7 @@ export class ProjectService {
     /**
      * remove the notification from project
      */
-     removeNotification(notification: Notification) {
+    removeNotification(notification: Notification) {
         return new Observable((observer) => {
             if (this.projectData.notifications) {
                 for (let i = 0; i < this.projectData.notifications.length; i++) {
@@ -564,6 +565,70 @@ export class ProjectService {
                 }
             }
             this.storage.setServerProjectData(ProjectDataCmdType.DelNotification, notification, this.projectData).subscribe(result => {
+                observer.next();
+            }, err => {
+                console.error(err);
+                this.notifySaveError(err);
+                observer.error(err);
+            });
+        });
+    }
+    //#endregion
+
+    //#region Scripts resource
+    /**
+     * get notifications resource
+     */
+    getScripts(): Script[] {
+        return (this.projectData) ? (this.projectData.scripts) ? this.projectData.scripts : [] : null;
+    }
+
+    /**
+     * save the script to project
+     */
+    setScript(script: Script, old: Script) {
+        return new Observable((observer) => {
+            if (!this.projectData.scripts) {
+                this.projectData.scripts = [];
+            }
+            let exist = this.projectData.scripts.find(tx => tx.id === script.id);
+            if (exist) {
+                exist.name = script.name;
+                exist.code = script.code;
+                exist.parameters = script.parameters;
+            } else {
+                this.projectData.scripts.push(script);
+            }
+            this.storage.setServerProjectData(ProjectDataCmdType.SetScript, script, this.projectData).subscribe(result => {
+                if (old && old.id && old.id !== script.id) {
+                    this.removeScript(old).subscribe(result => {
+                        observer.next();
+                    });
+                } else {
+                    observer.next();
+                }
+            }, err => {
+                console.error(err);
+                this.notifySaveError(err);
+                observer.error(err);
+            });
+        });
+    }
+
+    /**
+     * remove the script from project
+     */
+    removeScript(script: Script) {
+        return new Observable((observer) => {
+            if (this.projectData.scripts) {
+                for (let i = 0; i < this.projectData.scripts.length; i++) {
+                    if (this.projectData.scripts[i].id === script.id) {
+                        this.projectData.scripts.splice(i, 1);
+                        break;
+                    }
+                }
+            }
+            this.storage.setServerProjectData(ProjectDataCmdType.DelScript, script, this.projectData).subscribe(result => {
                 observer.next();
             }, err => {
                 console.error(err);
@@ -604,7 +669,7 @@ export class ProjectService {
         }, err => {
             console.error(err);
             this.notifySaveError(err);
-        });                
+        });
     }
 
     /**
@@ -624,7 +689,7 @@ export class ProjectService {
         }, err => {
             console.error(err);
             this.notifySaveError(err);
-        });           
+        });
     }
     //#endregion
 
@@ -664,6 +729,18 @@ export class ProjectService {
     }
     //#endregion
 
+    //#region Upload resource to server
+    uploadFile(file: any): Observable<UploadFile> {
+        return this.storage.uploadFile(file);
+    }
+    //#endregion
+
+    //#region DAQ query
+    getDaqValues(query: DaqQuery): Observable<any> {
+        return this.storage.getDaqValues(query);
+    }
+    //#endregion
+
     /**
      * Set Project data and save resource to backend
      * Used from open and upload JSON Project file
@@ -680,9 +757,10 @@ export class ProjectService {
     setNewProject() {
         this.projectData = new ProjectData();
         let server = new Device(Utils.getGUID(DEVICE_PREFIX));
-        server.name = 'BakeBytes';
+        server.name = 'FUXA';
         server.id = '0';
         server.type = DeviceType.FuxaServer;
+        server.enabled = true;
         server.property = new DeviceNetProperty();
         if (!this.appService.isClientApp) {
             this.projectData.server = server;
@@ -704,8 +782,23 @@ export class ProjectService {
         return (this.projectData) ? this.projectData.server : null;
     }
 
+    // getDevices(): any {
+    //     return (this.projectData) ? this.projectData.devices : {};
+    // }
+
     getDevices(): any {
-        return (this.projectData) ? this.projectData.devices : {};
+        let result = {};
+        if (this.projectData) {
+            result = this.projectData.devices;
+            if (!result[this.projectData.server.id]) {
+                // add server as device to use in script and logic
+                let server: Device = JSON.parse(JSON.stringify(this.projectData.server));
+                server.enabled = true;
+                server.tags = {};
+                result[server.id] = server;
+            }
+        }
+        return result;
     }
 
     getDeviceFromId(id: string): any {

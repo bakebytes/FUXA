@@ -15,6 +15,7 @@ import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { HAMMER_GESTURE_CONFIG } from '@angular/platform-browser';
 import { GestureConfig } from '@angular/material';
 import { AngularDraggableModule } from 'angular2-draggable';
+import { CodemirrorModule } from '@ctrl/ngx-codemirror';
 
 import { AppComponent } from './app.component';
 import { routing } from './app.routing';
@@ -39,6 +40,8 @@ import { AlarmListComponent } from './alarms/alarm-list/alarm-list.component';
 import { AlarmPropertyComponent } from './alarms/alarm-property/alarm-property.component';
 import { NotificationListComponent } from './notifications/notification-list/notification-list.component';
 import { NotificationPropertyComponent } from './notifications/notification-property/notification-property.component';
+import { ScriptListComponent } from './scripts/script-list/script-list.component';
+import { ScriptEditorComponent, DialogScriptParam } from './scripts/script-editor/script-editor.component';
 import { TextListComponent, DialogItemText } from './text-list/text-list.component';
 import { LabComponent } from './lab/lab.component';
 import { DeviceComponent, DeviceTagDialog } from './device/device.component';
@@ -58,6 +61,7 @@ import { SettingsService } from './_services/settings.service';
 import { PluginService } from './_services/plugin.service';
 import { AuthService } from './_services/auth.service';
 import { DiagnoseService } from './_services/diagnose.service';
+import { ScriptService } from './_services/script.service';
 import { ResWebApiService } from './_services/rcgi/reswebapi.service';
 import { ResDemoService } from './_services/rcgi/resdemo.service';
 import { ResClientService } from './_services/rcgi/resclient.service';
@@ -68,6 +72,7 @@ import { AppService } from './_services/app.service';
 import { TutorialComponent } from './help/tutorial/tutorial.component';
 import { WindowRef } from './_helpers/windowref';
 import { Utils, EnumToArrayPipe, EscapeHtmlPipe } from './_helpers/utils';
+import { Calc } from './_helpers/calc';
 import { Define } from './_helpers/define';
 import { Dictionary } from './_helpers/dictionary';
 import { NgxFabButtonComponent } from './gui-helpers/fab-button/ngx-fab-button.component';
@@ -104,6 +109,7 @@ import { HtmlButtonComponent } from './gauges/controls/html-button/html-button.c
 import { HtmlSelectComponent } from './gauges/controls/html-select/html-select.component';
 import { HtmlChartComponent } from './gauges/controls/html-chart/html-chart.component';
 import { HtmlGraphComponent } from './gauges/controls/html-graph/html-graph.component';
+import { HtmlIframeComponent } from './gauges/controls/html-iframe/html-iframe.component';
 import { HtmlBagComponent } from './gauges/controls/html-bag/html-bag.component';
 import { HtmlSwitchComponent } from './gauges/controls/html-switch/html-switch.component';
 import { GaugeProgressComponent } from './gauges/controls/gauge-progress/gauge-progress.component';
@@ -136,6 +142,7 @@ import { GraphPieComponent } from './gauges/controls/html-graph/graph-pie/graph-
 import { GraphPropertyComponent } from './gauges/controls/html-graph/graph-property/graph-property.component';
 import { GraphBaseComponent } from './gauges/controls/html-graph/graph-base/graph-base.component';
 import { ChartsModule } from 'ng2-charts';
+import { IframePropertyComponent } from './gauges/controls/html-iframe/iframe-property/iframe-property.component';
 
 export function createTranslateLoader(http: HttpClient) {
     return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -178,6 +185,7 @@ export function createTranslateLoader(http: HttpClient) {
         HtmlSelectComponent,
         HtmlChartComponent,
         HtmlGraphComponent,
+        HtmlIframeComponent,
         HtmlBagComponent,
         GaugeProgressComponent,
         GaugeSemaphoreComponent,
@@ -222,6 +230,9 @@ export function createTranslateLoader(http: HttpClient) {
         AlarmPropertyComponent,
         NotificationListComponent,
         NotificationPropertyComponent,
+        ScriptListComponent,
+        ScriptEditorComponent,
+        DialogScriptParam,
         TextListComponent,
         LogsViewComponent,
         NgxGaugeComponent,
@@ -240,7 +251,8 @@ export function createTranslateLoader(http: HttpClient) {
         GraphBarComponent,
         GraphPieComponent,
         GraphPropertyComponent,
-        GraphBaseComponent
+        GraphBaseComponent,
+        IframePropertyComponent
    ],
     imports: [
         BrowserModule,
@@ -267,7 +279,8 @@ export function createTranslateLoader(http: HttpClient) {
             }
         }),
         GridsterModule,
-        ChartsModule
+        ChartsModule,
+        CodemirrorModule
     ],
     providers: [
         // providersResourceService,
@@ -279,6 +292,7 @@ export function createTranslateLoader(http: HttpClient) {
         ProjectService,
         UserService,
         DiagnoseService,
+        ScriptService,
         PluginService,
         SettingsService,
         TesterService,
@@ -288,6 +302,7 @@ export function createTranslateLoader(http: HttpClient) {
         GaugesManager,
         WindowRef,
         Utils,
+        Calc,
         HtmlSwitchComponent,
         PipeComponent,
         SliderComponent,
@@ -334,6 +349,8 @@ export function createTranslateLoader(http: HttpClient) {
         AlarmPropertyComponent,
         NotificationListComponent,
         NotificationPropertyComponent,
+        ScriptListComponent,
+        ScriptEditorComponent,
         TextListComponent,
         DialogChartLine,
         DialogGraphSource,
@@ -345,7 +362,8 @@ export function createTranslateLoader(http: HttpClient) {
         NgxUplotComponent,
         GraphBarComponent,
         GraphPieComponent,
-        GraphBaseComponent
+        GraphBaseComponent,
+        DialogScriptParam
     ],
     bootstrap: [AppComponent]
 })

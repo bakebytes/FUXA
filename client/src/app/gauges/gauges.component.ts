@@ -7,7 +7,7 @@ import { HmiService } from '../_services/hmi.service';
 import { ChartRangeType } from '../_models/chart';
 
 import { GaugeBaseComponent } from './gauge-base/gauge-base.component';
-import { GaugeSettings, GaugeProperty, Variable, Event, GaugeEvent, GaugeEventType, GaugeStatus, Size } from '../_models/hmi';
+import { GaugeSettings, GaugeProperty, Variable, Event, GaugeEvent, GaugeEventType, GaugeStatus, Size, DaqQuery } from '../_models/hmi';
 import { ValueComponent } from './controls/value/value.component';
 import { GaugePropertyComponent, GaugeDialogType } from './gauge-property/gauge-property.component';
 import { HtmlInputComponent } from './controls/html-input/html-input.component';
@@ -33,6 +33,7 @@ import { NgxGaugeComponent } from '../gui-helpers/ngx-gauge/ngx-gauge.component'
 import { GaugeOptions } from '../gui-helpers/ngx-gauge/gaugeOptions';
 import { NgxNouisliderComponent } from '../gui-helpers/ngx-nouislider/ngx-nouislider.component';
 import { GraphBaseComponent } from './controls/html-graph/graph-base/graph-base.component';
+import { HtmlIframeComponent } from './controls/html-iframe/html-iframe.component';
 
 @Injectable()
 export class GaugesManager {
@@ -66,7 +67,7 @@ export class GaugesManager {
     // list of gauges components
     static Gauges = [ValueComponent, HtmlInputComponent, HtmlButtonComponent, HtmlBagComponent,
         HtmlSelectComponent, HtmlChartComponent, GaugeProgressComponent, GaugeSemaphoreComponent, ShapesComponent, ProcEngComponent, ApeShapesComponent,
-        PipeComponent, SliderComponent, HtmlSwitchComponent, HtmlGraphComponent];
+        PipeComponent, SliderComponent, HtmlSwitchComponent, HtmlGraphComponent, HtmlIframeComponent];
 
     constructor(private hmiService: HmiService,
         private winRef: WindowRef,
@@ -190,6 +191,8 @@ export class GaugesManager {
             return this.mapGauges[ga.id] = SliderComponent.detectChange(ga, res, ref);
         } else if (ga.type.startsWith(HtmlSwitchComponent.TypeTag)) {
             return this.mapGauges[ga.id] = HtmlSwitchComponent.detectChange(ga, res, ref);
+        } else if (ga.type.startsWith(HtmlIframeComponent.TypeTag)) {
+            HtmlIframeComponent.initElement(ga, true);
         }
         return false;
     }
@@ -705,9 +708,17 @@ export class GaugesManager {
             }
             return gauge;
         } else if (ga.type.startsWith(HtmlGraphComponent.TypeTag)) {
-            let gauge = HtmlGraphComponent.initElement(ga, res, ref, isview);
+            let gauge: GraphBaseComponent = HtmlGraphComponent.initElement(ga, res, ref, isview);
             if (gauge) {
                 this.setGraphPropety(gauge, ga.property);
+                gauge.onReload.subscribe((query: DaqQuery) => {
+                    this.hmiService.getDaqValues(query).subscribe(result => {
+                        gauge.setValues(query.sids, result);
+                    }, err => {
+                        gauge.setValues(query.sids, null);
+                        console.error('get DAQ values err: ' + err);
+                    });
+                });
                 this.mapGauges[ga.id] = gauge;
             }
             return gauge;
@@ -730,6 +741,9 @@ export class GaugesManager {
             let gauge = HtmlSwitchComponent.initElement(ga, res, ref, isview);
             this.mapGauges[ga.id] = gauge;
             return gauge;
+        } else if (ga.type.startsWith(HtmlIframeComponent.TypeTag)) {
+            HtmlIframeComponent.initElement(ga, isview);
+            return true;
         }
     }
 
@@ -768,7 +782,7 @@ export class GaugesManager {
                 let graph = this.hmiService.getGraph(property.id);
                 if (graph) {
                     gauge.init(graph.name, graph.property, graph.sources);
-                }                
+                }
             }
             if (property.options) {
                 gauge.setOptions(property.options);

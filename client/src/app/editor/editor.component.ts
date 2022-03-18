@@ -517,16 +517,11 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
         let views = this.hmi.views.filter((v) => v.type !== cardType && exist.indexOf(v.name) < 0).map((v) => { return v.name })
         let dialogRef = this.dialog.open(CardConfigComponent, {
             position: { top: '60px' },
-            data: { item: item, views: views }
+            data: { item: JSON.parse(JSON.stringify(item)), views: views }
         });
         dialogRef.afterClosed().subscribe(result => {
             if (result) {
-                let view = this.hmi.views.filter((v) => v.name === item.card.data);
-                if (view && view.length) {
-                    item.content = view[0];
-                } else {
-                    item.content = null;
-                }
+                item.card = result.card;
                 this.onSaveProject();
                 this.cardsview.render();
             }
@@ -538,7 +533,6 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     saveCards(dashboard) {
-        // this.dashboard.splice(this.dashboard.indexOf(item), 1);
     }
     // #region 
 
@@ -641,7 +635,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
             for (let i = 0; i < ele.length; i++) {
                 if (this.currentView.items[ele[i].id]) {
                     delete this.currentView.items[ele[i].id];
-                    if (this.gaugesRef.indexOf(ele[i].id) === -1) {
+                    if (this.gaugesRef.indexOf(ele[i].id) !== -1) {
                         if (this.gaugesRef[ele[i].id].ref && this.gaugesRef[ele[i].id].ref['ngOnDestroy']) {
                             try {
                                 this.gaugesRef[ele[i].id].ref['ngOnDestroy']();
@@ -1211,6 +1205,16 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
             }
             this.reloadGaugeDialog = !this.reloadGaugeDialog;
             return;
+        } else if (dlgType === GaugeDialogType.Iframe) {
+            this.gaugeDialog.type = dlgType;
+            this.gaugeDialog.data = {
+                settings: tempsettings, dlgType: dlgType, names: names
+            };
+            if (!this.sidePanel.opened) {
+                this.sidePanel.toggle();
+            }
+            this.reloadGaugeDialog = !this.reloadGaugeDialog;
+            return;
         } else if (dlgType === GaugeDialogType.Gauge) {
             dialogRef = this.dialog.open(BagPropertyComponent, {
                 position: { top: '30px' },
@@ -1254,7 +1258,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
                     settings: tempsettings, devices: Object.values(this.projectService.getDevices()), title: title,
                     views: hmi.views, dlgType: dlgType, withEvents: eventsSupported, withActions: actionsSupported, default: defaultValue,
                     inputs: Object.values(this.currentView.items).filter(gs => gs.name && (gs.id.startsWith('HXS_') || gs.id.startsWith('HXI_'))),
-                    names: names
+                    names: names, scripts: this.projectService.getScripts()
                 }
             });
         }

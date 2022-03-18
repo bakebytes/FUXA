@@ -3,9 +3,10 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-import { ProjectData, ProjectDataCmdType } from '../../_models/project';
+import { ProjectData, ProjectDataCmdType, UploadFile } from '../../_models/project';
 import { ResourceStorageService } from './resource-storage.service';
 import { AlarmQuery } from '../../_models/alarm';
+import { DaqQuery } from '../../_models/hmi';
 
 @Injectable()
 export class ResDemoService implements ResourceStorageService {
@@ -52,6 +53,12 @@ export class ResDemoService implements ResourceStorageService {
         });
     }
     
+    uploadFile(file: any): Observable<UploadFile> {
+        return new Observable((observer) => {
+            observer.error('Not supported!');
+        });
+    }
+
     getDeviceSecurity(id: string): Observable<any> {
         return new Observable((observer) => {
             observer.error('Not supported!');
@@ -90,5 +97,11 @@ export class ResDemoService implements ResourceStorageService {
 
     getAppId() {
         return ResourceStorageService.prjresource;
+    }
+
+    getDaqValues(query: DaqQuery): Observable<any> {
+        return new Observable((observer) => {
+            observer.error('Not supported!');
+        });
     }
 }

@@ -4,6 +4,9 @@
 
 var express = require("express");
 const authJwt = require('../jwt-helper');
+const fs = require('fs');
+const path = require('path');
+
 var runtime;
 var secureFnc;
 var checkGroupsFnc;
@@ -40,14 +43,15 @@ module.exports = {
                     runtime.logger.error("api get project: Not Found!");
                 }
             }).catch(function(err) {
-                if (err.code) {
+                if (err && err.code) {
                     if (err.code !== 'ERR_HTTP_HEADERS_SENT') {
                         res.status(400).json({error:err.code, message: err.message});
+                        runtime.logger.error("api get project: " + err.message);
                     }
                 } else {
-                    res.status(400).json({error:"unexpected_error", message:err.toString()});
+                    res.status(400).json({error:"unexpected_error", message: err});
+                    runtime.logger.error("api get project: " + err);
                 }
-                runtime.logger.error("api get project: " + err.message);
             });
         });
 
@@ -68,12 +72,13 @@ module.exports = {
                         res.end();
                     });
                 }).catch(function(err) {
-                    if (err.code) {
+                    if (err && err.code) {
                         res.status(400).json({error:err.code, message: err.message});
+                        runtime.logger.error("api post project: " + err.message);
                     } else {
-                        res.status(400).json({error:"unexpected_error", message:err.toString()});
+                        res.status(400).json({error:"unexpected_error", message: err});
+                        runtime.logger.error("api post project: " + err);
                     }
-                    runtime.logger.error("api post project: " + err.message);
                 });
             }
         });
@@ -97,10 +102,11 @@ module.exports = {
                 }).catch(function(err) {
                     if (err && err.code) {
                         res.status(400).json({error:err.code, message: err.message});
+                        runtime.logger.error("api post projectData: " + err.message);
                     } else {
-                        res.status(400).json({error:"unexpected_error", message:err.toString()});
+                        res.status(400).json({error:"unexpected_error", message: err});
+                        runtime.logger.error("api post projectData: " + err);
                     }
-                    runtime.logger.error("api post projectData: " + err.message);
                 });
             }
         });
@@ -142,12 +148,13 @@ module.exports = {
                         res.end();
                     }
                 }).catch(function(err) {
-                    if (err.code) {
+                    if (err && err.code) {
                         res.status(400).json({error:err.code, message: err.message});
+                        runtime.logger.error("api get device: " + err.message);
                     } else {
-                        res.status(400).json({error:"unexpected_error", message:err.toString()});
+                        res.status(400).json({error:"unexpected_error", message: err});
+                        runtime.logger.error("api get device: " + err);
                     }
-                    runtime.logger.error("api get device: " + err.message);
                 });
             }
         });
@@ -167,16 +174,47 @@ module.exports = {
                 runtime.project.setDeviceProperty(req.body.params).then(function(data) {
                     res.end();
                 }).catch(function(err) {
-                    if (err.code) {
+                    if (err && err.code) {
                         res.status(400).json({error:err.code, message: err.message});
+                        runtime.logger.error("api post device: " + err.message);
                     } else {
-                        res.status(400).json({error:"unexpected_error", message:err.toString()});
+                        res.status(400).json({error:"unexpected_error", message: err});
+                        runtime.logger.error("api post device: " + err);
                     }
-                    runtime.logger.error("api post device: " + err.message);
                 });                
             }
         });
- 
+
+        /**
+         * POST Upload file resource
+         * images will be in media file saved
+         */
+        prjApp.post('/api/upload', function (req, res) {
+            const file = req.body;
+            try {
+                let basedata = file.data;
+                let encoding = {};
+                // let basedata = file.data.replace(/^data:.*,/, '');
+                // let basedata = file.data.replace(/^data:image\/png;base64,/, "");
+                const filePath = path.join(runtime.settings.uploadFileDir, file.name);
+                if (file.type !== 'svg') {
+                    basedata = file.data.replace(/^data:.*,/, '');
+                    encoding = {encoding: 'base64'};
+                }
+                fs.writeFileSync(filePath, basedata, encoding);
+                let result = {'location': '/' + runtime.settings.httpUploadFileStatic + '/' +file.name };
+                res.json(result);
+            } catch (err) {
+                if (err && err.code) {
+                    res.status(400).json({error: err.code, message: err.message});
+                    runtime.logger.error("api upload: " + err.message);
+                } else {
+                    res.status(400).json({error:"unexpected_error", message: err});
+                    runtime.logger.error("api upload: " + err);
+                }
+            }
+        });
+
         return prjApp;
     }
 }

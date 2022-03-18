@@ -17,6 +17,31 @@
                     </mat-option>
                 </mat-select>
             </div>
+            <div class="section-newline"></div>
+            <div class="my-form-field section-item" style="display: inline-block; width: 120px">
+                <span>{{'graph.property-date-last-range' | translate}}</span>
+                <mat-select [(value)]="options.lastRange" [disabled]="!isDateTime(graphCtrl.value)" (selectionChange)="onGraphChanged()">
+                    <mat-option *ngFor="let ev of lastRangeType | enumToArray" [value]="ev.key">
+                        {{ ev.value }}
+                    </mat-option>
+                </mat-select>
+            </div>
+            <div class="section-inline-margin"></div>
+            <div class="my-form-field section-item" style="display: inline-block; width: 120px">
+                <span>{{'graph.property-date-group' | translate}}</span>
+                <mat-select [(value)]="options.dateGroup" [disabled]="!isDateTime(graphCtrl.value)" (selectionChange)="onGraphChanged()">
+                    <mat-option *ngFor="let ev of dateGroupType | enumToArray" [value]="ev.key">
+                        {{ ev.value }}
+                    </mat-option>
+                </mat-select>
+            </div>
+            <div class="section-inline-margin"></div>
+            <div class="my-form-field section-inline-toggle slider-field">
+                <span>{{'graph.property-offline' | translate}}</span>
+                <mat-slide-toggle color="primary" [checked]="!options.offline" (change)="options.offline = !options.offline;onGraphChanged();" 
+                                [disabled]="isDateTime(graphCtrl.value)">
+                </mat-slide-toggle>
+            </div>
         </div>
         <div class="element-property-header">
             <span>{{'graph.property-general' | translate}}</span>
@@ -67,6 +92,11 @@
                 <span>{{'graph.property-yaxis-fontsize' | translate}}</span>
                 <input numberOnly [(ngModel)]="options.yAxes.fontSize" (change)="onGraphChanged()" (keyup.enter)="onGraphChanged()" type="number" min="6">
             </div>
+            <div class="section-inline-margin"></div>
+            <div class="my-form-field section-inline-number section-toogle">
+                <span>{{'graph.property-decimals' | translate}}</span>
+                <input numberOnly [(ngModel)]="options.decimals" (change)="onGraphChanged()" (keyup.enter)="onGraphChanged()" type="number" min="0">
+            </div>          
             <div class="section-inline-margin"></div>
             <div class="my-form-field section-inline-toggle slider-field">
                 <span>{{'graph.property-yaxis-show' | translate}}</span>

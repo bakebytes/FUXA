@@ -148,7 +148,9 @@ function loadDevice(device) {
             activeDevices[device.id] = tdev;
             activeDevices[device.id].bindGetProperty(runtime.project.getDeviceProperty);
         } else {
-            runtime.logger.warn('try to create ' + device.name + ' but plugin is missing!');
+            if (!Device.isInternal(device)) {
+                runtime.logger.warn('try to create ' + device.name + ' but plugin is missing!');
+            }
             return false;
         }
     }
@@ -183,7 +185,7 @@ function getDevicesValues() {
 
 
 /**
- * Get the Device Tag value with Timestamp
+ * Get the Device Tag value
  * used from Alarms
  * @param {*} deviceid 
  * @param {*} sigid 
@@ -197,11 +199,52 @@ function getDeviceValue(deviceid, sigid) {
 }
 
 /**
+ * Get the Device Tag value
+ * used from Alarms
+ * @param {*} sigid 
+ * @param {*} fully, struct with timestamp
+ */
+ function getTagValue(sigid, fully) {
+     try {
+        let deviceid = getDeviceIdFromTag(sigid)
+        if (activeDevices[deviceid]) {
+            let result = activeDevices[deviceid].getValue(sigid);
+            if (fully) {
+                return result;
+            } else {
+                return result.value;
+            }
+        }
+    } catch (err) {
+        console.error(err);
+    }
+    return null;
+}
+
+/**
+ * Set the Device Tag value
+ * used from Scripts
+ * @param {*} tagid 
+ * @param {*} value 
+ */
+ function setTagValue(tagid, value) {
+    try {
+        let deviceid = getDeviceIdFromTag(tagid)
+        if (activeDevices[deviceid]) {
+            return activeDevices[deviceid].setValue(tagid, value);
+        }
+    } catch (err) {
+        console.error(err);
+    }
+    return null;
+}
+
+/**
  * Get the Device from the tag id
  * used from Alarms
  * @param {*} sigid 
  */
- function getDeviceIdForomTag(sigid) {
+ function getDeviceIdFromTag(sigid) {
     for (var id in activeDevices) {
         var tag = activeDevices[id].getTagProperty(sigid);
         if (tag) {
@@ -297,8 +340,10 @@ var devices = module.exports = {
     getDevicesStatus: getDevicesStatus,
     getDevicesValues: getDevicesValues,
     getDeviceValue: getDeviceValue,
+    getTagValue: getTagValue,
+    setTagValue: setTagValue,
     setDeviceValue: setDeviceValue,
-    getDeviceIdForomTag: getDeviceIdForomTag,
+    getDeviceIdFromTag: getDeviceIdFromTag,
     browseDevice: browseDevice,
     readNodeAttribute: readNodeAttribute,
     isWoking: isWoking,

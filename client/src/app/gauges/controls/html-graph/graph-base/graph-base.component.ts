@@ -1,20 +1,24 @@
 
-import { Component } from '@angular/core';
-import { GraphType, GraphSource } from '../../../../_models/graph';
+import { Component, Output, EventEmitter } from '@angular/core';
+import { GraphType, GraphSource, GraphRangeType, GraphDateGroupType } from '../../../../_models/graph';
 import { ChartOptions, GridLineOptions, ChartType, ChartColor, ChartYAxe } from 'chart.js';
 import { Utils } from '../../../../_helpers/utils';
-
+import { DaqQuery } from '../../../../_models/hmi';
 @Component({
     template: ''
 })
 export class GraphBaseComponent {
+    @Output() onReload: EventEmitter<DaqQuery> = new EventEmitter();
+    
     id: string;
     isEditor: boolean;
     public static VerticalBarChartType: ChartType = 'bar';
 
     init? (title: string, property: any, sources?: GraphSource[]): void;
     setOptions? (options: any): void;
-    setValue? (sigid: string, timestamp: any, sigvalue: any): void;
+    setValue?(sigid: string, timestamp: any, sigvalue: any): void;
+    setValues?(sigsid: string[], sigsvalues: any): void;
+    isOffline (): boolean { return false; }
 
     public static getGridLines(options: GraphOptions): GridLineOptions {
         let result = <GridLineOptions>{ display: options.gridLinesShow };
@@ -63,6 +67,10 @@ export interface GraphOptions extends ChartOptions {
     panel?: { height: number, width: number };
     type?: ChartType,
     theme?: string,
+    offline?: boolean,
+    decimals?: number,
+    lastRange?: GraphRangeType,
+    dateGroup?: GraphDateGroupType,
     borderWidth?: number,
     gridLinesShow?: boolean,
     gridLinesColor?: string,

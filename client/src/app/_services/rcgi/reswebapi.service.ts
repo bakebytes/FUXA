@@ -4,9 +4,10 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { EndPointApi } from '../../_helpers/endpointapi';
-import { ProjectData, ProjectDataCmdType } from '../../_models/project';
+import { ProjectData, ProjectDataCmdType, UploadFile } from '../../_models/project';
 import { ResourceStorageService } from './resource-storage.service';
 import { AlarmQuery } from '../../_models/alarm';
+import { DaqQuery } from '../../_models/hmi';
 
 @Injectable()
 export class ResWebApiService implements ResourceStorageService {
@@ -43,6 +44,12 @@ export class ResWebApiService implements ResourceStorageService {
         return this.http.post<any>(this.endPointConfig + '/api/projectData', params, { headers: header });
     }
     
+    uploadFile(resource: any): Observable<UploadFile> {
+        let header = new HttpHeaders({ 'Content-Type': 'application/json' });
+        let params = resource;
+        return this.http.post<any>(this.endPointConfig + '/api/upload', params, { headers: header });
+    }
+
     getDeviceSecurity(id: string): Observable<any> {
         let header = new HttpHeaders({ 'Content-Type': 'application/json' });
         let params = { query: 'security', name: id };
@@ -82,5 +89,11 @@ export class ResWebApiService implements ResourceStorageService {
 
     getAppId() {
         return ResourceStorageService.prjresource;
+    }
+
+    getDaqValues(query: DaqQuery): Observable<any> {
+        let header = new HttpHeaders({ 'Content-Type': 'application/json' });
+        let params = { query: JSON.stringify(query) };        
+        return this.http.get<any>(this.endPointConfig + '/api/daq', { headers: header, params });
     }
 }

@@ -45,7 +45,7 @@ module.exports = {
                     res.status(400).json({error:"unexpected_error", message:err.toString()});
                 }
                 runtime.logger.error("api get alarms: " + err.message);
-            }                
+            }
         });
 
                 /**
@@ -69,7 +69,7 @@ module.exports = {
                     res.status(400).json({error:"unexpected_error", message:err.toString()});
                 }
                 runtime.logger.error("api get alarms: " + err.message);
-            });                
+            });
         });
 
         /**
@@ -78,7 +78,7 @@ module.exports = {
          */
         alarmsApp.post("/api/alarmack", secureFnc, function(req, res, next) {
             var groups = checkGroupsFnc(req);
-            runtime.alarmsMgr.setAlarmAck(req.body.params).then(function(data) {
+            runtime.alarmsMgr.setAlarmAck(req.body.params, req.userId, groups).then(function(data) {
                 res.end();
             }).catch(function(err) {
                 if (err.code) {
@@ -87,7 +87,7 @@ module.exports = {
                     res.status(400).json({error:"unexpected_error", message:err.toString()});
                 }
                 runtime.logger.error("api post alarm-ack: " + err.message);
-            });                
+            });
         });
 
         /**
@@ -105,7 +105,7 @@ module.exports = {
                     res.status(400).json({error:"unexpected_error", message:err.toString()});
                 }
                 runtime.logger.error("api post alarms-clear: " + err.message);
-            });                
+            });
         });
         return alarmsApp;
     }

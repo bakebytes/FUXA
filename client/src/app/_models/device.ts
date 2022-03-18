@@ -45,6 +45,8 @@ export class Tag {
     format: any;
     /** Daq settings */
     daq: TagDaq;
+    /** Init value */
+    init: string;
 
     constructor(_id: string) {
         this.id = _id;
@@ -194,6 +196,15 @@ export const DEVICE_PREFIX = 'd_';
 export const TAG_PREFIX = 't_';
 
 export class DevicesUtils {
+    static getDeviceTagText (devices: Device[], id: string): string {
+        for (let i = 0; i < devices.length; i++) {
+            if (devices[i].tags[id]) {
+                return `${devices[i].name} - ${devices[i].tags[id].name}`;
+            }
+        }
+        return '';
+    }
+
     static getDeviceFromTagId (devices: Device[], id: string): Device {
         for (let i = 0; i < devices.length; i++) {
             if (devices[i].tags[id]) {
@@ -231,4 +242,10 @@ export enum DeviceConnectionStatusType {
     failed = 'device.connect-failed',
     off = 'device.connect-off',
     busy = 'device.connect-busy',
+}
+
+export enum ServerTagType {
+    number = 'number',
+    boolean = 'boolean',
+    string = 'string'
 }

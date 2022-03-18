@@ -11,6 +11,7 @@ var project = require('./project');
 var users = require('./users');
 var alarms = require('./alarms');
 var notificator = require('./notificator');
+var scripts = require('./scripts');
 var plugins = require('./plugins');
 var utils = require('./utils');
 const daqstorage = require('./storage/daqstorage');
@@ -21,6 +22,7 @@ var logger;
 var io;
 var alarmsMgr;
 var notificatorMgr;
+var scriptsMgr;
 var tagsSubscription = new Map();
 
 function init(_io, _api, _settings, _log, eventsMain) {
@@ -66,6 +68,7 @@ function init(_io, _api, _settings, _log, eventsMain) {
     });
     alarmsMgr = alarms.create(runtime);
     notificatorMgr = notificator.create(runtime);
+    scriptsMgr = scripts.create(runtime);
     devices.init(runtime);
 
     events.on('project-device:change', updateDevice);
@@ -73,6 +76,7 @@ function init(_io, _api, _settings, _log, eventsMain) {
     events.on('device-status:changed', updateDeviceStatus);
     events.on('alarms-status:changed', updateAlarmsStatus);
     events.on('tag-change:subscription', subscriptionTagChange);
+    events.on('script-console', scriptConsoleOutput);
 
     io.on('connection', (socket) => {
         logger.info('socket.io client connected');
@@ -265,6 +269,13 @@ function start() {
                 logger.error('runtime.failed-to-start-notificator: ' + err);
                 reject();
             });
+            // start scripts manager
+            scriptsMgr.start().then(function () {
+                resolve(true);
+            }).catch(function (err) {
+                logger.error('runtime.failed-to-start-scripts: ' + err);
+                reject();
+            });
         }).catch(function (err) {
             logger.error('runtime.failed-to-start: ' + err);
             reject();
@@ -286,6 +297,10 @@ function stop() {
         }).catch(function (err) {
             logger.error('runtime.failed-to-stop-notificatorMgr: ' + err);
         });
+        scriptsMgr.stop().then(function () {
+        }).catch(function (err) {
+            logger.error('runtime.failed-to-stop-scriptsMgr: ' + err);
+        });
         resolve(true);
     });
 }
@@ -304,6 +319,10 @@ function update(cmd, data) {
                 notificatorMgr.reset();
             } else if (cmd === project.ProjectDataCmdType.SetNotification || cmd === project.ProjectDataCmdType.DelNotification) {
                 notificatorMgr.reset();
+            } else if (cmd === project.ProjectDataCmdType.SetScript) {
+                scriptsMgr.updateScript(data);
+            } else if (cmd === project.ProjectDataCmdType.DelScript) {
+                scriptsMgr.removeScript(data);
             }
             resolve(true);
         } catch (err) {
@@ -405,6 +424,17 @@ function updateAlarmsStatus() {
     }
 }
 
+/**
+ * Trasmit the scripts console output
+ * @param {*} output 
+ */
+function scriptConsoleOutput(output) {
+    try {
+        io.emit(Events.IoEventTypes.SCRIPT_CONSOLE, output);
+    } catch (err) {
+    }
+}
+
 var runtime = module.exports = {
     init: init,
     project: project,
@@ -422,6 +452,7 @@ var runtime = module.exports = {
     get daqStorage() { return daqstorage },
     get alarmsMgr() { return alarmsMgr },
     get notificatorMgr() { return notificatorMgr },
+    get scriptsMgr() { return scriptsMgr },
     events: events,
 
 }

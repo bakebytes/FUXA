@@ -86,6 +86,8 @@ try {
     settings.packageDir = path.resolve(rootDir, '_pkg');
     settings.settingsFile = settingsFile;
     settings.environment = process.env.NODE_ENV || 'prod';
+    settings.uploadFileDir = '_upload_files';
+
     // check new settings from default and merge if not defined
     var defSettings = require(path.join(__dirname, 'settings.default.js'));
     if (defSettings.version !== settings.version) {
@@ -153,6 +155,12 @@ if (!fs.existsSync(settings.dbDir)) {
 // Check package folder
 if (!fs.existsSync(settings.packageDir)) {
     fs.mkdirSync(settings.packageDir);
+}
+// Check upload file folder
+settings.httpUploadFileStatic = 'resources';
+settings.uploadFileDir = path.resolve(workDir, settings.uploadFileDir);
+if (!fs.existsSync(settings.uploadFileDir)) {
+    fs.mkdirSync(settings.uploadFileDir);
 }
 
 // Server settings
@@ -224,8 +232,10 @@ app.use('/home', express.static(settings.httpStatic));
 app.use('/lab', express.static(settings.httpStatic));
 app.use('/editor', express.static(settings.httpStatic));
 app.use('/device', express.static(settings.httpStatic));
+app.use('/rodevice', express.static(settings.httpStatic));
 app.use('/users', express.static(settings.httpStatic));
 app.use('/view', express.static(settings.httpStatic));
+app.use('/' + settings.httpUploadFileStatic, express.static(settings.uploadFileDir));
 
 var accessLogStream = fs.createWriteStream(settings.logDir + '/api.log', {flags: 'a'});
 app.use(morgan('combined', { stream: accessLogStream }));

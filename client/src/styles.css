@@ -144,6 +144,10 @@ app-root {
     height: 100%;
 }
 
+.default-color {
+    color:rgba(0, 0, 0, 0.8);
+}
+
 /* toaster overwrite */
 /*-------------------*/
 #toast-container > div {
@@ -339,18 +343,32 @@ app-root {
 }
 
 .menu-item-content-icon {
-    padding-top: 10px;
-    padding-bottom: 5px;
+    height: 50px;
+    width: 55px;
+    display:table-cell;
+    vertical-align:middle;
+    padding-top: 4px;
 }
+
 .menu-item-content-icon .mat-icon {
     font-size: 32px;
     height: 32px;
     width: 32px;
 }
 
+.menu-item-content-icon img {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    max-height: 35px;
+    max-width: 35px;
+}
+
 .menu-item-content-text {
     padding: 10px 10px 10px 10px;
 }
+
 .menu-item-content-text span {
     text-align: left !important;
 }
@@ -361,12 +379,20 @@ app-root {
     text-align: -webkit-center;
     text-align: -moz-center;
 }
+
 .menu-item-content-block .mat-icon {
     display: block;
     font-size: 32px;
     height: 32px;
     width: 32px;
 }
+
+.menu-item-content-block img {
+    display: block;
+    max-height: 35px;
+    max-width: 35px;
+}
+
 .menu-item-content-block span {
     display: block;
     font-size: 14px;
@@ -376,13 +402,22 @@ app-root {
     text-align: left;
     padding: 10px 10px 10px 10px;
 }
+
 .menu-item-content-inline .mat-icon {
     display: inline-block;
     font-size: 22px;
     height: 22px;
     width: 22px;
-    vertical-align: text-bottom;
+    vertical-align: middle;
 }
+
+.menu-item-content-inline img {
+    display: inline-block;
+    width: 22px;
+    height: 22px;
+    vertical-align: middle;
+}
+
 .menu-item-content-inline span {
     padding-left: 5px;
     display: inline-block;
@@ -572,6 +607,12 @@ mat-toolbar-row {
 
 .mat-tooltip {
     font-size: 14px !important;
+}
+
+.mat-button-sm {
+    height: 30px !important;
+    width: 30px !important;
+    line-height: 22px !important;
 }
 
 /* width */
@@ -827,6 +868,10 @@ mat-toolbar-row {
 }
 
 /* Element side property */
+.element-property {
+    display: block;
+}
+
 .element-property-title {
     line-height: 30px;
     font-size: 17px;

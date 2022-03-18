@@ -85,6 +85,7 @@ export class NaviItem {
     link: string;
     view: string;
     icon: string;
+    image: string;
     permission: number;
 }
 
@@ -180,6 +181,10 @@ export class GaugeActionBlink {
     interval: number = 1000;
 }
 
+export class GaugePropertyColor {
+    fill: string;
+    stroke: string;
+}
 export class GaugeStatus {
     variablesValue = {};
     onlyChange = false;         // to process value only by change
@@ -214,6 +219,7 @@ export enum GaugeEventActionType {
     onToggleValue = 'shapes.event-ontogglevalue',
     onSetInput = 'shapes.event-onsetinput',
     onclose = 'shapes.event-onclose',
+    onRunScript = 'shapes.event-onrunscript',
 }
 
 export enum GaugeEventSetValueType {
@@ -242,6 +248,10 @@ export interface GaugeGraphProperty {
     id: string;
     type: string;
     options: any;
+}
+
+export interface GaugeIframeProperty {
+    address: string;
 }
 
 export class Variable {
@@ -292,6 +302,12 @@ export class DaqQuery {
     to: any;
     event: string;
     sids: string[];
+}
+
+export interface DaqValue {
+    id: string,
+    ts: number;
+    value: any;
 }
 
 export class DaqResult {
@@ -347,6 +363,7 @@ export class CardWidget {
 export enum CardWidgetType {
     view = 'card.widget-view',
     alarms = 'card.widget-alarms',
+    iframe = 'card.widget-iframe',
     table = 'card.widget-table',
 }
 
