@@ -43,6 +43,7 @@ import { NotificationListComponent } from './notifications/notification-list/not
 import { NotificationPropertyComponent } from './notifications/notification-property/notification-property.component';
 import { ScriptListComponent } from './scripts/script-list/script-list.component';
 import { ScriptEditorComponent, DialogScriptParam } from './scripts/script-editor/script-editor.component';
+import { ScriptSchedulingComponent } from './scripts/script-scheduling/script-scheduling.component';
 import { TextListComponent, DialogItemText } from './text-list/text-list.component';
 import { LabComponent } from './lab/lab.component';
 import { DeviceComponent, DeviceTagDialog } from './device/device.component';
@@ -84,6 +85,8 @@ import { SelOptionsComponent } from './gui-helpers/sel-options/sel-options.compo
 import { NgxSwitchComponent } from './gui-helpers/ngx-switch/ngx-switch.component';
 import { EditNameComponent } from './gui-helpers/edit-name/edit-name.component';
 import { DaterangeDialogComponent } from './gui-helpers/daterange-dialog/daterange-dialog.component';
+import { BitmaskComponent } from './gui-helpers/bitmask/bitmask.component';
+import { RangeNumberComponent } from './gui-helpers/range-number/range-number.component';
 
 import { DialogDraggableDirective } from './_directives/dialog-draggable.directive';
 import { ModalPositionCache } from './_directives/modal-position.cache';
@@ -113,6 +116,7 @@ import { HtmlChartComponent } from './gauges/controls/html-chart/html-chart.comp
 import { HtmlGraphComponent } from './gauges/controls/html-graph/html-graph.component';
 import { HtmlIframeComponent } from './gauges/controls/html-iframe/html-iframe.component';
 import { HtmlBagComponent } from './gauges/controls/html-bag/html-bag.component';
+import { HtmlTableComponent } from './gauges/controls/html-table/html-table.component';
 import { HtmlSwitchComponent } from './gauges/controls/html-switch/html-switch.component';
 import { GaugeProgressComponent } from './gauges/controls/gauge-progress/gauge-progress.component';
 import { GaugeSemaphoreComponent } from './gauges/controls/gauge-semaphore/gauge-semaphore.component';
@@ -145,6 +149,9 @@ import { GraphPropertyComponent } from './gauges/controls/html-graph/graph-prope
 import { GraphBaseComponent } from './gauges/controls/html-graph/graph-base/graph-base.component';
 import { ChartsModule } from 'ng2-charts';
 import { IframePropertyComponent } from './gauges/controls/html-iframe/iframe-property/iframe-property.component';
+import { TablePropertyComponent } from './gauges/controls/html-table/table-property/table-property.component';
+import { TableCustomizerComponent, DialogTableCell } from './gauges/controls/html-table/table-customizer/table-customizer.component';
+import { DataTableComponent } from './gauges/controls/html-table/data-table/data-table.component';
 
 export function createTranslateLoader(http: HttpClient) {
     return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -222,6 +229,7 @@ export function createTranslateLoader(http: HttpClient) {
         NgxFabButtonComponent,
         NgxFabItemButtonComponent,
         TreetableComponent,
+        BitmaskComponent,
         SelOptionsComponent,
         LazyForDirective,
         NgxSwitchComponent,
@@ -235,6 +243,7 @@ export function createTranslateLoader(http: HttpClient) {
         NotificationPropertyComponent,
         ScriptListComponent,
         ScriptEditorComponent,
+        ScriptSchedulingComponent,
         DialogScriptParam,
         TextListComponent,
         LogsViewComponent,
@@ -255,7 +264,12 @@ export function createTranslateLoader(http: HttpClient) {
         GraphPieComponent,
         GraphPropertyComponent,
         GraphBaseComponent,
-        IframePropertyComponent
+        IframePropertyComponent,
+        TablePropertyComponent,
+        TableCustomizerComponent,
+        DialogTableCell,
+        DataTableComponent,
+        RangeNumberComponent
    ],
     imports: [
         BrowserModule,
@@ -310,6 +324,7 @@ export function createTranslateLoader(http: HttpClient) {
         HtmlSwitchComponent,
         PipeComponent,
         SliderComponent,
+        HtmlTableComponent,
         Dictionary,
         ModalPositionCache,
         Define,
@@ -356,6 +371,7 @@ export function createTranslateLoader(http: HttpClient) {
         NotificationPropertyComponent,
         ScriptListComponent,
         ScriptEditorComponent,
+        ScriptSchedulingComponent,
         TextListComponent,
         DialogChartLine,
         DialogGraphSource,
@@ -368,7 +384,12 @@ export function createTranslateLoader(http: HttpClient) {
         GraphBarComponent,
         GraphPieComponent,
         GraphBaseComponent,
-        DialogScriptParam
+        DialogScriptParam,
+        BitmaskComponent,
+        DataTableComponent,
+        TableCustomizerComponent,
+        DialogTableCell,
+        RangeNumberComponent
     ],
     bootstrap: [AppComponent]
 })

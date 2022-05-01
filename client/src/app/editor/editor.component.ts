@@ -1174,6 +1174,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
         let tempsettings = JSON.parse(JSON.stringify(settings));
         let hmi = this.projectService.getHmi();
         let dlgType = GaugesManager.getEditDialogTypeToUse(settings.type);
+        let bitmaskSupported = GaugesManager.isBitmaskSupported(settings.type);
         let eventsSupported = this.isWithEvents(settings.type);
         let actionsSupported = this.isWithActions(settings.type);
         let defaultValue = GaugesManager.getDefaultValue(settings.type);
@@ -1250,6 +1251,16 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
                     names: names
                 }
             });
+        } else if (dlgType === GaugeDialogType.Table) {
+            this.gaugeDialog.type = dlgType;
+            this.gaugeDialog.data = {
+                settings: tempsettings, dlgType: dlgType, names: names
+            };
+            if (!this.sidePanel.opened) {
+                this.sidePanel.toggle();
+            }
+            this.reloadGaugeDialog = !this.reloadGaugeDialog;
+            return;
         } else {
             let title = this.getGaugeTitle(settings.type);
             dialogRef = this.dialog.open(GaugePropertyComponent, {
@@ -1258,7 +1269,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
                     settings: tempsettings, devices: Object.values(this.projectService.getDevices()), title: title,
                     views: hmi.views, dlgType: dlgType, withEvents: eventsSupported, withActions: actionsSupported, default: defaultValue,
                     inputs: Object.values(this.currentView.items).filter(gs => gs.name && (gs.id.startsWith('HXS_') || gs.id.startsWith('HXI_'))),
-                    names: names, scripts: this.projectService.getScripts()
+                    names: names, scripts: this.projectService.getScripts(), withBitmask: bitmaskSupported
                 }
             });
         }

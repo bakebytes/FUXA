@@ -7,7 +7,7 @@ import { HmiService } from '../_services/hmi.service';
 import { ChartRangeType } from '../_models/chart';
 
 import { GaugeBaseComponent } from './gauge-base/gauge-base.component';
-import { GaugeSettings, GaugeProperty, Variable, Event, GaugeEvent, GaugeEventType, GaugeStatus, Size, DaqQuery } from '../_models/hmi';
+import { GaugeSettings, GaugeProperty, Variable, Event, GaugeEvent, GaugeEventType, GaugeStatus, Size, DaqQuery, TableRangeType } from '../_models/hmi';
 import { ValueComponent } from './controls/value/value.component';
 import { GaugePropertyComponent, GaugeDialogType } from './gauge-property/gauge-property.component';
 import { HtmlInputComponent } from './controls/html-input/html-input.component';
@@ -34,6 +34,8 @@ import { GaugeOptions } from '../gui-helpers/ngx-gauge/gaugeOptions';
 import { NgxNouisliderComponent } from '../gui-helpers/ngx-nouislider/ngx-nouislider.component';
 import { GraphBaseComponent } from './controls/html-graph/graph-base/graph-base.component';
 import { HtmlIframeComponent } from './controls/html-iframe/html-iframe.component';
+import { HtmlTableComponent } from './controls/html-table/html-table.component';
+import { DataTableComponent } from './controls/html-table/data-table/data-table.component';
 
 @Injectable()
 export class GaugesManager {
@@ -52,6 +54,7 @@ export class GaugesManager {
 
     mapChart = {};
     mapGauges = {};
+    mapTable = {};
 
     // list of gauges tags to speed up the check
     gaugesTags = [];
@@ -67,7 +70,7 @@ export class GaugesManager {
     // list of gauges components
     static Gauges = [ValueComponent, HtmlInputComponent, HtmlButtonComponent, HtmlBagComponent,
         HtmlSelectComponent, HtmlChartComponent, GaugeProgressComponent, GaugeSemaphoreComponent, ShapesComponent, ProcEngComponent, ApeShapesComponent,
-        PipeComponent, SliderComponent, HtmlSwitchComponent, HtmlGraphComponent, HtmlIframeComponent];
+        PipeComponent, SliderComponent, HtmlSwitchComponent, HtmlGraphComponent, HtmlIframeComponent, HtmlTableComponent];
 
     constructor(private hmiService: HmiService,
         private winRef: WindowRef,
@@ -86,6 +89,9 @@ export class GaugesManager {
             try {
                 if (this.mapChart[message.gid]) {
                     let gauge: ChartUplotComponent = this.mapChart[message.gid];
+                    gauge.setValues(message.values);
+                } else if (this.mapTable[message.gid]) {
+                    let gauge: DataTableComponent = this.mapTable[message.gid];
                     gauge.setValues(message.values);
                 }
             } catch (err) {
@@ -193,6 +199,11 @@ export class GaugesManager {
             return this.mapGauges[ga.id] = HtmlSwitchComponent.detectChange(ga, res, ref);
         } else if (ga.type.startsWith(HtmlIframeComponent.TypeTag)) {
             HtmlIframeComponent.initElement(ga, true);
+        } else if (ga.type.startsWith(HtmlTableComponent.TypeTag)) {
+            delete this.mapGauges[ga.id];
+            let gauge = HtmlTableComponent.detectChange(ga, res, ref);
+            this.setTablePropety(gauge, ga.property);
+            this.mapGauges[ga.id] = gauge;
         }
         return false;
     }
@@ -296,6 +307,9 @@ export class GaugesManager {
                             }
                             if (this.mapGauges[g.id]) {
                                 delete this.mapGauges[g.id];
+                            }
+                            if (this.mapTable[g.id]) {
+                                delete this.mapTable[g.id];
                             }
                         } catch (err) {
                             console.error(err);
@@ -511,6 +525,15 @@ export class GaugesManager {
                         }
                     });
                     break;
+                } else if (ga.type.startsWith(HtmlTableComponent.TypeTag)) {
+                    if (ga.property.type !== 'history' && this.memorySigGauges[sig.id]) {
+                        Object.keys(this.memorySigGauges[sig.id]).forEach(k => {
+                            if (k === ga.id && this.mapGauges[k]) {
+                                HtmlTableComponent.processValue(ga, svgele, sig, gaugeStatus, this.mapGauges[k]);
+                            }
+                        });
+                    }
+                    break;
                 } else if (typeof GaugesManager.Gauges[i]['processValue'] === 'function') {
                     GaugesManager.Gauges[i]['processValue'](ga, svgele, sig, gaugeStatus);
                     break;
@@ -571,6 +594,18 @@ export class GaugesManager {
         }
     }
 
+    static isBitmaskSupported(type: string): boolean {
+        for (let i = 0; i < GaugesManager.Gauges.length; i++) {
+            if (type.startsWith(GaugesManager.Gauges[i].TypeTag)) {
+                if (typeof GaugesManager.Gauges[i]['isBitmaskSupported'] === 'function') {
+                    return GaugesManager.Gauges[i]['isBitmaskSupported']();
+                } else {
+                    return false;
+                }
+            }
+        }
+        return false;
+    }
 
     /**
      * used from controls in editor to get default value of edit gauge property
@@ -741,6 +776,20 @@ export class GaugesManager {
             let gauge = HtmlSwitchComponent.initElement(ga, res, ref, isview);
             this.mapGauges[ga.id] = gauge;
             return gauge;
+        } else if (ga.type.startsWith(HtmlTableComponent.TypeTag)) {
+            let gauge = HtmlTableComponent.initElement(ga, res, ref, isview);
+            if (gauge) {
+                this.setTablePropety(gauge, ga.property);
+                this.mapTable[ga.id] = gauge;
+                gauge.onTimeRange.subscribe(data => {
+                    this.hmiService.queryDaqValues(data);
+                });
+                this.mapGauges[ga.id] = gauge;
+                if (isview) {
+                    gauge.onRangeChanged(Utils.getEnumKey(TableRangeType, TableRangeType.last1h));
+                }                
+            }
+            return gauge;
         } else if (ga.type.startsWith(HtmlIframeComponent.TypeTag)) {
             HtmlIframeComponent.initElement(ga, isview);
             return true;
@@ -760,12 +809,13 @@ export class GaugesManager {
                 if (chart) {
                     const opt = <ChartOptions>{ ...property.options, ...{ title: chart.name, id: chart.name, scales: { x: { time: true } } } };
                     gauge.setOptions(opt, true);
+                    let yaxisNotOne = chart.lines.find(line => line.yaxis > 1);
                     for (let i = 0; i < chart.lines.length; i++) {
                         let line = chart.lines[i];
                         let sigid = line.id;
                         let sigProperty = this.hmiService.getMappedVariable(sigid, true);
                         if (sigProperty) {
-                            gauge.addLine(sigid, sigProperty.name, line);
+                            gauge.addLine(sigid, sigProperty.name, line, yaxisNotOne?true:false);
                         }
                     }
                     gauge.redraw();
@@ -784,6 +834,20 @@ export class GaugesManager {
                     gauge.init(graph.name, graph.property, graph.sources);
                 }
             }
+            if (property.options) {
+                gauge.setOptions(property.options);
+            }
+        }
+    }
+
+    private setTablePropety(gauge: DataTableComponent, property: any) {
+        if (property) {
+            // if (property.id) {
+            //     let graph = this.hmiService.getGraph(property.id);
+            //     if (graph) {
+            //         gauge.init(graph.name, graph.property, graph.sources);
+            //     }
+            // }
             if (property.options) {
                 gauge.setOptions(property.options);
             }
