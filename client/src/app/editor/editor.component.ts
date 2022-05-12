@@ -19,6 +19,7 @@ import { GaugeBaseComponent } from '../gauges/gauge-base/gauge-base.component'
 import { Utils } from '../_helpers/utils';
 import { ConfirmDialogComponent } from '../gui-helpers/confirm-dialog/confirm-dialog.component';
 import { Define } from '../_helpers/define';
+import { LibImagesComponent } from '../resources/lib-images/lib-images.component';
 
 import * as FileSaver from 'file-saver';
 import { BagPropertyComponent } from '../gauges/controls/html-bag/bag-property/bag-property.component';
@@ -1318,6 +1319,36 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     //#endregion
+
+    onAddResource() {
+        let dialogRef = this.dialog.open(LibImagesComponent, {
+            position: { top: '60px' }
+        });
+        dialogRef.afterClosed().subscribe(result => {
+            if (result) {
+                if (result) {
+                    this.imagefile = result;
+                    let self = this;
+                    if (this.imagefile.split('.').pop().toLowerCase() === 'svg') {
+                        fetch(this.imagefile).then(r => r.text()).then(text => {
+                            if (self.winRef.nativeWindow.svgEditor.setSvgImageToAdd) {
+                                self.winRef.nativeWindow.svgEditor.setSvgImageToAdd(text);
+                            }
+                            self.setMode('svg-image');                        
+                        })
+                    }
+                    // } else {
+                    //     this.getBase64Image(result, function (imgdata) {
+                    //         if (self.winRef.nativeWindow.svgEditor.setUrlImageToAdd) {
+                    //             self.winRef.nativeWindow.svgEditor.setUrlImageToAdd(imgdata);
+                    //         }
+                    //         self.setMode('image');
+                    //     });
+                    // }
+                }
+            }
+        });
+    }
 
     isWithShadow() {
         if (this.selectedElement) {

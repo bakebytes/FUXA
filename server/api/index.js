@@ -15,6 +15,7 @@ var alarmsApi = require('./alarms');
 var pluginsApi = require('./plugins');
 var diagnoseApi = require('./diagnose');
 var scriptsApi = require('./scripts');
+var resourcesApi = require('./resources');
 var daqApi = require('./daq');
 
 var apiApp;
@@ -29,7 +30,7 @@ function init(_server, _runtime) {
         if (runtime.settings.disableServer !== false) {
             apiApp = express();
             
-            var maxApiRequestSize = runtime.settings.apiMaxLength || '15mb';
+            var maxApiRequestSize = runtime.settings.apiMaxLength || '35mb';
             apiApp.use(bodyParser.json({limit:maxApiRequestSize}));
             apiApp.use(bodyParser.urlencoded({limit:maxApiRequestSize,extended:true}));
             authJwt.init(runtime.settings.secretCode, runtime.settings.tokenExpiresIn);
@@ -49,6 +50,8 @@ function init(_server, _runtime) {
             apiApp.use(daqApi.app());
             scriptsApi.init(runtime, authJwt.verifyToken, verifyGroups);
             apiApp.use(scriptsApi.app());
+            resourcesApi.init(runtime, authJwt.verifyToken, verifyGroups);
+            apiApp.use(resourcesApi.app());
 
             const limiter = rateLimit({
                 windowMs: 5 * 60 * 1000, // 5 minutes
