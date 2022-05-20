@@ -12,7 +12,7 @@
         <button mat-menu-item (click)="onSaveProjectAs()">{{'header.saveas-project' | translate}}</button>
         <mat-divider class="menu-separator"></mat-divider>
         <button mat-menu-item (click)="onOpenProject();$event.stopPropagation()">{{'header.open-project' | translate}}</button>
-        <input type="file" #fileImportInput style="display: none" id="projectFileUpload" (change)="onFileChangeListener($event)" accept=".fuxap,.json" />
+        <input type="file" #fileImportInput style="display: none" id="projectFileUpload" (change)="onFileChangeListener($event)" accept=".json" />
     </mat-menu>
     <button mat-button title="{{'header.edit-project' | translate}}" class="main-btn" (click)="onSetup()">
         <mat-icon aria-label="Edit Views">settings</mat-icon>
@@ -38,4 +38,3 @@
     </div>
 </div>
 <app-tutorial #tutorial></app-tutorial>
-
