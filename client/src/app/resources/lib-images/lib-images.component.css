@@ -18,3 +18,7 @@
     object-fit: cover;
     cursor: pointer;
 }
+
+::ng-deep .lib-image-panel .mat-expansion-panel-content {
+    background-color: rgb(233, 233, 233);
+}
