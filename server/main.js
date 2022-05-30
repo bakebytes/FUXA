@@ -57,6 +57,9 @@ if (parsedArgs.userDir) {
     rootDir = parsedArgs.userDir;
     workDir = path.resolve(parsedArgs.userDir, '_appdata');
 }
+if (parsedArgs.env) {
+    require('./envBBtest.js');
+}
 
 if (!fs.existsSync(workDir)) {
     fs.mkdirSync(workDir);

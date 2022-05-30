@@ -407,6 +407,8 @@ module.exports = {
     getRequestResult: getRequestResult,
     loadPlugin: loadPlugin,
     isInternal: isInternal,
+    
+    get DeviceType() { return DeviceEnum }
 }
 
 /**

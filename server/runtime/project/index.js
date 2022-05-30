@@ -11,7 +11,7 @@ const async = require('async');
 var events = require('../events');
 var utils = require('../utils');
 const prjstorage = require('./prjstorage');
-
+const DeviceType = require('../devices/device').DeviceType;
 const version = '1.02';
 var settings;                   // Application settings
 var logger;                     // Application logger
@@ -121,10 +121,11 @@ function load() {
                             }); 
                         }
                     ],
-                    function (err) {
+                    async function (err) {
                         if (err) {
                             reject(err);
                         } else {
+                            await _mergeDefaultConfig();
                             resolve();
                         }
                     });
@@ -759,6 +760,123 @@ function _filterProjectGroups(groups) {
         }
     }
     return result;
+}
+
+function _mergeDefaultConfig() {
+    return new Promise(async function (resolve, reject) {
+        try {
+            if (process.env.BB_EQUIP_COUNT) {
+                logger.info('project.prjstorage-merge-default-config: in progress!');
+                for (var deviceIndex = 0; deviceIndex < process.env.BB_EQUIP_COUNT; deviceIndex++) {
+                    try {
+                        var device = process.env[`BB_EQUIP_${deviceIndex}`];
+                        if (typeof device === 'string') {
+                            device = JSON.parse(device);
+                        }
+                        var tagIds = [];
+                        // check device required
+                        if (!device.id || !device.name) {
+                            logger.error(`BB_EQUIP_${deviceIndex} property error ${err}`);
+                            continue;
+                        }
+                        var deviceToAdd = { ...device, ...{ type: DeviceType.AzIoTclient}};
+                        deviceToAdd.polling = device.polling || 1000;
+                        deviceToAdd.property = device.config || {};
+                        if (deviceToAdd.property.hostname) {
+                            deviceToAdd.property.address = deviceToAdd.property.hostname;
+                        }
+
+                        // check tags
+                        if (Array.isArray(device.tags)) {
+                            for (var y = 0; y < device.tags.length; y++) {
+                                var tag = device.tags[y];
+                                if (!tag.id || tagIds.indexOf(tag.id) !== -1) {
+                                    logger.error(`BB_EQUIP_${deviceIndex} ${device.name} Error: tag ID is not defined or already exist ${tag.id}`);
+                                    continue;
+                                }
+                                try {
+                                    var tagToAdd = new Tag(tag.id);
+                                    if (tag.name) tagToAdd.name = tag.name;
+                                    if (tag.label) tagToAdd.label = tag.label;
+                                    if (tag.type) tagToAdd.type = tag.type;
+                                    if (tag.address) tagToAdd.address = tag.address;
+                                    if (tag.memaddress) tagToAdd.memaddress = tag.memaddress;
+                                    if (tag.divisor) tagToAdd.divisor = tag.divisor;
+                                    // check options for OPCUA, BACnet, WebAPI
+                                    if (deviceToAdd.type === DeviceType.OPCUA || deviceToAdd.type === DeviceType.BACnet || deviceToAdd.type === DeviceType.WebAPI) {
+                                        tagToAdd.label = tag.name;
+                                    }
+                                    // check options for MQTT
+                                    if (deviceToAdd.type === DeviceType.MQTTclient) {
+                                        if (tag.subscription) {
+                                            tagToAdd.options = { subs: [tag.subscription] };
+                                            tagToAdd.address = tag.subscription;
+                                            tagToAdd.memaddress = tag.subscription;
+                                            if (tagToAdd.type === 'json' && tag.item) {
+                                                tagToAdd.memaddress = tag.item;
+                                            }
+                                        } else if (tag.publish && Array.isArray(tag.publish)) {
+                                            let pubs = [];
+                                            for (var t = 0; t < tag.publish.length; t++) {
+                                                if (!tag.publish[t].type) {
+                                                    logger.error(`BB_EQUIP_${deviceIndex} ${device.name} Error: publish type is not defined ${tag.id}`);
+                                                    continue;
+                                                }
+                                                let pub = { type: tag.publish[t].type, address: tag.publish[t].address };
+                                                if (tag.publish[t].key) pub['key'] = tag.publish[t].key;
+                                                if (tag.publish[t].name) pub['name'] = tag.publish[t].name;
+                                                if (pub.type === 'tag') {
+                                                    if (tag.publish[t].id) {
+                                                        pub['value'] = tag.publish[t].id;
+                                                        pubs.push(pub);
+                                                    }
+                                                } else {
+                                                    pubs.push(pub);
+                                                }
+                                            }
+                                            if (pubs.length) {
+                                                tagToAdd.options = { pubs: pubs };
+                                            }
+                                        } else {
+                                            logger.error(`BB_EQUIP_${deviceIndex} ${device.name} Error: tag defination ${tag.id}`);
+                                            continue;
+                                        }
+                                    }
+                                    deviceToAdd.tags[tagToAdd.id] = tagToAdd;
+                                } catch (terr) {
+                                    logger.error(`BB_EQUIP_${deviceIndex} ${device.name} Error: tag defination ${tag.id} ${terr}`);
+                                }
+                            }
+                        }
+                        setDevice(deviceToAdd);
+                        if (device.security) {
+                            await setDeviceSecurity(deviceToAdd.id, device.security);
+                        }
+                        logger.info(`BB_EQUIP_${deviceIndex}: Device ${deviceToAdd.name} added!`);
+                    } catch (err) {
+                        logger.error(`project.prjstorage-merge-default-config! BB_EQUIP_${deviceIndex} failed! ${err}`);
+                        reject();
+                    }
+                }
+                logger.info('project.prjstorage-merge-default-config: successful!', true);
+            }
+            resolve();
+        } catch (err) {
+            logger.error(`project.prjstorage-merge-default-config! failed! ${err}`);
+            reject();
+        }
+    });
+}
+
+function setDeviceSecurity(name, value) {
+    return new Promise(async function (resolve, reject) {
+        await prjstorage.setSection({ table: prjstorage.TableType.DEVICESSECURITY, name: name, value: value }).then(() => {
+            resolve();
+        }).catch(function (err) {
+            logger.error(`project.prjstorage-merge-default: set device property failed! '${prjstorage.TableType.DEVICESSECURITY} ${err}'`);
+            reject(err);
+        });
+    });
 }
 
 const ProjectDataCmdType = {

@@ -34,9 +34,6 @@ module.exports = {
             var groups = checkGroupsFnc(req);
             if (res.statusCode === 403) {
                 runtime.logger.error("api post runscript: Tocken Expired");
-            } else if (authJwt.adminGroups.indexOf(groups) === -1) {
-                res.status(401).json({ error: "unauthorized_error", message: "Unauthorized!" });
-                runtime.logger.error("api post runscript: Unauthorized");
             } else {
                 runtime.scriptsMgr.runScript(req.body.params.script).then(function (result) {
                     res.json(result);
