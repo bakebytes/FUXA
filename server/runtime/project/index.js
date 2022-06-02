@@ -274,7 +274,15 @@ function removeView(view) {
 }
 
 /**
- * Set Device to loacal data
+ * Set project name, used to import from env variable
+ * @param {*} name
+ */
+ function setProjectName(name) {
+    data.name = name;
+}
+
+/**
+ * Set Device to local data
  * @param {*} device 
  */
 function setDevice(device) {
@@ -765,6 +773,13 @@ function _filterProjectGroups(groups) {
 function _mergeDefaultConfig() {
     return new Promise(async function (resolve, reject) {
         try {
+            if (process.env.BB_PROJECT) {
+                try {
+                    setProjectName(JSON.parse(process.env['BB_PROJECT']).name);
+                } catch (err) {
+                    logger.error(`project.prjstorage-merge-default-config! BB_PROJECT.name failed! ${err}`);
+                }
+            }
             if (process.env.BB_EQUIP_COUNT) {
                 logger.info('project.prjstorage-merge-default-config: in progress!');
                 for (var deviceIndex = 0; deviceIndex < process.env.BB_EQUIP_COUNT; deviceIndex++) {
@@ -775,7 +790,7 @@ function _mergeDefaultConfig() {
                         }
                         var tagIds = [];
                         // check device required
-                        if (!device.id || !device.name) {
+                        if (!device || !device.id || !device.name) {
                             logger.error(`BB_EQUIP_${deviceIndex} property error ${err}`);
                             continue;
                         }
@@ -802,46 +817,6 @@ function _mergeDefaultConfig() {
                                     if (tag.address) tagToAdd.address = tag.address;
                                     if (tag.memaddress) tagToAdd.memaddress = tag.memaddress;
                                     if (tag.divisor) tagToAdd.divisor = tag.divisor;
-                                    // check options for OPCUA, BACnet, WebAPI
-                                    if (deviceToAdd.type === DeviceType.OPCUA || deviceToAdd.type === DeviceType.BACnet || deviceToAdd.type === DeviceType.WebAPI) {
-                                        tagToAdd.label = tag.name;
-                                    }
-                                    // check options for MQTT
-                                    if (deviceToAdd.type === DeviceType.MQTTclient) {
-                                        if (tag.subscription) {
-                                            tagToAdd.options = { subs: [tag.subscription] };
-                                            tagToAdd.address = tag.subscription;
-                                            tagToAdd.memaddress = tag.subscription;
-                                            if (tagToAdd.type === 'json' && tag.item) {
-                                                tagToAdd.memaddress = tag.item;
-                                            }
-                                        } else if (tag.publish && Array.isArray(tag.publish)) {
-                                            let pubs = [];
-                                            for (var t = 0; t < tag.publish.length; t++) {
-                                                if (!tag.publish[t].type) {
-                                                    logger.error(`BB_EQUIP_${deviceIndex} ${device.name} Error: publish type is not defined ${tag.id}`);
-                                                    continue;
-                                                }
-                                                let pub = { type: tag.publish[t].type, address: tag.publish[t].address };
-                                                if (tag.publish[t].key) pub['key'] = tag.publish[t].key;
-                                                if (tag.publish[t].name) pub['name'] = tag.publish[t].name;
-                                                if (pub.type === 'tag') {
-                                                    if (tag.publish[t].id) {
-                                                        pub['value'] = tag.publish[t].id;
-                                                        pubs.push(pub);
-                                                    }
-                                                } else {
-                                                    pubs.push(pub);
-                                                }
-                                            }
-                                            if (pubs.length) {
-                                                tagToAdd.options = { pubs: pubs };
-                                            }
-                                        } else {
-                                            logger.error(`BB_EQUIP_${deviceIndex} ${device.name} Error: tag defination ${tag.id}`);
-                                            continue;
-                                        }
-                                    }
                                     deviceToAdd.tags[tagToAdd.id] = tagToAdd;
                                 } catch (terr) {
                                     logger.error(`BB_EQUIP_${deviceIndex} ${device.name} Error: tag defination ${tag.id} ${terr}`);
@@ -877,6 +852,15 @@ function setDeviceSecurity(name, value) {
             reject(err);
         });
     });
+}
+
+function Tag(_id) {
+    var id = _id;
+    var name = '';
+    var label = '';
+    var type = '';
+    var address = '';
+    var divisor = 1;
 }
 
 const ProjectDataCmdType = {
