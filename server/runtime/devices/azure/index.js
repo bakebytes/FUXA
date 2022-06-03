@@ -47,7 +47,7 @@ function AzIoTclient(_data, _logger, _events) {
                     logger.info(`'${data.name}' connected`, true);
                     _clearVarsValue();
                     _emitStatus('connect-ok');
-                    _mapTopicsAddress(Object.values(data.tags));
+                    _mapTopicsAddress(data.tags.map((tag) => (tag.id)));
                     resolve();
                     _checkWorking(false);
                 } else {
@@ -72,7 +72,6 @@ function AzIoTclient(_data, _logger, _events) {
 
     var onMessages = function (messages) {
         for (const message of messages) {
-            logger.warn(`received message: ${JSON.stringify(message)}`, true);
             if (message.systemProperties["iothub-connection-device-id"] !== options.deviceId) {
                 continue;
             }
