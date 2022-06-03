@@ -47,7 +47,7 @@ function AzIoTclient(_data, _logger, _events) {
                     logger.info(`'${data.name}' connected`, true);
                     _clearVarsValue();
                     _emitStatus('connect-ok');
-                    _mapTopicsAddress(data.tags.map((tag) => (tag.id)));
+                    _mapTopicsAddress(Object.values(data.tags));
                     resolve();
                     _checkWorking(false);
                 } else {
