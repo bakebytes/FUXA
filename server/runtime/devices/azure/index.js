@@ -72,12 +72,17 @@ function AzIoTclient(_data, _logger, _events) {
 
     var onMessages = function (messages) {
         for (const message of messages) {
+            logger.warn(`received message: ${JSON.stringify(message)}`, true);
             if (message.systemProperties["iothub-connection-device-id"] !== options.deviceId) {
                 continue;
             }
             if (message.systemProperties["iothub-connection-module-id"] !== options.moduleId) {
                 continue;
             }
+            if (message.systemProperties["iothub-message-source"] !== 'Telemetry') {
+                continue;
+            }
+            
             for (const point of message.body["data"]) {
                 if (point["plcName"] !== options.plcName) {
                     continue;
