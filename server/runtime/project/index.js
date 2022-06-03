@@ -812,7 +812,6 @@ function _mergeDefaultConfig() {
                                 }
                                 try {
                                     var tagToAdd = new Tag(tag.id);
-                                    if (tag.id) tagToAdd.id = tag.id;
                                     if (tag.name) tagToAdd.name = tag.name;
                                     if (tag.label) tagToAdd.label = tag.label;
                                     if (tag.type) tagToAdd.type = tag.type;
@@ -857,12 +856,12 @@ function setDeviceSecurity(name, value) {
 }
 
 function Tag(_id) {
-    var id = _id;
-    var name = '';
-    var label = '';
-    var type = '';
-    var address = '';
-    var divisor = 1;
+    this.id = _id;
+    this.name = '';
+    this.label = '';
+    this.type = '';
+    this.address = '';
+    this.divisor = 1;
 }
 
 const ProjectDataCmdType = {
