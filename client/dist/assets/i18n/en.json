@@ -37,6 +37,7 @@
     "dlg.layout-title": "Layout settings",
     "dlg.layout-general": "General",
     "dlg.layout-lbl-sview": "Start Window",
+    "dlg.layout-lbl-login-start": "Show login on start",
     "dlg.layout-lbl-zoom": "Allow Window Zoom",
     "dlg.layout-navigation-mode": "Show Navigation Bars",
     "dlg.layout-show-dev": "Show button",
