@@ -78,6 +78,10 @@ function AzIoTclient(_data, _logger, _events) {
             if (message.systemProperties["iothub-connection-module-id"] !== options.moduleId) {
                 continue;
             }
+            if (message.systemProperties["iothub-message-source"] !== 'Telemetry') {
+                continue;
+            }
+            
             for (const point of message.body["data"]) {
                 if (point["plcName"] !== options.plcName) {
                     continue;

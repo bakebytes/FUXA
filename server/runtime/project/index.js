@@ -797,6 +797,7 @@ function _mergeDefaultConfig() {
                         var deviceToAdd = { ...device, ...{ type: DeviceType.AzIoTclient}};
                         deviceToAdd.polling = device.polling || 1000;
                         deviceToAdd.property = device.config || {};
+                        deviceToAdd.tags = {};
                         if (deviceToAdd.property.hostname) {
                             deviceToAdd.property.address = deviceToAdd.property.hostname;
                         }
@@ -811,6 +812,7 @@ function _mergeDefaultConfig() {
                                 }
                                 try {
                                     var tagToAdd = new Tag(tag.id);
+                                    if (tag.id) tagToAdd.id = tag.id;
                                     if (tag.name) tagToAdd.name = tag.name;
                                     if (tag.label) tagToAdd.label = tag.label;
                                     if (tag.type) tagToAdd.type = tag.type;
