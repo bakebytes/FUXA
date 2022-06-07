@@ -814,6 +814,7 @@ function _mergeDefaultConfig() {
                                     if (tag.address) tagToAdd.address = tag.address;
                                     if (tag.memaddress) tagToAdd.memaddress = tag.memaddress;
                                     if (tag.divisor) tagToAdd.divisor = tag.divisor;
+                                    if (tag.options) tagToAdd.options = tag.options;
                                     deviceToAdd.tags[tagToAdd.id] = tagToAdd;
                                 } catch (terr) {
                                     logger.error(`BB_EQUIP_${deviceIndex} ${device.name} Error: tag defination ${tag.id} ${terr}`);
@@ -858,6 +859,7 @@ function Tag(_id) {
     this.type = '';
     this.address = '';
     this.divisor = 1;
+    this.options = {};
 }
 
 const ProjectDataCmdType = {
