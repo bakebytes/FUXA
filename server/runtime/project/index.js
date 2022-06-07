@@ -794,13 +794,9 @@ function _mergeDefaultConfig() {
                             logger.error(`BB_EQUIP_${deviceIndex} property error ${err}`);
                             continue;
                         }
-                        var deviceToAdd = { ...device, ...{ type: DeviceType.AzIoTclient}};
+                        var deviceToAdd = { ...device, ...{ type: DeviceType.MQTTclient}};
                         deviceToAdd.polling = device.polling || 1000;
-                        deviceToAdd.property = device.config || {};
                         deviceToAdd.tags = {};
-                        if (deviceToAdd.property.hostname) {
-                            deviceToAdd.property.address = deviceToAdd.property.hostname;
-                        }
 
                         // check tags
                         if (Array.isArray(device.tags)) {
