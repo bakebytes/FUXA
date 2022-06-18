@@ -1,6 +1,8 @@
 import { Injectable, Pipe, PipeTransform } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 
+declare const numeral: any;
+
 @Injectable()
 export class Utils {
 
@@ -136,6 +138,29 @@ export class Utils {
         } else {
             return (arg == true || arg == 'true' || arg == 1) ? true : false;
         }
+    }
+
+    /**
+     * check boolean and convert to number
+     * @param value 
+     */
+    static toNumber(value: any) {
+        const b = Utils.Boolify(value);
+        if (!Utils.isNullOrUndefined(b)) {
+            return Number(b);
+        }
+        return value;
+    }
+
+    static formatValue(value: string, format: string): string {
+        try {
+            if (Utils.isNumeric(value)) {
+                return numeral(value).format(format);
+            }
+        } catch (e) {
+            console.error(e);
+        }
+        return value;        
     }
 
     static arrayToObject = (array, keyField) => {

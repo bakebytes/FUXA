@@ -424,9 +424,9 @@
     "editor.cmenu-group": "Group",
     "editor.cmenu-ungroup": "Ungroup",
     "editor.cmenu-bring-front": "Bring to Front",
-    "editor.cmenu-bring-forward": "Bring Forward",
-    "editor.cmenu-send-backward": "Send Backward",
-    "editor.cmenu-send-back": "Send to Back",
+    "editor.cmenu-bring-forward": "Bring to Forward",
+    "editor.cmenu-send-backward": "Bring Backward",
+    "editor.cmenu-send-back": "Bring to Back",
     "editor.cmenu-layer-duplicate": "Duplicate Layer...",
     "editor.cmenu-layer-delete": "Delete Layer",
     "editor.cmenu-layer-marge-down": "Merge Down",
@@ -551,6 +551,8 @@
     "editor.tools-ungroup-title": "Ungroup Elements [G]",
     "editor.tools-hyperlink-title": "Make Hyperlink",
 
+    "tutorial.editor-keyboard-shortcuts": "Editor Keyboard Shortcuts",
+
     "shapes.action-hide": "Hide",
     "shapes.action-show": "Show",
     "shapes.action-blink": "Blink",
@@ -655,6 +657,8 @@
     "device.list-options": "Tag options",
 
     "devices.export": "Export devices",
+    "devices.export-json": "JSON",
+    "devices.export-csv": "CSV",
     "devices.import": "Import devices",
     "device.property-client": "Device Property",
     "device.property-server": "BakeBytes Server Property",
@@ -929,7 +933,7 @@
     "scripts.list-name": "Name",
     "scripts.list-type": "Type",
     "scripts.list-params": "Parameters",
-    "scripts.list-scheduling": "Scheduling/Interval",
+    "scripts.list-scheduling": "Scheduling / Interval",
     "scripts.list-permission": "Authorization",
     "scripts.list-options": "Script options",
 
@@ -1091,5 +1095,6 @@
     "msg.signin-failed": "Unauthorized",
     "msg.get-project-void": "Project not found!",
     "msg.editor-mode-locked": "The editor is already open!",
-    "msg.alarms-clear-success": "All alarms have been cancelled!"
+    "msg.alarms-clear-success": "All alarms have been cancelled!",
+    "msg.import-devices-error": "Import devices failed!"
 }

@@ -1,6 +1,6 @@
 {
   "name": "fuxa",
-  "version": "1.1.6-718",
+  "version": "1.1.6-729",
   "keywords": [],
   "author": "frangoteam <4frango@gmail.com>",
   "description": "Web-based Process Visualization (SCADA/HMI/Dashboard) software",
@@ -61,9 +61,9 @@
     "@angular/cli": "~7.3.10",
     "@angular/compiler-cli": "~7.2.0",
     "@angular/language-service": "~7.2.0",
+    "@types/node": "~8.9.4",
     "@types/jasmine": "~2.8.8",
     "@types/jasminewd2": "~2.0.3",
-    "@types/node": "~8.9.4",
     "codelyzer": "~4.5.0",
     "jasmine-core": "~2.99.1",
     "jasmine-spec-reporter": "~4.2.1",

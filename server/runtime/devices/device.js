@@ -299,7 +299,7 @@ function Device(data, runtime) {
      * Bind function to ask project stored property (security)
      */
     this.bindGetProperty = function (fnc) {
-        if (data.type === DeviceEnum.OPCUA || data.type === DeviceEnum.MQTTclient || data.type === DeviceEnum.inmation) {
+        if (data.type === DeviceEnum.OPCUA || data.type === DeviceEnum.MQTTclient) {
             comm.bindGetProperty(fnc);
         }
     }
