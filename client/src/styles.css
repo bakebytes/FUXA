@@ -611,6 +611,7 @@ mat-toolbar-row {
 
 .mat-dialog-title {
     margin: 0 0 12px !important;
+    width: calc(100% - 50px);
 }
 
 .mat-raised-button {
@@ -773,7 +774,7 @@ mat-toolbar-row {
 /* Dialog */
 .dialog-action {
     float: right;
-    padding-bottom: 20px !important;
+    /* padding-bottom: 20px !important; */
 }
 
 .dialog-property .mat-dialog-container {
