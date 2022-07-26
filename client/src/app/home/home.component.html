@@ -15,11 +15,11 @@
 			<div class="header-title">
 				{{title}}
 			</div>
-			<div *ngIf="securityEnabled" class="header-login">
+			<!-- <div *ngIf="securityEnabled" class="header-login">
 				<button mat-icon-button (click)="onLogin()">
 					<mat-icon aria-label="Login" [style.color]="isLoggedIn() ? 'rgb(59, 144, 255)' : layoutHeader.fgcolor">account_circle</mat-icon>
 				</button>
-			</div>
+			</div> -->
 			<div class="header-button">
 				<div class="alarm-layout" style="min-width: 40px;">
 					<button mat-icon-button *ngIf="alarms.show" (click)="onAlarmsShowMode('collapse')">

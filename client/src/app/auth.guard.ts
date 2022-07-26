@@ -21,15 +21,8 @@ export class AuthGuard implements CanActivate {
         if (!this.projectService.isSecurityEnabled()) {
             return of(true);
         }
-        if (this.authService.isAdmin()) {
-            return of(true);
-        }
-        return this.projectService.checkServer().pipe(map((response: any) => {
-            if (response && !response.secureEnabled) {
-                return true;
-            }
-            return false;
-        }));
+        let asViewer = (state.url.indexOf('home') !== -1 || !state.url) ? true : false;
+        return this.authService.checkAutorization(asViewer);
     }
 
     private notifySaveError() {

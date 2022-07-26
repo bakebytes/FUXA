@@ -29,18 +29,18 @@ function init(_server, _runtime) {
     return new Promise(function (resolve, reject) {
         if (runtime.settings.disableServer !== false) {
             apiApp = express();
-            
+            var secretCode = process.env.BB_JWT_SECRET || runtime.settings.secretCode; 
             var maxApiRequestSize = runtime.settings.apiMaxLength || '35mb';
             apiApp.use(bodyParser.json({limit:maxApiRequestSize}));
             apiApp.use(bodyParser.urlencoded({limit:maxApiRequestSize,extended:true}));
-            authJwt.init(runtime.settings.secretCode, runtime.settings.tokenExpiresIn);
+            authJwt.init(secretCode, runtime.settings.tokenExpiresIn);
             prjApi.init(runtime, authJwt.verifyToken, verifyGroups);
             apiApp.use(prjApi.app());
             usersApi.init(runtime, authJwt.verifyToken, verifyGroups);
             apiApp.use(usersApi.app());
             alarmsApi.init(runtime, authJwt.verifyToken, verifyGroups);
             apiApp.use(alarmsApi.app());
-            authApi.init(runtime, authJwt.secretCode, authJwt.tokenExpiresIn);
+            authApi.init(runtime, secretCode, authJwt.tokenExpiresIn);
             apiApp.use(authApi.app());
             pluginsApi.init(runtime, authJwt.verifyToken, verifyGroups);
             apiApp.use(pluginsApi.app());
@@ -102,6 +102,18 @@ function init(_server, _runtime) {
                         res.status(400).json({ error: "unexpected_error", message: err });
                         runtime.logger.error("api post settings: " + err);
                     }
+                }
+            });
+
+            /**
+             * GET Permission and User profile
+             */
+            apiApp.get('/api/permission', authJwt.verifyToken, function (req, res) {
+                if (req.userName && req.userGroups) {
+                    res.json({ username: req.userName, fullname: req.userName, groups: req.userGroups });
+                } else {
+                    res.status(401).json({error:"unauthorized_error", message: "Unauthorized!"});
+                    runtime.logger.error("api post settings: Unauthorized");
                 }
             });
 

@@ -30,10 +30,6 @@ export class AuthInterceptor implements HttpInterceptor {
                 req = req.clone({ headers: req.headers.set(TOKEN_HEADER_KEY, token) });
             }
         }
-        // if (!req.headers.has('Content-Type')) {
-        //     req = req.clone({ headers: req.headers.set('Content-Type', 'application/json') });
-        // }
-        // req = req.clone({ headers: req.headers.set('Accept', 'application/json') });
         return next.handle(req).pipe(
             tap((event: HttpEvent<any>) => {
             }, (err: any) => {
@@ -41,8 +37,8 @@ export class AuthInterceptor implements HttpInterceptor {
                     if (err.status === 403) {
                         // redirect to the login route or show a modal
                         authService.signOut();
-                        const projectService = this.injector.get(ProjectService)
-                        projectService.reload();
+                        // const projectService = this.injector.get(ProjectService)
+                        // projectService.reload();
                     }
                 }
             }

@@ -23,6 +23,7 @@ function verifyToken (req, res, next) {
         jwt.verify(token, secretCode, (err, decoded) => {
             if (err) {
                 req.userId = null;
+                req.userName = null;
                 req.userGroups = null;
                 if (err.name === 'TokenExpiredError' || err.name === 'JsonWebTokenError') {
                     req.tokenExpired = true;
@@ -34,11 +35,11 @@ function verifyToken (req, res, next) {
                 //     message: 'Fail to Authentication. Error -> ' + err
                 // });
             } else {
-                req.userId = decoded.id;
-                req.userGroups = decoded.groups;
-                if (req.headers['x-auth-user']) {
-                    let user = JSON.parse(req.headers['x-auth-user']);
-                    if (user && user.groups != req.userGroups) {
+                if (decoded.user) {
+                    req.userId = decoded.user.id;
+                    req.userName = decoded.user.name;
+                    req.userGroups = getUserGroups(decoded.user.role);
+                    if (!req.userGroups) {
                         res.status(403).json({ error: "unauthorized_error", message: "User Profile Corrupted!" });
                     }
                 }
@@ -51,6 +52,17 @@ function verifyToken (req, res, next) {
         req.userGroups = null;
         next();
     }
+}
+
+function getUserGroups(role) {
+    if (role.permission) {
+        if (role.permission.indexOf('DASHBOARD_SCADA_EDITOR') !== -1) {
+            return 255;
+        } else if (role.permission.indexOf('DASHBOARD_SCADA_VIEWER') !== -1) {
+            return 1;
+        }
+    }
+    return 0;
 }
 
 function getTokenExpiresIn() {

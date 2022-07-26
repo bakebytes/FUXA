@@ -17,9 +17,9 @@ import { TextListComponent } from './text-list/text-list.component';
 import { DEVICE_READONLY } from './_models/hmi';
 
 const appRoutes: Routes = [
-    { path: '', component: HomeComponent},//, canActivate: [AuthGuard] },
-    { path: 'home', component: HomeComponent},//, canActivate: [AuthGuard] },
-    { path: 'editor', component: EditorComponent, canActivate: [AuthGuard]},
+    { path: '', component: HomeComponent, canActivate: [AuthGuard] },
+    { path: 'home', component: HomeComponent, canActivate: [AuthGuard] },
+    { path: 'editor', component: EditorComponent, canActivate: [AuthGuard] },
     { path: 'lab', component: LabComponent, canActivate: [AuthGuard] },
     { path: 'device', component: DeviceComponent, canActivate: [AuthGuard] },
     { path: DEVICE_READONLY, component: DeviceComponent, canActivate: [AuthGuard] },
@@ -30,7 +30,7 @@ const appRoutes: Routes = [
     { path: 'scripts', component: ScriptListComponent, canActivate: [AuthGuard] },
     { path: 'text', component: TextListComponent, canActivate: [AuthGuard] },
     { path: 'events', component: LogsViewComponent, canActivate: [AuthGuard] },
-    { path: 'view', component: ViewComponent },
+    { path: 'view', component: ViewComponent, canActivate: [AuthGuard] },
 
     // otherwise redirect to home
     { path: '**', redirectTo: '' }

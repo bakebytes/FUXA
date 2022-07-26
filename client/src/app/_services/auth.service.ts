@@ -40,6 +40,22 @@ export class AuthService {
 
 	}
 
+	checkAutorization(asViewer: boolean): Observable<boolean> {
+        return new Observable((observer) => {
+			this.http.get<any>(this.endPointConfig + '/api/permission').subscribe(result => {
+				this.currentUser = <UserProfile>result;
+				if (!asViewer && !this.isAdmin()) {
+					observer.next(false);
+				} else {
+					observer.next(true);
+				}
+			}, err => {
+				console.error(err);
+				observer.next(false);
+			});
+        });
+    }
+
 	signOut() {
 		this.removeUser();
 	}
@@ -49,11 +65,7 @@ export class AuthService {
 	}
 
 	getUserToken(): string {
-		if (this.currentUser) {
-			return this.currentUser.token;
-		} else {
-			return null;
-		}
+		return this.getCookieValue('token');
 	}
 
     isAdmin(): boolean {
@@ -63,9 +75,18 @@ export class AuthService {
         return false;
     }
 
+	private getCookieValue(name: string) {
+		let tk = document.cookie.split('; ').find((row) => row.startsWith(`${name}=`));
+		if (tk) {
+			return tk.split('=')[1];
+		}
+		return '';
+	}
+
 	// to check by page refresh
 	private saveUserToken(user: UserProfile) {
 		localStorage.setItem('currentUser', JSON.stringify(user));
+		// document.cookie = `token=${user.token}`;
 	}
 
 	private removeUser() {
