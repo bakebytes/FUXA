@@ -585,6 +585,7 @@
     "pipe.property-content-width": "Center fill weight",
     "pipe.property-content-color": "Center fill",
     "pipe.property-content-space": "Center fill dash width",
+    "pipe.action-hide-content": "Hide content",
 
     "slider.property-props": "Property",
     "slider.property-horizontal": "Horizontal",
