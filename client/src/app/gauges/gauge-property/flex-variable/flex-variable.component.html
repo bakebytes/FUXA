@@ -3,14 +3,14 @@
         <span>{{variableLabel | translate}}</span>
         <input [(ngModel)]="variableValue" (change)="onChanged()" style="width: 100px" type="text">
     </div>
-    <div class="my-form-field" style="display:inline-block;">
+    <div *ngIf="withTag" class="my-form-field" style="display:inline-block;">
         <span style="text-overflow:clip; white-space:nowrap; width: 28px">{{tagLabel | translate}}</span>
         <div class="my-form-field-link"></div>
         <button mat-icon-button (click)="onBindTag()" style="line-height: 28px;height:28px; width:28px; vertical-align: middle;">
             <mat-icon>link</mat-icon>
         </button>
     </div>
-    <div class="my-form-field" style="margin-left: 0px;">
+    <div *ngIf="withTag" class="my-form-field" style="margin-left: 0px;">
         <span>{{getDeviceName()}}</span>
         <input style="font-size: 13px;min-width: 450px" value="{{getVariableName()}}" readonly="true" [disabled]="true" 
             title="{{tagTitle | translate}}" placeholder="{{tagTitle | translate}}">
