@@ -15,7 +15,11 @@ var events = require("./runtime/events").create();
 const FUXA = require('./fuxa.js');
 
 const express = require('express');
+const cookieParser = require("cookie-parser");
+
 const app = express();
+
+app.use(cookieParser());
 
 var server;
 var settingsFile;

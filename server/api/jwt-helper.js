@@ -17,8 +17,10 @@ function init(_secretCode, _tokenExpires) {
 }
 
 function verifyToken (req, res, next) {
-    let token = req.headers['x-access-token'];
-
+    let token = null;
+    if (req.cookies) {
+        token =  req.cookies['token'];
+    }
     if (token) {
         jwt.verify(token, secretCode, (err, decoded) => {
             if (err) {
