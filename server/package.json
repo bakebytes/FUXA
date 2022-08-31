@@ -15,7 +15,6 @@
   },
   "dependencies": {
     "@influxdata/influxdb-client": "^1.25.0",
-
     "@azure/event-hubs": ">=5.0.2",
     "@inmation/inmation-api-client": "^1.7.11",
     "@types/socket.io": "^2.1.2",

@@ -148,7 +148,6 @@ function mergeUserSettings(settings) {
 }
 
 function verifyGroups(req) {
-    // return 255;
     return (runtime.settings && runtime.settings.secureEnabled) ? ((req.tokenExpired) ? 0 : req.userGroups) : authJwt.adminGroups[0];
 }
 
