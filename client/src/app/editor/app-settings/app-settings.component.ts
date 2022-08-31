@@ -6,7 +6,7 @@ import { DiagnoseService } from '../../_services/diagnose.service';
 import { TranslateService } from '@ngx-translate/core';
 import { ToastrService } from 'ngx-toastr';
 
-import { AppSettings, MailMessage, SmtpSettings } from '../../_models/settings';
+import { AppSettings, DaqStore, DaqStoreType, MailMessage, SmtpSettings, StoreCredentials } from '../../_models/settings';
 
 @Component({
     selector: 'app-app-settings',
@@ -29,6 +29,8 @@ export class AppSettingsComponent implements OnInit {
     smtpTestAddress = '';
     showPassword = false;
     
+    daqstoreType = DaqStoreType;
+    
     constructor(private settingsService: SettingsService,
         private diagnoseService: DiagnoseService,
         private translateService: TranslateService,
@@ -50,6 +52,10 @@ export class AppSettingsComponent implements OnInit {
         }
         if (!this.settings.smtp) {
             this.settings.smtp = new SmtpSettings();
+        }
+        this.settings.daqstore = this.settings.daqstore || new DaqStore();
+        if (!this.settings.daqstore.credentials) {
+            this.settings.daqstore.credentials = new StoreCredentials()
         }
     }
 
@@ -76,7 +82,7 @@ export class AppSettingsComponent implements OnInit {
 
     onSmtpTest() {
         this.smtpTesting = true;
-        let msg = <MailMessage>{ from: this.settings.smtp.username, to: this.smtpTestAddress, subject: 'FUXA', text: 'TEST' };
+        let msg = <MailMessage>{ from: this.settings.smtp.mailsender || this.settings.smtp.username, to: this.smtpTestAddress, subject: 'FUXA', text: 'TEST' };
         this.diagnoseService.sendMail(msg, this.settings.smtp).subscribe(() => {
             this.smtpTesting = false;
             var msg = '';

@@ -757,7 +757,31 @@ mat-toolbar-row {
     background-color: #2196f3;
 }
 
+@media screen and (max-height: 1500px) {
+    .dialog-ld-content {
+        max-height: 820px !important;
+        height: 820px !important;
+        overflow-y: scroll;
+        overflow-x: hidden;
+    }
+}
+
+@media screen and (max-height: 1200px) {
+    .dialog-ld-content {
+        max-height: 720px !important;
+        height: 720px !important;
+        overflow-y: scroll;
+        overflow-x: hidden;
+    }
+}
+
 @media screen and (max-height: 920px) {
+    .dialog-ld-content {
+        max-height: 600px !important;
+        height: 600px !important;
+        overflow-y: scroll;
+        overflow-x: hidden;
+    }
     .dialog-mdsd-content {
         height: 605px !important;
         overflow-y: scroll;
@@ -768,6 +792,24 @@ mat-toolbar-row {
     }
     .dialog-mdsd-table {
         height: 500px !important;
+    }
+}
+
+@media screen and (max-height: 820px) {
+    .dialog-ld-content {
+        max-height: 500px !important;
+        height: 500px !important;
+        overflow-y: scroll;
+        overflow-x: hidden;
+    }
+}
+
+@media screen and (max-height: 720px) {
+    .dialog-ld-content {
+        max-height: 400px !important;
+        height: 400px !important;
+        overflow-y: scroll;
+        overflow-x: hidden;
     }
 }
 
@@ -925,4 +967,45 @@ mat-toolbar-row {
 
 .inbk {
     display: inline-block;
+}
+
+.message-error {
+    color:#ff5151;
+}
+
+/* standard */
+.block {
+    display: block;
+}
+
+.mt10 {
+    margin-top: 10px;
+}
+
+.mt15 {
+    margin-top: 15px;
+}
+
+.mt20 {
+    margin-top: 20px;
+}
+
+.ml10 {
+    margin-left: 10px;
+}
+
+.mr10 {
+    margin-right: 10px;
+}
+
+.ml20 {
+    margin-left: 20px;
+}
+
+.mr20 {
+    margin-right: 20px;
+}
+
+.mr5 {
+    margin-right: 5px;
 }

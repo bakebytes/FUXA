@@ -118,6 +118,16 @@ function load() {
                             }).catch(function (err) {
                                 logger.error(`project.prjstorage-failed-to-load! '${prjstorage.TableType.SCRIPTS}' ${err}`);
                                 callback(err);
+                            });
+                        },
+                        // step 5 get reports
+                        function (callback) {
+                            getReports().then(reports => {
+                                data.reports = reports;
+                                callback();
+                            }).catch(function (err) {
+                                logger.error(`project.prjstorage-failed-to-load! '${prjstorage.TableType.REPORTS}' ${err}`);
+                                callback(err);
                             }); 
                         }
                     ],
@@ -215,6 +225,14 @@ function setProjectData(cmd, value) {
                 section.table = prjstorage.TableType.SCRIPTS;
                 section.name = value.id;
                 toremove = removeScript(value);
+            } else if (cmd === ProjectDataCmdType.SetReport) {
+                section.table = prjstorage.TableType.REPORTS;
+                section.name = value.id;
+                setReport(value);
+            } else if (cmd === ProjectDataCmdType.DelReport) {
+                section.table = prjstorage.TableType.REPORTS;
+                section.name = value.id;
+                toremove = removeReport(value);
             } else {
                 logger.error(`prjstorage.setdata failed! '${section.table}'`);
                 reject('prjstorage.failed-to-setdata: Command not found!');    
@@ -475,6 +493,44 @@ function removeNotification(notification) {
 }
 
 /**
+ * Set or add if not exist (check with report.id) the Report in Project
+ * @param {*} report 
+ */
+ function setReport(report) {
+    if (!data.reports) {
+        data.reports = [];
+    }
+    var pos = -1;
+    for (var i = 0; i < data.reports.length; i++) {
+        if (data.reports[i].id === report.id) {
+            pos = i;
+        }
+    }
+    if (pos >= 0) {
+        data.reports[pos] = report;
+    } else {
+        data.reports.push(report);
+    }
+}
+
+/**
+ * Remove the Report from Project
+ * @param {*} script 
+ */
+ function removeReport(report) {
+    if (data.reports) {
+        var pos = -1;
+        for (var i = 0; i < data.reports.length; i++) {
+            if (data.reports[i].id === report.id) {
+                data.reports.splice(i, 1);
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+/**
  * Get the project data in accordance with autorization
  */
 function getProject(userId, userGroups) {
@@ -549,13 +605,21 @@ function setProject(prjcontent) {
                             }
                         }
                     } else if (key === 'scripts') {
-                        // notifications
+                        // scripts
                         var scripts = prjcontent[key];
                         if (scripts && scripts.length) {
                             for (var i = 0; i < scripts.length; i++) {
                                 scs.push({ table: prjstorage.TableType.SCRIPTS, name: scripts[i].id, value: scripts[i] });
                             }
-                        }     
+                        }
+                    } else if (key === 'reports') {
+                        // reports
+                        var reports = prjcontent[key];
+                        if (reports && reports.length) {
+                            for (var i = 0; i < reports.length; i++) {
+                                scs.push({ table: prjstorage.TableType.REPORTS, name: reports[i].id, value: reports[i] });
+                            }
+                        }
                     } else {
                         // charts, graphs, version
                         scs.push({ table: prjstorage.TableType.GENERAL, name: key, value: prjcontent[key] });
@@ -689,6 +753,28 @@ function getAlarms() {
             }
         }).catch(function (err) {
             logger.error(`project.prjstorage.get-scripts failed! '${prjstorage.TableType.SCRIPTS} ${err}'`);
+            reject(err);
+        });
+    });
+}
+
+/**
+ * Get the reports 
+ */
+ function getReports() {
+    return new Promise(function (resolve, reject) {
+        prjstorage.getSection(prjstorage.TableType.REPORTS).then(drows => {
+            if (drows.length > 0) {
+                var reports = [];
+                for (var id = 0; id < drows.length; id++) {
+                    reports.push(JSON.parse(drows[id].value));
+                }
+                resolve(reports);
+            } else {
+                resolve();
+            }
+        }).catch(function (err) {
+            logger.error(`project.prjstorage.get-reports failed! '${prjstorage.TableType.REPORTS} ${err}'`);
             reject(err);
         });
     });
@@ -879,6 +965,8 @@ const ProjectDataCmdType = {
     DelNotification: 'del-notification',
     SetScript: 'set-script',
     DelScript: 'del-script',
+    SetReport: 'set-report',
+    DelReport: 'del-report',
 }
 
 module.exports = {
@@ -888,6 +976,7 @@ module.exports = {
     getAlarms: getAlarms,
     getNotifications: getNotifications,
     getScripts: getScripts,
+    getReports: getReports,
     getDeviceProperty: getDeviceProperty,
     setDeviceProperty: setDeviceProperty,
     setProjectData: setProjectData,

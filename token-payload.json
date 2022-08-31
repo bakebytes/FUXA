@@ -1,0 +1,15 @@
+
+{
+    "user": {
+        "id": "1234",
+        "name": "pippo",
+        "role": {
+            "id": "1234",
+            "name": "Operator",
+            "permission": [
+                "DASHBOARD_SCADA_VIEWER",
+                "DASHBOARD_SCADA_EDITOR"
+            ]
+        }
+    }
+}

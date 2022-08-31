@@ -17,6 +17,7 @@ var diagnoseApi = require('./diagnose');
 var scriptsApi = require('./scripts');
 var resourcesApi = require('./resources');
 var daqApi = require('./daq');
+var commandApi = require('./command');
 
 var apiApp;
 var server;
@@ -52,6 +53,8 @@ function init(_server, _runtime) {
             apiApp.use(scriptsApi.app());
             resourcesApi.init(runtime, authJwt.verifyToken, verifyGroups);
             apiApp.use(resourcesApi.app());
+            commandApi.init(runtime, authJwt.verifyToken, verifyGroups);
+            apiApp.use(commandApi.app());
 
             const limiter = rateLimit({
                 windowMs: 5 * 60 * 1000, // 5 minutes
@@ -112,6 +115,7 @@ function init(_server, _runtime) {
                 if (req.userName && req.userGroups) {
                     res.json({ username: req.userName, fullname: req.userName, groups: req.userGroups });
                 } else {
+                    // res.json({ username: 'pippo', fullname: 'ciccio', groups: 255 });
                     res.status(401).json({error:"unauthorized_error", message: "Unauthorized!"});
                     runtime.logger.error("api post settings: Unauthorized");
                 }
@@ -138,9 +142,13 @@ function mergeUserSettings(settings) {
     if (settings.smtp) {
         runtime.settings.smtp = settings.smtp;
     }
+    if (settings.daqstore) {
+        runtime.settings.daqstore = settings.daqstore;
+    }
 }
 
 function verifyGroups(req) {
+    // return 255;
     return (runtime.settings && runtime.settings.secureEnabled) ? ((req.tokenExpired) ? 0 : req.userGroups) : authJwt.adminGroups[0];
 }
 

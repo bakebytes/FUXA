@@ -155,7 +155,13 @@ import { IframePropertyComponent } from './gauges/controls/html-iframe/iframe-pr
 import { TablePropertyComponent } from './gauges/controls/html-table/table-property/table-property.component';
 import { TableCustomizerComponent, DialogTableCell } from './gauges/controls/html-table/table-customizer/table-customizer.component';
 import { DataTableComponent } from './gauges/controls/html-table/data-table/data-table.component';
+import { ReportListComponent } from './reports/report-list/report-list.component';
+import { ReportEditorComponent } from './reports/report-editor/report-editor.component';
 import { DataConverterService } from './_services/data-converter.service';
+import { ReportItemTextComponent } from './reports/report-editor/report-item-text/report-item-text.component';
+import { ReportItemTableComponent } from './reports/report-editor/report-item-table/report-item-table.component';
+import { CommandService } from './_services/command.service';
+import { ReportItemAlarmsComponent } from './reports/report-editor/report-item-alarms/report-item-alarms.component';
 
 export function createTranslateLoader(http: HttpClient) {
     return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -249,6 +255,8 @@ export function createTranslateLoader(http: HttpClient) {
         ScriptEditorComponent,
         ScriptSchedulingComponent,
         ScriptPermissionComponent,
+        ReportListComponent,
+        ReportEditorComponent,
         DialogScriptParam,
         TextListComponent,
         LogsViewComponent,
@@ -275,7 +283,10 @@ export function createTranslateLoader(http: HttpClient) {
         DialogTableCell,
         DataTableComponent,
         RangeNumberComponent,
-        LibImagesComponent
+        LibImagesComponent,
+        ReportItemTextComponent,
+        ReportItemTableComponent,
+        ReportItemAlarmsComponent
    ],
     imports: [
         BrowserModule,
@@ -316,6 +327,7 @@ export function createTranslateLoader(http: HttpClient) {
         ProjectService,
         UserService,
         DiagnoseService,
+        CommandService,
         DataConverterService,
         ScriptService,
         ResourcesService,
@@ -381,6 +393,8 @@ export function createTranslateLoader(http: HttpClient) {
         ScriptEditorComponent,
         ScriptSchedulingComponent,
         ScriptPermissionComponent,
+        ReportListComponent,
+        ReportEditorComponent,
         TextListComponent,
         DialogChartLine,
         DialogGraphSource,
@@ -399,7 +413,10 @@ export function createTranslateLoader(http: HttpClient) {
         TableCustomizerComponent,
         DialogTableCell,
         RangeNumberComponent,
-        LibImagesComponent
+        LibImagesComponent,
+        ReportItemTextComponent,
+        ReportItemTableComponent,
+        ReportItemAlarmsComponent
     ],
     bootstrap: [AppComponent]
 })
