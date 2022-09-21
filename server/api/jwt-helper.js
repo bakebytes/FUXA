@@ -21,8 +21,6 @@ function verifyToken (req, res, next) {
     if (req.cookies) {
         token =  req.cookies['token'];
     }
-    // token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE4MTYyMzkwMjIsInVzZXIiOnsiaWQiOiIxMjM0IiwibmFtZSI6InBpcHBvIiwicm9sZSI6eyJpZCI6IjEyMzQiLCJuYW1lIjoiT3BlcmF0b3IiLCJwZXJtaXNzaW9uIjpbIkRBU0hCT0FSRF9TQ0FEQV9FRElUT1IiXX19fQ.3VGH5HWMNsyq11533FweyxrG9OCEttfzK2kyeer_gLg';
-    token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE4MTYyMzkwMjIsInVzZXIiOnsiaWQiOiIxMjM0IiwibmFtZSI6InBpcHBvIiwicm9sZSI6eyJpZCI6IjEyMzQiLCJuYW1lIjoiT3BlcmF0b3IiLCJwZXJtaXNzaW9uIjpbIkRBU0hCT0FSRF9TQ0FEQV9WSUVXRVIiXX19fQ.AStUuXRVEh0YPccATHGkM4qqsD8gaVTx_k8EfLWUQJs';
     if (token) {
         jwt.verify(token, secretCode, (err, decoded) => {
             if (err) {
