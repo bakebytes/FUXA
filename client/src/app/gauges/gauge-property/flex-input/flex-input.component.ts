@@ -1,7 +1,7 @@
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { Options } from 'ng5-slider';
 
-import { GaugeRangeProperty } from '../../../_models/hmi';
+import { GaugeProperty, GaugeRangeProperty, InputOptionsProperty } from '../../../_models/hmi';
 import { DevicesUtils, Tag } from '../../../_models/device';
 import { Utils } from '../../../_helpers/utils';
 import { FlexVariableComponent } from '../flex-variable/flex-variable.component';
@@ -13,9 +13,10 @@ import { FlexVariableComponent } from '../flex-variable/flex-variable.component'
 })
 export class FlexInputComponent implements OnInit {
     @Input() data: any;
+    @Input() property: GaugeProperty;
     @Input() ranges: GaugeRangeProperty[];
     @Input() type: string;
-    @Input() inputType: string;
+    @Input() propertyType: PropertyType;
     @Input() default: any;
     @ViewChild('unit') varunit: FlexVariableComponent;
     @ViewChild('digits') vardigits: FlexVariableComponent;
@@ -59,8 +60,10 @@ export class FlexInputComponent implements OnInit {
                 this.withLabel = this.ranges[0].style[0];
                 this.withValue = this.ranges[0].style[1];
             }
-        } else if (this.isWithUnit()) {
-
+        } else if (this.isOutputCtrl()) {
+        } 
+        if (this.isInputCtrl()) {
+            this.property.options = this.property.options || <InputOptionsProperty>{ updated: false, numeric: false };
         }
         this.ranges.forEach(range => {
             if (!range.color) {
@@ -91,7 +94,7 @@ export class FlexInputComponent implements OnInit {
     getRanges() {
         let result = [];
         this.ranges.forEach(element => {
-            element.type = this.inputType;
+            element.type = this.propertyType;
             if (this.isWithStep()) {
                 element.max = element.min;
                 if (element.min !== null && element.max !== null) {
@@ -130,7 +133,7 @@ export class FlexInputComponent implements OnInit {
                 }
             }
         }
-        if (this.isWithUnit()) {
+        if (this.isOutputCtrl()) {
             let device = DevicesUtils.getDeviceFromTagId(this.data.devices, _tag.id);
             if (device) {
                 if (this.varunit) {
@@ -144,35 +147,31 @@ export class FlexInputComponent implements OnInit {
     }
 
     isWithRange() {
-        if (this.inputType === 'range') {
-            return true;
-        }
-        return false;
+        return this.propertyType === PropertyType.range;
     }
 
     isMinMax() {
-        if (this.inputType === 'minmax') {
-            return true;
-        }
-        return false;
+        return this.propertyType === PropertyType.minmax;
     }
 
     isWithRangeColor() {
-        if (this.inputType === 'range') {
-            return true;
-        }
-        return false;
+        return this.propertyType === PropertyType.range;
     }
 
     isWithStep() {
-        if (this.inputType === 'step') {
-            return true;
-        }
-        return false;
+        return this.propertyType === PropertyType.step;
     }
 
-    isWithUnit() {
-        if (this.inputType === 'unit') {
+    isOutputCtrl() {
+        return this.propertyType === PropertyType.output;
+    }
+
+    isInputCtrl() {
+        return this.propertyType === PropertyType.input;
+    }
+
+    isInputMinMax(){
+        if (this.data.dlgType === 16) {  // GaugeDialogType.Input
             return true;
         }
         return false;
@@ -195,4 +194,14 @@ export class FlexInputComponent implements OnInit {
 
 export enum InputItemType {
     Color,
+}
+
+
+export enum PropertyType {
+    output = 1,
+    range = 2,
+    text = 3,
+    step = 4,
+    minmax = 5,
+    input = 6,
 }
