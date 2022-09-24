@@ -71,10 +71,10 @@
         </div>
         <div *ngIf="isOutputCtrl()" class="item-unit">
             <flex-variable #unit [data]="data" (onchange)="onUnitChanged(item, $event)" [variableId]="item.textId" [variableValue]="item.text"
-                [variableLabel]="'gauges.property-input-unit'" [withTag]="false">
+                [variableLabel]="'gauges.property-input-unit'" [withTag]="false" style="display: inline-block;">
             </flex-variable>
             <flex-variable #digits [data]="data" (onchange)="onFormatDigitChanged(item, $event)" [variableId]="item.fractionDigitsId"
-                [variableValue]="item.fractionDigits" [variableLabel]="'gauges.property-format-digits'" [withTag]="false">
+                [variableValue]="item.fractionDigits" [variableLabel]="'gauges.property-format-digits'" [withTag]="false" style="display: inline-block;">
             </flex-variable>
         </div>
         <div *ngIf="isInputMinMax()">

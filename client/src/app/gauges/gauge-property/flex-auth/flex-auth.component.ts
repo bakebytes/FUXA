@@ -18,7 +18,6 @@ export class FlexAuthComponent implements OnInit {
     constructor(public dialog: MatDialog) { }
 
     ngOnInit() {
-        // this.property = JSON.parse(JSON.stringify(this.data.settings.property));
     }
 
     onEditPermission() {
