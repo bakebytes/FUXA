@@ -13,15 +13,7 @@
     // 'id': element id used if you like make a animation managed in angular component
     // 'type': svg element type (path, text, ellipse,...) see svg description
     // 'attr': element attribute, depending of type
-    var shapes = [
-        {
-            name: 'rectangle', ico: 'assets/lib/svgeditor/shapes/img/shape-rectangle.svg', content: [
-                { id: '', type: 'rect', attr: { width: '40', height: '40' } }]
-        },           
-        {
-            name: 'circle', ico: 'assets/lib/svgeditor/shapes/img/shape-circle.svg', content: [
-                { id: '', type: 'ellipse', attr: { cx: '20', cy: '20', rx: '20.5', ry: '20.5' } }]
-        },        
+    var shapes = [     
         {
             name: 'diamond', ico: 'assets/lib/svgeditor/shapes/img/shape-diamond.svg', content: [
                 { id: '', type: 'path', attr: { d: 'M 20 0 L 40 20 L 20 40 L 0 20 Z' } }]
@@ -117,10 +109,6 @@
         {
             name: 'drop', ico: 'assets/lib/svgeditor/shapes/img/shape-drop.svg', content: [
                 { id: '', type: 'path', attr: { d: 'M 25 0 L 47.27 43.64 C 49.06 47.16 50 51.05 50 55 C 50 61.63 47.37 67.99 42.68 72.68 C 37.99 77.37 31.63 80 25 80 C 18.37 80 12.01 77.37 7.32 72.68 C 2.63 67.99 0 61.63 0 55 C 0 51.05 0.94 47.16 2.73 43.64 Z' } }]
-        },
-        {
-            name: 'heart', ico: 'assets/lib/svgeditor/shapes/img/shape-heart.svg', content: [
-                { id: '', type: 'path', attr: { d: 'M 40 80 C 42.96 76.66 59.91 57.56 70.51 45.62 C 80 34.93 79.79 19.35 71.17 9.68 C 62.54 0 48.58 0.04 40 9.76 C 31.41 0.04 17.46 0 8.83 9.67 C 0.2 19.34 0 34.93 9.49 45.62 C 20.08 57.56 37.03 76.66 40 80 Z' } }]
         },
         {
             name: 'nosymbol', ico: 'assets/lib/svgeditor/shapes/img/shape-nosymbol.svg', content: [
