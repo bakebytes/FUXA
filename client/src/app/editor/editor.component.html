@@ -509,7 +509,7 @@
                                         </select>
                                     </div>
                                 </div>
-                                <div class="svg-property">
+                                <div class="svg-property tohide">
                                     <div class="svg-tool-button" id="linejoin_miter" #linejoinmiter (click)="onSetStrokeOption(linejoinmiter)"
                                         matTooltip="{{'editor.stroke-joinmiter-title' | translate}}">
                                         <span class="icon-linejoin-miter"></span>
@@ -523,7 +523,7 @@
                                         <span class="icon-linejoin-bevel"></span>
                                     </div>
                                 </div>
-                                <div class="svg-property">
+                                <div class="svg-property tohide">
                                     <div class="svg-tool-button" id="linecap_butt" #linecapbutt (click)="onSetStrokeOption(linecapbutt)"
                                         matTooltip="{{'editor.stroke-capbutt-title' | translate}}">
                                         <span class="icon-linecap-butt"></span>
@@ -549,7 +549,7 @@
                             </div>
                         </div>
                     </mat-expansion-panel>
-                    <mat-expansion-panel id="marker_panel" class="svg-workarea-fly-p" (opened)="panelMarkerOpenState = true" (closed)="panelMarkerOpenState = false" hideToggle="true"
+                    <mat-expansion-panel id="marker_panel" class="svg-workarea-fly-p tohide" (opened)="panelMarkerOpenState = true" (closed)="panelMarkerOpenState = false" hideToggle="true"
                         expanded="true">
                         <mat-expansion-panel-header class="svg-workarea-leftbar-h">
                             <mat-panel-title>

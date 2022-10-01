@@ -974,6 +974,10 @@ mat-toolbar-row {
 }
 
 /* standard */
+.tohide {
+    display: none !important;
+}
+
 .block {
     display: block;
 }
