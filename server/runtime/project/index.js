@@ -12,6 +12,7 @@ var events = require('../events');
 var utils = require('../utils');
 const prjstorage = require('./prjstorage');
 const DeviceType = require('../devices/device').DeviceType;
+
 const version = '1.02';
 var settings;                   // Application settings
 var logger;                     // Application logger

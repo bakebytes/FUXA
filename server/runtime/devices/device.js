@@ -10,7 +10,6 @@ var BACNETclient = require('./bacnet');
 var HTTPclient = require('./httprequest');
 var MQTTclient = require('./mqtt');
 var AzIoTclient = require('./azure');
-var INMATIONclient = require('./inmation');
 var EthernetIPclient = require('./ethernetip');
 var FuxaServer = require('./fuxaserver');
 // var TEMPLATEclient = require('./template');
@@ -69,11 +68,6 @@ function Device(data, runtime) {
             return null;
         }
         comm = AzIoTclient.create(data, logger, events, manager);        
-    } else if (data.type === DeviceEnum.inmation) {
-        if (!INMATIONclient) {
-            return null;
-        }
-        comm = INMATIONclient.create(data, logger, events, manager);     
     } else if (data.type === DeviceEnum.EthernetIP) {
         if (!EthernetIPclient) {
             return null;
@@ -251,12 +245,6 @@ function Device(data, runtime) {
                 }).catch(function (err) {
                     reject(err);
                 });
-            } else if (data.type === DeviceEnum.inmation) {
-                comm.browse(path, callback).then(function (result) {
-                    resolve(result);
-                }).catch(function (err) {
-                    reject(err);
-                });
             } else {
                 reject('Browse not supported!');
             }
@@ -383,8 +371,6 @@ function loadPlugin(type, module) {
         MQTTclient = require(module);
     } else if (type === DeviceEnum.AzIoTclient) {
         AzIoTclient = require(module);
-    } else if (type === DeviceEnum.inmation) {
-        INMATIONclient = require(module);
     } else if (type === DeviceEnum.EthernetIP) {
         EthernetIPclient = require(module);
     } else if (type === DeviceEnum.FuxaServer) {
@@ -407,7 +393,7 @@ module.exports = {
     getRequestResult: getRequestResult,
     loadPlugin: loadPlugin,
     isInternal: isInternal,
-    
+
     get DeviceType() { return DeviceEnum }
 }
 
@@ -425,7 +411,6 @@ var DeviceEnum = {
     AzIoTclient: 'AzIoTclient',
     EthernetIP: 'EthernetIP',
     FuxaServer: 'FuxaServer',
-    inmation: 'inmation',
     // Template: 'template'
 }
 

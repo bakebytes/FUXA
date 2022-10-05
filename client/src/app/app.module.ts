@@ -57,7 +57,6 @@ import { DeviceMapComponent } from './device/device-map/device-map.component';
 import { FuxaViewComponent } from './fuxa-view/fuxa-view.component';
 import { CardsViewComponent } from './cards-view/cards-view.component';
 import { TesterComponent } from './tester/tester.component';
-import { customHttpProvider } from './_helpers/custom-http';
 import { TesterService } from './tester/tester.service';
 import { UserService } from './_services/user.service';
 import { SettingsService } from './_services/settings.service';
@@ -164,6 +163,7 @@ import { CommandService } from './_services/command.service';
 import { ReportItemAlarmsComponent } from './reports/report-editor/report-item-alarms/report-item-alarms.component';
 import { ReportItemChartComponent } from './reports/report-editor/report-item-chart/report-item-chart.component';
 import { ScriptModeComponent } from './scripts/script-mode/script-mode.component';
+import { DeviceWebapiPropertyDialogComponent } from './device/device-map/device-webapi-property-dialog/device-webapi-property-dialog.component';
 
 export function createTranslateLoader(http: HttpClient) {
     return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -184,6 +184,7 @@ export function createTranslateLoader(http: HttpClient) {
         TagOptionsComponent,
         TopicPropertyComponent,
         DevicePropertyComponent,
+        DeviceWebapiPropertyDialogComponent,
         LayoutPropertyComponent,
         PluginsComponent,
         AppSettingsComponent,
@@ -338,7 +339,6 @@ export function createTranslateLoader(http: HttpClient) {
         PluginService,
         SettingsService,
         TesterService,
-        customHttpProvider,
         httpInterceptorProviders,
         AuthService,
         GaugesManager,
@@ -375,6 +375,7 @@ export function createTranslateLoader(http: HttpClient) {
         HtmlSwitchPropertyComponent,
         TagOptionsComponent,
         DevicePropertyComponent,
+        DeviceWebapiPropertyDialogComponent,
         TagPropertyComponent,
         TopicPropertyComponent,
         ConfirmDialogComponent,
