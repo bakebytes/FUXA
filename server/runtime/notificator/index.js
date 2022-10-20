@@ -4,6 +4,7 @@
 
 'use strict';
 const nodemailer = require('nodemailer');
+const { QueueServiceClient } = require('@azure/storage-queue');
 // const notifystorage = require('./notifystorage');
 
 var NOTIFY_CHECK_STATUS_INTERVAL = 1000 * 60;
@@ -22,7 +23,20 @@ function NotificatorManager(_runtime) {
     var lastCheck = 0;                  // Timestamp to check intervall only in IDLE
     var subscriptionStatus = {};        // Status of subscription, to check if there are some change
     var notificationsFound = 0;         // Notifications found to check 
+    var queueServiceClient;
 
+    if (!process.env.BB_AZ_STORAGE_CONNECTION_STRING) {
+        logger.error('BB storage connection undefined!');
+    } else {
+        try {
+            queueServiceClient = QueueServiceClient.fromConnectionString(
+                process.env.BB_AZ_STORAGE_CONNECTION_STRING
+            );
+        } catch (err) {
+            logger.error(`BB storage connection error! ${err}`);
+        }
+    }
+    
     /**
      * Start TimerInterval to check Notifications
      */
@@ -272,25 +286,19 @@ function NotificatorManager(_runtime) {
     this.sendMail = function (msg, smtp) {
         return new Promise(async function (resolve, reject) {
             try {
-                var smtpServer = smtp || settings.smtp;
-                if (smtpServer && smtpServer.host && smtpServer.port && smtpServer.username && smtpServer.password) {
-                    const transporter = nodemailer.createTransport({
-                        host: smtpServer.host,
-                        port: smtpServer.port,
-                        secure: (smtpServer.port === 465) ? true : false, // true for 465, false for other ports
-                        auth: {
-                            user: smtpServer.username,
-                            pass: smtpServer.password
-                        }
-                    });
-                    if (!msg.from || smtpServer.mailsender) {
-                        msg.from = smtpServer.mailsender || smtpServer.username;
-                    }
-                    let info = await transporter.sendMail(msg);
-                    console.log(info.messageId);
-                    resolve(`Message sent: ${info.messageId}`);
+                if (!process.env.BB_EMAIL_QUEUE_NAME || !queueServiceClient) {
+                    logger.error('BB queue name undefined!');
+                    reject('BB queue name undefined!');
                 } else {
-                    reject('SMTP data error!');
+                    const queueClient = queueServiceClient.getQueueClient(process.env.BB_EMAIL_QUEUE_NAME);
+                    await queueClient.sendMessage(JSON.stringify({
+                        templateName: 'SCADA',
+                        to: msg.to,
+                        subject: msg.subject,
+                        data: msg.text,
+                        from: msg.from || 'service@bakebytes.io',
+                    }));
+                    resolve(`Message sent to ${msg.to}`);
                 }
             } catch (err) {
                 reject(err);
