@@ -313,12 +313,13 @@ function NotificatorManager(_runtime) {
         if (filePathToAttach) {
             const filename = path.basename(filePathToAttach);
             const folder = path.basename(filePathToAttach.replace(filename, ''));
+            const url = `https://${JSON.parse(process.env.BB_PROJECT).id}.scada.bakebytes.io`;
             attachments = [{
                 filename: filename,
                 type: 'application/pdf',
                 disposition: 'attachment',
                 content_id: 'FR1',
-                contentLink: `${settings.serverBaseUrl}${folder}/${filename}`
+                contentLink: `${url}/${folder}/${filename}`
             }];
             logger.info(`ATTACHMENT ${attachments[0].filename}`);
             logger.info(`ATTACHMENT ${attachments[0].type}`);
