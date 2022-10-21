@@ -257,6 +257,7 @@ app.use('/users', express.static(settings.httpStatic));
 app.use('/view', express.static(settings.httpStatic));
 app.use('/' + settings.httpUploadFileStatic, express.static(settings.uploadFileDir));
 app.use('/_images', express.static(settings.imagesFileDir));
+app.use('/_reports', express.static(settings.reportsDir));
 
 var accessLogStream = fs.createWriteStream(settings.logDir + '/api.log', {flags: 'a'});
 app.use(morgan('combined', { stream: accessLogStream }));
@@ -322,8 +323,9 @@ function startFuxa() {
             });
             server.listen(settings.uiPort, settings.uiHost, function () {
                 settings.serverPort = server.address().port;
+                settings.serverBaseUrl = getListenPath();
                 process.title = 'FUXA';
-                logger.info('WebServer is running ' + getListenPath());
+                logger.info('WebServer is running ' + settings.serverBaseUrl);
             });
         } else {
             logger.info('server.headless-mode');

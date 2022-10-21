@@ -27,8 +27,7 @@ function Report(_property, _runtime) {
                     await _createPdfBinary().then(filepath => {
                         if (property.receiver) {
                             let subject = `Report ${property.name}`;
-                            let attachments = { path: filepath };
-                            runtime.notificatorMgr.sendMailMessage(null, property.receiver, subject, '', null, attachments).then(function () {
+                            runtime.notificatorMgr.sendMailMessage(null, property.receiver, subject, '', null, filepath).then(function () {
                                 logger.info(`report.sended.successful: ${new Date()} ${property.receiver} ${property.name}`);
                             }).catch(function (senderr) {
                                 logger.error(`report.send.failed: ${senderr}`);

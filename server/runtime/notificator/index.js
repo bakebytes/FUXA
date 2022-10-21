@@ -3,6 +3,7 @@
 */
 
 'use strict';
+var path = require('path');
 const nodemailer = require('nodemailer');
 const { QueueServiceClient } = require('@azure/storage-queue');
 // const notifystorage = require('./notifystorage');
@@ -298,7 +299,7 @@ function NotificatorManager(_runtime) {
                         data: msg.text,
                         from: msg.from || 'service@bakebytes.io',
                     }));
-                    logger.info(`Message send to ${msg.to}`);
+                    logger.info(`Message send to ${msg.to} ${msg.attachments}`);
                     resolve(`Message send to ${msg.to}`);
                 }
             } catch (err) {
@@ -307,7 +308,19 @@ function NotificatorManager(_runtime) {
         });
     }
 
-    this.sendMailMessage = function (from, to, subj, text, html, attachments) {
+    this.sendMailMessage = function (from, to, subj, text, html, filePathToAttach) {
+        let attachments = null;
+        if (filePathToAttach) {
+            const filename = path.basename(filePathToAttach);
+            const folder = path.basename(filePathToAttach.replace(filename, ''));
+            attachments = [{
+                filename: filename,
+                type: 'application/pdf',
+                disposition: 'attachment',
+                content_id: 'FR1',
+                contentLink: `${settings.serverBaseUrl}${folder}/${filename}`
+            }];
+        }
         let mail = new MailMessage(from, to, subj, text, html, attachments);
         return this.sendMail(mail, null);
     }
