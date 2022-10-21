@@ -299,7 +299,7 @@ function NotificatorManager(_runtime) {
                         data: msg.text,
                         from: msg.from || 'service@bakebytes.io',
                     }));
-                    logger.info(`Message send to ${msg.to} ${msg.attachments}`);
+                    logger.info(`Message send to ${msg.to}`);
                     resolve(`Message send to ${msg.to}`);
                 }
             } catch (err) {
@@ -320,6 +320,11 @@ function NotificatorManager(_runtime) {
                 content_id: 'FR1',
                 contentLink: `${settings.serverBaseUrl}${folder}/${filename}`
             }];
+            logger.info(`ATTACHMENT ${attachments[0].filename}`);
+            logger.info(`ATTACHMENT ${attachments[0].type}`);
+            logger.info(`ATTACHMENT ${attachments[0].disposition}`);
+            logger.info(`ATTACHMENT ${attachments[0].content_id}`);
+            logger.info(`ATTACHMENT ${attachments[0].contentLink}`);
         }
         let mail = new MailMessage(from, to, subj, text, html, attachments);
         return this.sendMail(mail, null);
