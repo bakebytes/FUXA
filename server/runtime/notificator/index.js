@@ -298,6 +298,7 @@ function NotificatorManager(_runtime) {
                         subject: msg.subject,
                         data: msg.text,
                         from: msg.from || 'service@bakebytes.io',
+                        attachments: msg.attachments
                     }));
                     logger.info(`Message send to ${msg.to}`);
                     resolve(`Message send to ${msg.to}`);
