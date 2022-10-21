@@ -322,10 +322,6 @@ function NotificatorManager(_runtime) {
                 content_id: 'FR1',
                 contentLink: `${url}/${folder}/${filename}`
             }];
-            logger.info(`ATTACHMENT ${attachments[0].filename}`);
-            logger.info(`ATTACHMENT ${attachments[0].type}`);
-            logger.info(`ATTACHMENT ${attachments[0].disposition}`);
-            logger.info(`ATTACHMENT ${attachments[0].content_id}`);
             logger.info(`ATTACHMENT ${attachments[0].contentLink}`);
         }
         let mail = new MailMessage(from, to, subj, text, html, attachments);
