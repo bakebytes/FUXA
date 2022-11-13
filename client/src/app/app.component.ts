@@ -2,7 +2,7 @@ import { Component, OnInit, AfterViewInit, OnDestroy, ViewChild } from '@angular
 import { Location } from '@angular/common';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { Subscription } from "rxjs";
+import { Subscription } from 'rxjs';
 
 import { environment } from '../environments/environment';
 
@@ -23,7 +23,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
 	showdev = false;
 	isLoading = false;
 
-	@ViewChild('fabmenu') fabmenu: any;
+	@ViewChild('fabmenu', {static: false}) fabmenu: any;
 	private subscriptionLoad: Subscription;
 	private subscriptionShowLoading: Subscription;
 
@@ -39,7 +39,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
 	ngOnInit() {
 		console.log(`FUXA v${environment.version}`);
 	}
-	
+
 	ngAfterViewInit() {
 		try {
 			this.settingsService.init();
@@ -120,5 +120,11 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
 	onGoTo(goto) {
 		this.router.navigate([goto]);
 		this.fabmenu.toggle();
+		//TODO!
+        if (!this.location.path().includes(goto) && ['home', 'lab'].indexOf(goto) !== -1) {
+			setTimeout(() => {
+				this.projectService.notifyToLoadHmi();
+			}, 500);
+		}
 	}
 }

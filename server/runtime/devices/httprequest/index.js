@@ -3,6 +3,8 @@
  */
 'use strict';
 const axios = require('axios');
+const utils = require('../../utils');
+const deviceUtils = require('../device-utils');
 
 function HTTPclient(_data, _logger, _events) {
     var data = _data;                   // Current webapi data
@@ -14,20 +16,21 @@ function HTTPclient(_data, _logger, _events) {
     var varsValue = [];                 // Signale to send to frontend { id, type, value }
     var requestItemsMap = {};           // Map of request (JSON, CSV, XML, ...) {key: item path, value: tag}
     var overloading = 0;                // Overloading counter to mange the break connection
-    var daqInterval = 0;                // Min save DAQ value interval, used to store DAQ too if the value don't change (milliseconds)
-    var lastDaqInterval = 0;            // To manage minimum interval to save a DAQ value
     var lastTimestampRequest;           // Last Timestamp request
     var lastTimestampValue;             // Last Timestamp of asked values
+    var newItemsCount;                  // Count of new items, between load and received
+
+    var apiProperty = { getTags: null, postTags: null, format: 'JSON', ownFlag: true };
 
     /**
      * Connect the client by make a request
      */
     this.connect = function () {
         return new Promise(function (resolve, reject) {
-            if (data.property && data.property.address) {
+            if (_checkConnection()) {
                 try {
                     if (_checkWorking(true)) {
-                        logger.info(`'${data.name}' try to connect ${data.property.address}`, true);
+                        logger.info(`'${data.name}' try to connect ${apiProperty.getTags}`, true);
                         _clearVarsValue();
                         _emitStatus('connect-ok');
                         resolve();
@@ -72,7 +75,7 @@ function HTTPclient(_data, _logger, _events) {
 
     /**
      * Read values in polling mode 
-     * Update the tags values list, save in DAQ if value changed or for daqInterval and emit values to clients
+     * Update the tags values list, save in DAQ if value changed or in interval and emit values to clients
      */
     this.polling = function () {
         if (_checkWorking(true)) {
@@ -89,13 +92,7 @@ function HTTPclient(_data, _logger, _events) {
                         lastTimestampValue = new Date().getTime();
                         _emitValues(varsValue);
                         if (this.addDaq) {
-                            var current = new Date().getTime();
-                            if (current - daqInterval > lastDaqInterval) {
-                                this.addDaq(varsValue, data.name);
-                                lastDaqInterval = current;
-                            } else if (varsValueChanged) {
-                                this.addDaq(varsValueChanged, data.name);
-                            }
+                            this.addDaq(varsValueChanged, data.name);
                         }
                         if (lastStatus !== 'connect-ok') {
                             _emitStatus('connect-ok');                    
@@ -125,9 +122,8 @@ function HTTPclient(_data, _logger, _events) {
     /**
      * Set the callback to set value to DAQ
      */
-    this.bindAddDaq = function (fnc, intervalToSave) {
+    this.bindAddDaq = function (fnc) {
         this.addDaq = fnc;                          // Add the DAQ value to db history
-        daqInterval = intervalToSave;
     }
     this.addDaq = null;                             // Callback to add the DAQ value to db history
 
@@ -141,13 +137,13 @@ function HTTPclient(_data, _logger, _events) {
             requestItemsMap = {};
             var count = Object.keys(data.tags).length;
             for (var id in data.tags) {
-                if (!requestItemsMap[data.tags[id].address]) {
-                    requestItemsMap[data.tags[id].address] = [data.tags[id]];
+                const address = data.tags[id].address || data.tags[id].id;
+                if (!requestItemsMap[address]) {
+                    requestItemsMap[address] = [data.tags[id]];
                 } else {
-                    requestItemsMap[data.tags[id].address].push(data.tags[id]);   
+                    requestItemsMap[address].push(data.tags[id]);   
                 }
             }
-
             logger.info(`'${data.name}' data loaded (${count})`, true);
         } catch (err) {
             logger.error(`'${data.name}' load error! ${err}`);
@@ -174,8 +170,22 @@ function HTTPclient(_data, _logger, _events) {
     /**
      * Set the Tag value, not used
      */
-    this.setValue = function (sigid, value) {
-        logger.warn(`'${data.name}' setValue not supported!`);
+    this.setValue = function (tagId, value) {
+        if (apiProperty.ownFlag && data.tags[tagId]) {
+            if (apiProperty.postTags) {
+                data.tags[tagId].value = _parseValue(data.tags[tagId].type, value);
+                axios.post(apiProperty.getTags, [{id: tagId, value: data.tags[tagId].value}]).then(res => {
+                    lastTimestampRequest = new Date().getTime();
+                    logger.info(`setValue '${data.tags[tagId].name}' to ${value})`, true);
+                }).catch(err => {
+                    logger.error(`setValue '${data.tags[tagId].name}' error! ${err}`);
+                });
+            } else {
+                logger.error(`postTags undefined (setValue)`, true);
+            }
+        } else {
+            logger.error(`setValue not supported!`, true);
+        }
     }
 
     /**
@@ -197,12 +207,36 @@ function HTTPclient(_data, _logger, _events) {
         }
     }
 
+    /**
+     * Return Tags property
+     */
+    this.getTagsProperty = function () {
+        return new Promise(function (resolve, reject) {
+            try {
+                resolve({ tags: Object.values(requestItemsMap), newTagsCount: newItemsCount });
+            } catch (err) {
+                reject(err);
+            }
+        });
+    }
+
+    var _checkConnection = function () {
+        if (data.property.address) {
+            apiProperty.getTags = data.property.address;
+            apiProperty.ownFlag = false;
+        } else {
+            apiProperty.getTags = data.property.getTags;
+            apiProperty.postTags = data.property.postTags;
+        }
+        return apiProperty.getTags || apiProperty.postTags;
+    }
+
     var _readRequest = function () {
         return new Promise(function (resolve, reject) {
-            if (data.property.method === 'GET') {
-                axios.get(data.property.address).then(res => {
+            if (apiProperty.getTags) {
+                axios.get(apiProperty.getTags).then(res => {
                     lastTimestampRequest = new Date().getTime();
-                    resolve(parseData(res.data, data.property));
+                    resolve(res.data);
                 }).catch(err => {
                     reject(err);
                 });
@@ -225,33 +259,59 @@ function HTTPclient(_data, _logger, _events) {
 
     /**
      * Update the Tags values read
-     * First convert the request data to a flat struct
+     * For WebAPI NotOwn: first convert the request data to a flat struct
      * @param {*} reqdata 
      */
-    var _updateVarsValue = function (reqdata) {
-        var someval = false;
-        var changed = [];
-        var result = [];
-        var items = dataToFlat(reqdata, data.property);
-        for (var key in items) {
-            if (requestItemsMap[key]) {
-                for (var index in requestItemsMap[key]) {
-                    var tag = requestItemsMap[key][index];
-                    if (tag) {
-                        someval = true;
-                        result[tag.id] = { id: tag.id, value: (tag.memaddress) ? items[tag.memaddress] : items[key], type: items[key].type, daq: tag.daq };
+    var _updateVarsValue = (reqdata) => {
+        const timestamp = new Date().getTime();
+        var changed = {};
+        if (apiProperty.ownFlag) {
+            var newItems = 0;
+            for (var i = 0; i < reqdata.length; i++) {
+                const id = reqdata[i].id;
+                if (id) {
+                    if (!data.tags[id]) {
+                        newItems++;
+                    } else {
+                        reqdata[i].daq = data.tags[id].daq;
+                    }
+                    requestItemsMap[id] = [reqdata[i]];
+                    reqdata[i].changed = varsValue[id] && reqdata[i].value !== varsValue[id].value;
+                    if (this.addDaq && !utils.isNullOrUndefined(reqdata[i].value) && deviceUtils.tagDaqToSave(reqdata[i], timestamp)) {
+                        changed[id] = reqdata[i];
+                    }
+                    reqdata[i].changed = false;
+                    varsValue[id] = reqdata[i];
+                }
+            }
+            newItemsCount = newItems;
+            return changed;
+        } else {
+            var someval = false;
+            var result = {};
+            var items = dataToFlat(reqdata, apiProperty);
+            for (var key in items) {
+                if (requestItemsMap[key]) {
+                    for (var index in requestItemsMap[key]) {
+                        var tag = requestItemsMap[key][index];
+                        if (tag) {
+                            someval = true;
+                            result[tag.id] = { id: tag.id, value: (tag.memaddress) ? items[tag.memaddress] : items[key], type: items[key].type, daq: tag.daq };
+                        }
                     }
                 }
             }
-        }
-        if (someval) {
-            for (var id in result) {
-                if (varsValue[id] !== result[id]) {
-                    changed[id] = result[id];
+            if (someval) {
+                for (var id in result) {
+                    result[id].changed = varsValue[id] && result[id].value !== varsValue[id].value;
+                    if (this.addDaq && !utils.isNullOrUndefined(result[id].value) && deviceUtils.tagDaqToSave(result[id], timestamp)) {
+                        changed[id] = result[id];
+                    }                    
+                    result[id].changed = false;
+                    varsValue[id] = result[id];
                 }
-                varsValue[id] = result[id];
+                return changed;
             }
-            return changed;
         }
         return null;
     }
@@ -293,18 +353,35 @@ function HTTPclient(_data, _logger, _events) {
         overloading = 0;
         return true;
     }
-}
 
-function parseData(data, property) {
-    if (property.format === 'CSV') {
-
-    } else {
-        return data;
-    }    
-}
-
-function parseCSV(data) {
-
+    /**
+     * Cheack and parse the value return converted value
+     * @param {*} type as string
+     * @param {*} value as string
+     * return converted value
+     */
+    var _parseValue = function (type, value) {
+        if (type === 'number') {
+            return parseFloat(value); 
+        } else if (type === 'boolean') {
+            return Boolean(value);
+        } else if (type === 'string') {
+            return value;
+        } else {
+            let val = parseFloat(value);
+            if (Number.isNaN(val)) {
+                // maybe boolean
+                val = Number(value);
+                // maybe string
+                if (Number.isNaN(val)) {
+                    val = value;
+                }
+            } else {
+                val = parseFloat(val.toFixed(5));
+            }
+            return val;
+        }
+    }
 }
 
 function dataToFlat(data, property) {
@@ -352,7 +429,7 @@ function getRequestResult(property) {
         try {
             if (property.method === 'GET') {
                 axios.get(property.address).then(res => {
-                    resolve(parseData(res.data, property));
+                    resolve(res.data);
                 }).catch(err => {
                     reject(err);
                 });

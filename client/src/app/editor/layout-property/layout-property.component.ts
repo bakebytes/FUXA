@@ -1,5 +1,6 @@
+/* eslint-disable @angular-eslint/component-class-suffix */
 import { Component, OnInit, Inject, ViewChild } from '@angular/core';
-import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
 
 import { SelOptionsComponent } from '../../gui-helpers/sel-options/sel-options.component';
@@ -65,22 +66,22 @@ export class LayoutPropertyComponent implements OnInit {
         this.zoomMode = ZoomModeType;
 
         Object.keys(this.navMode).forEach(key => {
-            this.translateService.get(this.navMode[key]).subscribe((txt: string) => {this.navMode[key] = txt});
+            this.translateService.get(this.navMode[key]).subscribe((txt: string) => {this.navMode[key] = txt;});
         });
         Object.keys(this.navType).forEach(key => {
-            this.translateService.get(this.navType[key]).subscribe((txt: string) => {this.navType[key] = txt});
+            this.translateService.get(this.navType[key]).subscribe((txt: string) => {this.navType[key] = txt;});
         });
         Object.keys(this.notifyMode).forEach(key => {
-            this.translateService.get(this.notifyMode[key]).subscribe((txt: string) => {this.notifyMode[key] = txt});
+            this.translateService.get(this.notifyMode[key]).subscribe((txt: string) => {this.notifyMode[key] = txt;});
         });
         Object.keys(this.zoomMode).forEach(key => {
-            this.translateService.get(this.zoomMode[key]).subscribe((txt: string) => {this.zoomMode[key] = txt});
+            this.translateService.get(this.zoomMode[key]).subscribe((txt: string) => {this.zoomMode[key] = txt;});
         });
         Object.keys(this.inputMode).forEach(key => {
-            this.translateService.get(this.inputMode[key]).subscribe((txt: string) => {this.inputMode[key] = txt});
+            this.translateService.get(this.inputMode[key]).subscribe((txt: string) => {this.inputMode[key] = txt;});
         });
         Object.keys(this.headerMode).forEach(key => {
-            this.translateService.get(this.headerMode[key]).subscribe((txt: string) => {this.headerMode[key] = txt});
+            this.translateService.get(this.headerMode[key]).subscribe((txt: string) => {this.headerMode[key] = txt;});
         });
     }
 
@@ -104,7 +105,7 @@ export class LayoutPropertyComponent implements OnInit {
                     item.text = result.item.text;
                     item.view = result.item.view;
                     item.link = result.item.link;
-                    item.permission = result.permission; 
+                    item.permission = result.permission;
                 } else {
                     let nitem = new NaviItem();
                     nitem.icon = result.item.icon;
@@ -112,7 +113,7 @@ export class LayoutPropertyComponent implements OnInit {
                     nitem.text = result.item.text;
                     nitem.view = result.item.view;
                     nitem.link = result.item.link;
-                    nitem.permission = result.permission; 
+                    nitem.permission = result.permission;
                     this.draggableListLeft.push(nitem);
                 }
             }
@@ -141,14 +142,14 @@ export class LayoutPropertyComponent implements OnInit {
             nitem.text = item.text;
             nitem.view = item.view;
             nitem.link = item.link;
-            this.data.layout.navigation.items.push(nitem);            
-        })
+            this.data.layout.navigation.items.push(nitem);
+        });
     }
 
     onNoClick(): void {
 		this.dialogRef.close();
     }
-    
+
     getViewName(vid: NaviItem) {
         if (vid.view) {
             const view = this.data.views.find(x=>x.id === vid.view);
@@ -170,16 +171,16 @@ export class LayoutPropertyComponent implements OnInit {
 export class DialogMenuItem {
     // defaultColor = Utils.defaultColor;
 	selectedGroups = [];
-    groups = UserGroups.Groups;    
+    groups = UserGroups.Groups;
     icons = Define.materialIcons;
     linkAddress = LinkType.address;
     linkAlarms = LinkType.alarms;
-    
-    @ViewChild(SelOptionsComponent) seloptions: SelOptionsComponent;
+
+    @ViewChild(SelOptionsComponent, {static: false}) seloptions: SelOptionsComponent;
 
     constructor(public projectService: ProjectService,
         public dialogRef: MatDialogRef<DialogMenuItem>,
-        @Inject(MAT_DIALOG_DATA) public data: any) { 
+        @Inject(MAT_DIALOG_DATA) public data: any) {
             this.selectedGroups = UserGroups.ValueToGroups(this.data.permission);
         }
 
@@ -211,7 +212,7 @@ export class DialogMenuItem {
                 } catch (err) {
                     console.error(err);
                 }
-            }
+            };
             if (fileToUpload.type === 'svg') {
                 reader.readAsText(event.target.files[0]);
             } else {

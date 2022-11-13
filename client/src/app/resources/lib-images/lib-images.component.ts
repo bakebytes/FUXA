@@ -1,6 +1,6 @@
-import { Component, OnInit, AfterViewInit } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
-import { Subscription } from "rxjs";
+import { Component, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { Subscription } from 'rxjs';
 
 import { ResourceGroup, Resources, ResourceType } from '../../_models/resources';
 import { ResourcesService } from '../../_services/resources.service';
@@ -10,7 +10,7 @@ import { ResourcesService } from '../../_services/resources.service';
     templateUrl: './lib-images.component.html',
     styleUrls: ['./lib-images.component.css']
 })
-export class LibImagesComponent implements OnInit, AfterViewInit {
+export class LibImagesComponent implements AfterViewInit, OnDestroy {
 
     resImages?: ResourceGroup[];
     subscription: Subscription;
@@ -18,9 +18,6 @@ export class LibImagesComponent implements OnInit, AfterViewInit {
     constructor(
         private dialogRef: MatDialogRef<LibImagesComponent>,
         private resourcesService: ResourcesService) { }
-
-    ngOnInit() {
-    }
 
     ngAfterViewInit() {
         this.loadResources();
@@ -36,7 +33,7 @@ export class LibImagesComponent implements OnInit, AfterViewInit {
 
     loadResources() {
         this.subscription = this.resourcesService.getResources(ResourceType.images).subscribe((result: Resources) => {
-            if (result) {                
+            if (result) {
                 this.resImages = result.groups || [];
             }
         }, err => {

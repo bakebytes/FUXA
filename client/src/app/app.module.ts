@@ -8,12 +8,9 @@ import { MaterialModule } from './material.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ColorPickerModule } from 'ngx-color-picker';
 
-import { Ng5SliderModule } from 'ng5-slider';
 import { ToastrModule } from 'ngx-toastr';
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
-import { HAMMER_GESTURE_CONFIG } from '@angular/platform-browser';
-import { GestureConfig } from '@angular/material';
 import { AngularDraggableModule } from 'angular2-draggable';
 import { CodemirrorModule } from '@ctrl/ngx-codemirror';
 import { NgxDaterangepickerMd } from './gui-helpers/daterangepicker';
@@ -164,13 +161,14 @@ import { ReportItemAlarmsComponent } from './reports/report-editor/report-item-a
 import { ReportItemChartComponent } from './reports/report-editor/report-item-chart/report-item-chart.component';
 import { ScriptModeComponent } from './scripts/script-mode/script-mode.component';
 import { DeviceWebapiPropertyDialogComponent } from './device/device-map/device-webapi-property-dialog/device-webapi-property-dialog.component';
+import { SvgSelectorComponent } from './editor/svg-selector/svg-selector.component';
 
 export function createTranslateLoader(http: HttpClient) {
     return new TranslateHttpLoader(http, './assets/i18n/', '.json');
 }
 
 @NgModule({
-    declarations: [	
+    declarations: [
         HomeComponent,
         EditorComponent,
         HeaderComponent,
@@ -214,6 +212,7 @@ export function createTranslateLoader(http: HttpClient) {
         GaugeSemaphoreComponent,
         GaugePropertyComponent,
         DialogGaugePermission,
+        SvgSelectorComponent,
         ChartPropertyComponent,
         BagPropertyComponent,
         PipePropertyComponent,
@@ -292,7 +291,7 @@ export function createTranslateLoader(http: HttpClient) {
         ReportItemTableComponent,
         ReportItemAlarmsComponent,
         ReportItemChartComponent
-   ],
+    ],
     imports: [
         BrowserModule,
         FormsModule,
@@ -302,12 +301,11 @@ export function createTranslateLoader(http: HttpClient) {
         MaterialModule,
         BrowserAnimationsModule,
         ColorPickerModule,
-        Ng5SliderModule,
         AngularDraggableModule,
         MatSelectSearchModule,
         ToastrModule.forRoot({
             timeOut: 3000,
-            positionClass: "toast-bottom-right",
+            positionClass: 'toast-bottom-right',
             preventDuplicates: false
         }),
         TranslateModule.forRoot({
@@ -352,8 +350,7 @@ export function createTranslateLoader(http: HttpClient) {
         Dictionary,
         ModalPositionCache,
         Define,
-        AuthGuard,
-        { provide: HAMMER_GESTURE_CONFIG, useClass: GestureConfig }
+        AuthGuard
     ],
     entryComponents: [
         DialogDocProperty,
@@ -366,6 +363,7 @@ export function createTranslateLoader(http: HttpClient) {
         DeviceTagDialog,
         GaugePropertyComponent,
         DialogGaugePermission,
+        SvgSelectorComponent,
         ChartPropertyComponent,
         NgxGaugeComponent,
         NgxNouisliderComponent,

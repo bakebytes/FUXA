@@ -1,5 +1,5 @@
-import { Component, Inject, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { MatDialog } from '@angular/material';
+import { Component, Inject, OnInit, Input, Output, EventEmitter, OnDestroy } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { ReplaySubject } from 'rxjs';
 import { FormControl } from '@angular/forms';
 import { takeUntil } from 'rxjs/operators';
@@ -20,12 +20,12 @@ import { Utils } from '../../../../_helpers/utils';
     templateUrl: './chart-property.component.html',
     styleUrls: ['./chart-property.component.css']
 })
-export class ChartPropertyComponent implements OnInit {
-    
+export class ChartPropertyComponent implements OnInit, OnDestroy {
+
     @Input() data: any;
     @Output() onPropChanged: EventEmitter<any> = new EventEmitter();
-    @Input('reload') set reload(b: any) { 
-        this._reload(); 
+    @Input('reload') set reload(b: any) {
+        this._reload();
     }
 
     lastRangeType = ChartRangeType;
@@ -51,12 +51,12 @@ export class ChartPropertyComponent implements OnInit {
         private translateService: TranslateService) { }
 
     ngOnInit() {
-     
+
         Object.keys(this.chartViewType).forEach(key => {
-            this.translateService.get(this.chartViewType[key]).subscribe((txt: string) => { this.chartViewType[key] = txt });
+            this.translateService.get(this.chartViewType[key]).subscribe((txt: string) => { this.chartViewType[key] = txt; });
         });
         Object.keys(this.legendModes).forEach(key => {
-            this.translateService.get(this.legendModes[key]).subscribe((txt: string) => { this.legendModes[key] = txt });
+            this.translateService.get(this.legendModes[key]).subscribe((txt: string) => { this.legendModes[key] = txt; });
         });
     }
 
@@ -92,14 +92,11 @@ export class ChartPropertyComponent implements OnInit {
     onChartChanged() {
         this.data.settings.property = <GaugeChartProperty>{ id: null, type: this.chartViewValue, options: JSON.parse(JSON.stringify(this.options)) };
         if (this.chartCtrl.value) {
-            this.data.settings.name = this.chartCtrl.value.name;
             this.data.settings.property.id = this.chartCtrl.value.id;
-        } else {
-            this.data.settings.name = '';
         }
         this.onPropChanged.emit(this.data.settings);
     }
-    
+
     onEditNewChart() {
         let dialogRef = this.dialog.open(ChartConfigComponent, {
             position: { top: '60px' },
@@ -124,7 +121,7 @@ export class ChartPropertyComponent implements OnInit {
             });
         if (toset) {
             let idx = -1;
-            this.data.charts.every(function (value, index, _arr) {
+            this.data.charts.every(function(value, index, _arr) {
                 if (value.id === toset) {
                     idx = index;
                     return false;

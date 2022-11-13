@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, Inject, ViewChild } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
-import { Subscription } from "rxjs";
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { Subscription } from 'rxjs';
 
 import { Device, TagType, Tag, DeviceType, ModbusTagType, BACnetObjectType, ServerTagType } from './../../_models/device';
 import { TreetableComponent, Node, NodeType } from '../../gui-helpers/treetable/treetable.component';
@@ -27,7 +27,7 @@ export class TagPropertyComponent implements OnInit, OnDestroy {
     private subscriptionNodeAttribute: Subscription;
 	private subscriptionDeviceWebApiRequest: Subscription;
 
-    @ViewChild(TreetableComponent) treetable: TreetableComponent;
+    @ViewChild(TreetableComponent, {static: false}) treetable: TreetableComponent;
 
     constructor(
         private hmiService: HmiService,
@@ -139,14 +139,14 @@ export class TagPropertyComponent implements OnInit, OnDestroy {
             for (let i = 0; i < tags.length; i++) {
                 if (tags[i].id !== this.data.tag.id && tags[i].name === this.data.tag.name) {
                     this.error = '';
-                    this.translateService.get('msg.device-tag-exist').subscribe((txt: string) => { this.error = txt });
+                    this.translateService.get('msg.device-tag-exist').subscribe((txt: string) => { this.error = txt; });
                     return;
                 }
             }
         } else {
             Object.keys(this.treetable.nodes).forEach((key) => {
                 let n: Node = this.treetable.nodes[key];
-                if (n.checked && n.enabled) {
+                if (n.checked && n.enabled && (!n.childs || n.childs.length == 0)) {
                     this.data.nodes.push(this.treetable.nodes[key]);
                 }
             });
@@ -157,7 +157,7 @@ export class TagPropertyComponent implements OnInit, OnDestroy {
     onCheckValue(tag) {
         if (this.existing.indexOf(tag.target.value) !== -1) {
             this.error = '';
-            this.translateService.get('msg.device-tag-exist').subscribe((txt: string) => { this.error = txt });
+            this.translateService.get('msg.device-tag-exist').subscribe((txt: string) => { this.error = txt; });
         } else {
             this.error = '';
         }
@@ -241,7 +241,7 @@ export class TagPropertyComponent implements OnInit, OnDestroy {
                 if (!node.parent.parent.todefine.id && this.data.device.tags[nodeId] && this.data.device.tags[nodeId].options) {
                     node.parent.parent.todefine.id = this.data.device.tags[nodeId].options.selid;
                     node.parent.parent.todefine.value = this.data.device.tags[nodeId].options.selval;
-                }  
+                }
             } else if (selected) {
                 enabled = false;
             }
@@ -273,7 +273,7 @@ export class TagPropertyComponent implements OnInit, OnDestroy {
                 if (childId && childValue) {
                     let objNode = new Node(childId.id, childId.property);  // node array element (id: id:id, text: current id value)
                     objNode.class = NodeType.Reference;                     // to check
-                    objNode.property = childValue.id                        // value:id
+                    objNode.property = childValue.id;                        // value:id
                     objNode.todefine = { selid: childId.text, selval: childValue.text };
                     objNode.type = Utils.getType(childValue.property);
                     objNode.checked = true;
@@ -343,7 +343,7 @@ export class TagPropertyComponent implements OnInit, OnDestroy {
     isOpcua() {
 		return (this.data.device.type === DeviceType.OPCUA) ? true : false;
     }
-    
+
     isWebApi() {
 		return (this.data.device.type === DeviceType.WebAPI) ? true : false;
     }

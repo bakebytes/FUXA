@@ -2,7 +2,16 @@
     <mat-progress-bar mode="indeterminate" color="warn" style="position: absolute; top: 0px; left: 0px; right: 0px; z-index: 99999;">
     </mat-progress-bar>
 </div>
-<mat-drawer #sidePanel class="example-sidenav" mode="side" position="end" style="position:fixed;margin-top: 36px;height: calc(100% - 74px);padding: 7px; width:350px">
+<mat-drawer #svgSelectorPanel class="editor-sidenav" mode="side" position="end">
+    <button mat-icon-button (click)="svgSelectorPanel.toggle()" style="position: absolute; top: 3px; right: 3px;">
+        <mat-icon>close</mat-icon>
+    </button>
+    <button mat-icon-button (click)="checkSvgElementsMap(true)" style="position: absolute; top: 3px; right: 40px;">
+        <mat-icon>autorenew</mat-icon>
+    </button>
+    <app-svg-selector (onSelect)="onSvgElementSelected($event)" (onPreview)="onSvgElementPreview($event)" [elements]="svgElements" [selected]="svgElementSelected"></app-svg-selector>
+</mat-drawer>
+<mat-drawer #sidePanel class="editor-sidenav" mode="side" position="end">
     <button mat-icon-button (click)="sidePanel.toggle()" style="position: absolute; top: 3px; right: 3px;">
         <mat-icon>close</mat-icon>
     </button>
@@ -465,19 +474,19 @@
                             <div class="svg-tool-button" (click)="onAlignSelected('left')" matTooltip="{{'editor.align-left-title' | translate}}">
                                 <span class="icon-align-left"></span>
                             </div>
-                            <div class="svg-tool-button" (click)="onAlignSelected('center')" matTooltip="{{'editor.align-center-title' | translate}}Align Center">
+                            <div class="svg-tool-button" (click)="onAlignSelected('center')" matTooltip="{{'editor.align-center-title' | translate}}">
                                 <span class="icon-align-center"></span>
                             </div>
-                            <div class="svg-tool-button" (click)="onAlignSelected('right')" matTooltip="{{'editor.align-right-title' | translate}}Align Right">
+                            <div class="svg-tool-button" (click)="onAlignSelected('right')" matTooltip="{{'editor.align-right-title' | translate}}">
                                 <span class="icon-align-right"></span>
                             </div>
-                            <div class="svg-tool-button" (click)="onAlignSelected('top')" matTooltip="{{'editor.align-top-title' | translate}}Align Top">
+                            <div class="svg-tool-button" (click)="onAlignSelected('top')" matTooltip="{{'editor.align-top-title' | translate}}">
                                 <span class="icon-align-top"></span>
                             </div>
-                            <div class="svg-tool-button" (click)="onAlignSelected('middle')" matTooltip="{{'editor.align-middle-title' | translate}}Align Middle">
+                            <div class="svg-tool-button" (click)="onAlignSelected('middle')" matTooltip="{{'editor.align-middle-title' | translate}}">
                                 <span class="icon-align-middle"></span>
                             </div>
-                            <div class="svg-tool-button" (click)="onAlignSelected('bottom')" matTooltip="{{'editor.align-bottom-title' | translate}}Align Bottom">
+                            <div class="svg-tool-button" (click)="onAlignSelected('bottom')" matTooltip="{{'editor.align-bottom-title' | translate}}">
                                 <span class="icon-align-bottom"></span>
                             </div>
                         </div>
@@ -721,10 +730,14 @@
                                 <span class="ungroup"></span>
                             </button>
                         </div>
+                        <div class="svg-element-selected">
+                            <button mat-button matTooltip="{{'editor.tools-svg-selector' | translate}}" (click)="svgSelectorPanel.toggle()" class="main-btn">
+                                <mat-icon style="font-size: 28px;">list</mat-icon>
+                            </button>
+                        </div>
                     </div>
                     <!-- tools_top -->
                     <div id="cur_context_panel">
-
                     </div>
 
                     <!-- tool bottom -->
@@ -754,14 +767,14 @@
                         </div>
 
                         <div id="tools_bottom_2" class="colors">
-                            <input readonly [(colorPicker)]="colorFill" class="color-fill" matTooltip="{{'editor.tools-fillcolor-title' | translate}}" [style.background]="colorFill"
-                                [cpAlphaChannel]="'always'" [cpPosition]="'top'" (colorPickerChange)="onChangeFillColor($event)" [cpPresetColors]="defaultColor"
-                                [cpCancelButton]="true" [cpCancelButtonClass]="'cpCancelButtonClass'" [cpCancelButtonText]="'Cancel'" [cpOKButton]="true" [cpOKButtonText]="'OK'"
-                                [cpOKButtonClass]="'cpOKButtonClass'" />
-                            <input readonly [(colorPicker)]="colorStroke" class="color-stroke" matTooltip="{{'editor.tools-strokecolor-title' | translate}}"
-                                [style.background]="colorStroke" [cpAlphaChannel]="'always'" [cpPosition]="'top'" (colorPickerChange)="onChangeStrokeColor($event)"
-                                [cpPresetColors]="defaultColor" [cpCancelButton]="true" [cpCancelButtonClass]="'cpCancelButtonClass'" [cpCancelButtonText]="'Cancel'"
-                                [cpOKButton]="true" [cpOKButtonText]="'OK'" [cpOKButtonClass]="'cpOKButtonClass'" />
+                            <input readonly [(colorPicker)]="colorFill" class="color-fill" [style.background]="colorFill"
+                                [cpAlphaChannel]="'always'" [cpPosition]="'top'" (colorPickerChange)="onChangeFillColor($event)"
+                                [cpPresetColors]="defaultColor" [cpCancelButton]="true" [cpCancelButtonClass]="'cpCancelButtonClass'"
+                                [cpCancelButtonText]="'Cancel'" [cpOKButton]="true" [cpOKButtonText]="'OK'" [cpOKButtonClass]="'cpOKButtonClass'" />
+                            <input readonly [(colorPicker)]="colorStroke" class="color-stroke" [style.background]="colorStroke"
+                                [cpAlphaChannel]="'always'" [cpPosition]="'top'" (colorPickerChange)="onChangeStrokeColor($event)"
+                                [cpPresetColors]="defaultColor" [cpCancelButton]="true" [cpCancelButtonClass]="'cpCancelButtonClass'"
+                                [cpCancelButtonText]="'Cancel'" [cpOKButton]="true" [cpOKButtonText]="'OK'" [cpOKButtonClass]="'cpOKButtonClass'" />
                             <div class="color_tool" id="tool_fill" hidden>
                                 <label class="icon_label" for="fill_color" matTooltip="{{'editor.tools-fillcolor-title' | translate}}"></label>
                                 <div class="color_block">
@@ -1072,4 +1085,5 @@
         </li>
     </ul>
     <!-- layers context menu END -->
+    <div #svgpreview class="svg-preview"></div>
 </div>

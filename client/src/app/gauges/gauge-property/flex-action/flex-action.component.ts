@@ -1,6 +1,7 @@
 import { Component, OnInit, Input } from '@angular/core';
 
 import { TranslateService } from '@ngx-translate/core';
+import { Utils } from '../../../_helpers/utils';
 
 import { GaugeProperty, GaugeAction, GaugeRangeProperty, GaugeActionsType, GaugeActionBlink, GaugeActionRotate } from '../../../_models/hmi';
 
@@ -21,6 +22,7 @@ export class FlexActionComponent implements OnInit {
     actionRotate = Object.keys(GaugeActionsType).find(key => GaugeActionsType[key] === GaugeActionsType.rotate);
     itemtype: any;
     slideView = true;
+    defaultColor = Utils.defaultColor;
 
     constructor(private translateService: TranslateService) { }
 
@@ -35,7 +37,7 @@ export class FlexActionComponent implements OnInit {
         if (this.data.withActions) {
 			this.actionsSupported = this.data.withActions;
 			Object.keys(this.actionsSupported).forEach(key => {
-				this.translateService.get(this.actionsSupported[key]).subscribe((txt: string) => { this.actionsSupported[key] = txt });
+				this.translateService.get(this.actionsSupported[key]).subscribe((txt: string) => { this.actionsSupported[key] = txt; });
 			});
 		}
     }
@@ -85,6 +87,6 @@ export class FlexActionComponent implements OnInit {
             ga.options = new GaugeActionBlink();
         } else if (type === this.actionRotate && typeof(ga.options) !== typeof(GaugeActionRotate)) {
             ga.options = new GaugeActionRotate();
-        } 
+        }
     }
 }

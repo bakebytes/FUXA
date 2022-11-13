@@ -3,6 +3,17 @@ import { Component, OnInit, AfterViewInit, OnDestroy, ViewChild, HostListener, E
 declare const noUiSlider: any;
 declare const wNumb: any;
 
+export class NgxNouisliderOptions {
+    orientation = 'vertical';//'horizontal';
+    direction = 'ltr';
+    fontFamily = 'Sans-serif';
+    shape = { baseColor: '#cdcdcd', connectColor: '#262c3b', handleColor: '#3f4964' };
+    marker = { color: '#222222', subWidth: 5, subHeight: 1, fontSize: 18, divHeight: 2, divWidth: 12 };
+    range = { min: 0, max: 100 };
+    step = 1;
+    pips = { mode: 'values', values: [0, 50, 100], density: 4 };
+    tooltip = { type: 'none', decimals: 0, background: '#FFF', color: '#000', fontSize: 12 };
+}
 @Component({
     selector: 'ngx-nouislider',
     templateUrl: './ngx-nouislider.component.html',
@@ -11,8 +22,8 @@ declare const wNumb: any;
 export class NgxNouisliderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     @Input() public id: string;
-    @ViewChild('panel') public panel: ElementRef;
-    @ViewChild('slider') public slider: ElementRef;
+    @ViewChild('panel', {static: false}) public panel: ElementRef;
+    @ViewChild('slider', {static: false}) public slider: ElementRef;
     @Input() public options: NgxNouisliderOptions;
 
     size = { w: 0, h: 0 };
@@ -60,7 +71,7 @@ export class NgxNouisliderComponent implements OnInit, AfterViewInit, OnDestroy 
 
     setOptions(options: any): boolean {
         let toInit = false;
-        if (this.options.orientation !== options.orientation || JSON.stringify(this.options.range) !== JSON.stringify(options.range) || 
+        if (this.options.orientation !== options.orientation || JSON.stringify(this.options.range) !== JSON.stringify(options.range) ||
             JSON.stringify(this.options.pips) !== JSON.stringify(options.pips) || JSON.stringify(this.options.marker) !== JSON.stringify(options.marker) ||
             JSON.stringify(this.options.tooltip) !== JSON.stringify(options.tooltip)) {
             toInit = true;
@@ -82,10 +93,10 @@ export class NgxNouisliderComponent implements OnInit, AfterViewInit, OnDestroy 
 
     init() {
         if (this.options.orientation === 'vertical') {
-            this.slider.nativeElement.style.height = this.size.h + "px";
+            this.slider.nativeElement.style.height = this.size.h + 'px';
             this.slider.nativeElement.style.width =  null;
         } else {
-            this.slider.nativeElement.style.width = this.size.w + "px";
+            this.slider.nativeElement.style.width = this.size.w + 'px';
             this.slider.nativeElement.style.height =  null;
         }
         let tooltip = [false];
@@ -117,11 +128,11 @@ export class NgxNouisliderComponent implements OnInit, AfterViewInit, OnDestroy 
         if (this.options.tooltip.type === 'show') {
             var tp = this.uiSlider.target.getElementsByClassName('noUi-tooltip');
             if (tp && tp.length > 0)
-                tp[0].style.display = 'block';
+                {tp[0].style.display = 'block';}
         } else if (this.options.tooltip.type === 'hide') {
             var tp = this.uiSlider.target.getElementsByClassName('noUi-active noUi-tooltip');
             if (tp && tp.length > 0)
-                tp[0].style.display = 'block';
+                {tp[0].style.display = 'block';}
         }
         if (this.options.tooltip.type !== 'none') {
             var tp = this.uiSlider.target.getElementsByClassName('noUi-tooltip');
@@ -129,11 +140,11 @@ export class NgxNouisliderComponent implements OnInit, AfterViewInit, OnDestroy 
                 tp[0].style.color = this.options.tooltip.color;
                 tp[0].style.background = this.options.tooltip.background;
                 tp[0].style.fontSize = this.options.tooltip.fontSize + 'px';
-            }    
+            }
         }
 
 		let self = this;
-        this.uiSlider.on('slide', function (values, handle) {
+        this.uiSlider.on('slide', function(values, handle) {
             if (self.onUpdate) {
                 self.resetWorkingTimeout();
                 self.onUpdate(values[handle]);
@@ -167,16 +178,4 @@ export class NgxNouisliderComponent implements OnInit, AfterViewInit, OnDestroy 
         return parseFloat(this.uiSlider.get());
     }
 
-}
-
-export class NgxNouisliderOptions {
-    orientation = 'vertical';//'horizontal';
-    direction = 'ltr';
-    fontFamily = 'Sans-serif';
-    shape = { baseColor: '#cdcdcd', connectColor: '#262c3b', handleColor: '#3f4964' };
-    marker = { color: '#222222', subWidth: 5, subHeight: 1, fontSize: 18, divHeight: 2, divWidth: 12 };
-    range = { min: 0, max: 100 };
-    step = 1;
-    pips = { mode: 'values', values: [0, 50, 100], density: 4 };
-    tooltip = { type: 'none', decimals: 0, background: '#FFF', color: '#000', fontSize: 12 }
 }

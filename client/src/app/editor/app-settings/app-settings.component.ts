@@ -1,5 +1,5 @@
 import { Component, OnInit, Inject } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 import { SettingsService } from '../../_services/settings.service';
 import { DiagnoseService } from '../../_services/diagnose.service';
@@ -25,10 +25,10 @@ export class AppSettingsComponent implements OnInit {
     smtpTesting = false;
     smtpTestAddress = '';
     showPassword = false;
-    
+
     daqstoreType = DaqStoreType;
     retationType = DaqStoreRetentionType;
-    
+
     constructor(private settingsService: SettingsService,
         private diagnoseService: DiagnoseService,
         private translateService: TranslateService,
@@ -53,7 +53,7 @@ export class AppSettingsComponent implements OnInit {
         }
         this.settings.daqstore = this.settings.daqstore || new DaqStore();
         if (!this.settings.daqstore.credentials) {
-            this.settings.daqstore.credentials = new StoreCredentials()
+            this.settings.daqstore.credentials = new StoreCredentials();
         }
     }
 
@@ -107,10 +107,10 @@ export class AppSettingsComponent implements OnInit {
         }
         if (!this.settings.smtp.username || !this.settings.smtp.username.length) {
             return false;
-        } 
+        }
         if (!this.smtpTestAddress || !this.smtpTestAddress.length) {
             return false;
-        }       
+        }
         return true;
     }
 

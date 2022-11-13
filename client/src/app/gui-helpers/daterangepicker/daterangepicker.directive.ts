@@ -1,3 +1,5 @@
+/* eslint-disable @angular-eslint/no-conflicting-lifecycle */
+/* eslint @angular-eslint/no-host-metadata-property: off */
 import {
   Directive,
   ViewContainerRef,
@@ -46,9 +48,9 @@ export class DaterangepickerDirective implements OnInit, OnChanges, DoCheck {
   private _value: any;
   private localeDiffer: KeyValueDiffer<string, any>;
   @Input()
-  minDate: _moment.Moment
+  minDate: _moment.Moment;
   @Input()
-  maxDate: _moment.Moment
+  maxDate: _moment.Moment;
   @Input()
   autoApply: boolean;
   @Input()
@@ -93,14 +95,14 @@ export class DaterangepickerDirective implements OnInit, OnChanges, DoCheck {
   @Input()
   showRangeLabelOnInput: boolean;
   @Input()
-  showCancel: boolean = false;
+  showCancel = false;
   // timepicker variables
   @Input()
   timePicker: Boolean = false;
   @Input()
   timePicker24Hour: Boolean = false;
   @Input()
-  timePickerIncrement: number = 1;
+  timePickerIncrement = 1;
   @Input()
   timePickerSeconds: Boolean = false;
   _locale: LocaleConfig = {};
@@ -111,8 +113,8 @@ export class DaterangepickerDirective implements OnInit, OnChanges, DoCheck {
     return this._locale;
   }
   @Input()
-  private _endKey: string = 'endDate';
-  private _startKey: string = 'startDate';
+  private _endKey = 'endDate';
+  private _startKey = 'startDate';
   @Input() set startKey(value) {
     if (value !== null) {
       this._startKey = value;
@@ -218,7 +220,7 @@ export class DaterangepickerDirective implements OnInit, OnChanges, DoCheck {
     this.picker.show(event);
     setTimeout(() => {
       this.setPosition();
-    })
+    });
   }
 
   hide(e?) {
@@ -249,10 +251,10 @@ export class DaterangepickerDirective implements OnInit, OnChanges, DoCheck {
   private setValue(val: any) {
     if (val) {
       if (val[this._startKey]) {
-        this.picker.setStartDate(val[this._startKey])
+        this.picker.setStartDate(val[this._startKey]);
       }
       if (val[this._endKey]) {
-        this.picker.setEndDate(val[this._endKey])
+        this.picker.setEndDate(val[this._endKey]);
       }
       this.picker.calculateChosenLabel();
       if (this.picker.chosenLabel) {
@@ -293,7 +295,7 @@ export class DaterangepickerDirective implements OnInit, OnChanges, DoCheck {
             top: containerTop,
             left: element.offsetLeft  + 'px',
             right: 'auto'
-          }
+          };
       }
       if (style) {
         this._renderer.setStyle(container, 'top', style.top);
@@ -317,7 +319,7 @@ export class DaterangepickerDirective implements OnInit, OnChanges, DoCheck {
       }
       const clickedInside = this._el.nativeElement.contains(targetElement);
       if (!clickedInside) {
-         this.hide()
+         this.hide();
       }
   }
 }

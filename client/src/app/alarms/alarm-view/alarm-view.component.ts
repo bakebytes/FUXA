@@ -1,6 +1,7 @@
 import { Component, OnInit, AfterViewInit, OnDestroy, Input, ViewChild, Output, EventEmitter } from '@angular/core';
-import { MatDialog, MatDialogRef, MAT_DIALOG_DATA, MatMenuTrigger } from '@angular/material';
-import { MatTable, MatTableDataSource, MatPaginator, MatSort } from '@angular/material';
+import { MatTable, MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatSort } from '@angular/material/sort';
 import { Subscription, Subject, timer, Observable, empty } from 'rxjs';
 import { takeUntil, switchMap, catchError } from 'rxjs/operators';
 
@@ -31,12 +32,12 @@ export class AlarmViewComponent implements OnInit, AfterViewInit, OnDestroy {
     @Input() autostart = false;
     @Input() showInContainer = false;
     @Input() fullview = true;
-    @Output() showMode:EventEmitter<string> = new EventEmitter();
+    @Output() showMode: EventEmitter<string> = new EventEmitter();
 
     dataSource = new MatTableDataSource([]);
-    @ViewChild(MatTable) table: MatTable<any>;
-    @ViewChild(MatSort) sort: MatSort;
-    @ViewChild(MatPaginator) paginator: MatPaginator;
+    @ViewChild(MatTable, {static: false}) table: MatTable<any>;
+    @ViewChild(MatSort, {static: false}) sort: MatSort;
+    @ViewChild(MatPaginator, {static: false}) paginator: MatPaginator;
 
     private rxjsPollingTimer = timer(0, 2000);
     private destroy = new Subject();
@@ -46,10 +47,10 @@ export class AlarmViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
     ngOnInit() {
         Object.keys(this.statusText).forEach(key => {
-            this.translateService.get(this.statusText[key]).subscribe((txt: string) => { this.statusText[key] = txt });
+            this.translateService.get(this.statusText[key]).subscribe((txt: string) => { this.statusText[key] = txt; });
         });
         Object.keys(this.priorityText).forEach(key => {
-            this.translateService.get(this.priorityText[key]).subscribe((txt: string) => { this.priorityText[key] = txt });
+            this.translateService.get(this.priorityText[key]).subscribe((txt: string) => { this.priorityText[key] = txt; });
         });
     }
 
@@ -107,7 +108,7 @@ export class AlarmViewComponent implements OnInit, AfterViewInit, OnDestroy {
             alr.forEach(alr => {
                 alr.status = this.getStatus(alr.status);
                 alr.type = this.getPriority(alr.type);
-            })
+            });
             this.dataSource.data = alr;
         }
     }
@@ -152,7 +153,7 @@ export class AlarmViewComponent implements OnInit, AfterViewInit, OnDestroy {
                 result.forEach(alr => {
                     alr.status = this.getStatus(alr.status);
                     alr.type = this.getPriority(alr.type);
-                })
+                });
                 this.dataSource.data = result;
             }
         }, err => {

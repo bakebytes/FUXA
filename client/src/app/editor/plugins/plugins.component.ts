@@ -1,5 +1,5 @@
 import { Component, OnInit, Inject } from '@angular/core';
-import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 import { TranslateService } from '@ngx-translate/core';
 import { ProjectService } from '../../_services/project.service';
@@ -29,11 +29,11 @@ export class PluginsComponent implements OnInit {
         private projectService: ProjectService) { }
 
     ngOnInit() {
-        this.translateService.get('dlg.plugins-status-installing').subscribe((txt: string) => { this.installing = txt });
-        this.translateService.get('dlg.plugins-status-removing').subscribe((txt: string) => { this.removing = txt });
-        this.translateService.get('dlg.plugins-status-installed').subscribe((txt: string) => { this.installed = txt });
-        this.translateService.get('dlg.plugins-status-removed').subscribe((txt: string) => { this.removed = txt });
-        this.translateService.get('dlg.plugins-status-error').subscribe((txt: string) => { this.error = txt });
+        this.translateService.get('dlg.plugins-status-installing').subscribe((txt: string) => { this.installing = txt; });
+        this.translateService.get('dlg.plugins-status-removing').subscribe((txt: string) => { this.removing = txt; });
+        this.translateService.get('dlg.plugins-status-installed').subscribe((txt: string) => { this.installed = txt; });
+        this.translateService.get('dlg.plugins-status-removed').subscribe((txt: string) => { this.removed = txt; });
+        this.translateService.get('dlg.plugins-status-error').subscribe((txt: string) => { this.error = txt; });
 
         this.pluginService.getPlugins().subscribe(plugins => {
             this.plugins = plugins;

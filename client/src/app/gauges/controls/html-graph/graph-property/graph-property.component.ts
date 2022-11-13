@@ -1,5 +1,5 @@
-import { Component, EventEmitter, OnInit, AfterViewInit, Input, ElementRef, ViewChild, Output } from '@angular/core';
-import { MatDialog } from '@angular/material';
+import { Component, EventEmitter, OnInit, AfterViewInit, Input, ElementRef, ViewChild, Output, OnDestroy } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { FormControl } from '@angular/forms';
 import { takeUntil } from 'rxjs/operators';
 import { Subject, ReplaySubject } from 'rxjs';
@@ -18,12 +18,12 @@ import { Utils } from '../../../../_helpers/utils';
     templateUrl: './graph-property.component.html',
     styleUrls: ['./graph-property.component.css']
 })
-export class GraphPropertyComponent implements OnInit, AfterViewInit {
+export class GraphPropertyComponent implements OnInit, OnDestroy {
 
     @Input() data: any;
     @Output() onPropChanged: EventEmitter<any> = new EventEmitter();
-    @Input('reload') set reload(b: any) { 
-        this._reload(); 
+    @Input('reload') set reload(b: any) {
+        this._reload();
     }
 
     themeType = GraphThemeType;
@@ -43,7 +43,7 @@ export class GraphPropertyComponent implements OnInit, AfterViewInit {
 
     constructor(
         public dialog: MatDialog,
-        private translateService: TranslateService) { 
+        private translateService: TranslateService) {
         }
 
     ngOnInit() {
@@ -51,21 +51,18 @@ export class GraphPropertyComponent implements OnInit, AfterViewInit {
             this.graphType = GraphType.bar;
             if (!this.data.settings.property) {
                 this.data.settings.property = <GaugeGraphProperty>{ id: null, type: null, options: null };
-            } 
+            }
             if (!this.data.settings.property.options) {
                 this.data.settings.property.options = GraphBarComponent.DefaultOptions();
             }
             Object.keys(this.lastRangeType).forEach(key => {
-                this.translateService.get(this.lastRangeType[key]).subscribe((txt: string) => { this.lastRangeType[key] = txt });
+                this.translateService.get(this.lastRangeType[key]).subscribe((txt: string) => { this.lastRangeType[key] = txt; });
             });
             Object.keys(this.dateGroupType).forEach(key => {
-                this.translateService.get(this.dateGroupType[key]).subscribe((txt: string) => { this.dateGroupType[key] = txt });
+                this.translateService.get(this.dateGroupType[key]).subscribe((txt: string) => { this.dateGroupType[key] = txt; });
             });
         }
         this._reload();
-    }
-
-    ngAfterViewInit() {
     }
 
     ngOnDestroy() {
@@ -97,7 +94,6 @@ export class GraphPropertyComponent implements OnInit, AfterViewInit {
     onGraphChanged() {
         this.data.settings.property = <GaugeGraphProperty>{ id: null, type: null, options: null };
         if (this.graphCtrl.value) {
-            this.data.settings.name = this.graphCtrl.value.name;
             this.data.settings.property.id = this.graphCtrl.value.id;
             this.data.settings.property.type = this.graphCtrl.value.type;
             if (!this.isDateTime(this.graphCtrl.value)) {
@@ -108,8 +104,6 @@ export class GraphPropertyComponent implements OnInit, AfterViewInit {
                 this.options.lastRange = <GraphRangeType>Utils.getEnumKey(GraphRangeType, GraphRangeType.last1d);
                 this.options.dateGroup = <GraphDateGroupType>Utils.getEnumKey(GraphDateGroupType, GraphDateGroupType.hours);
             }
-        } else {
-            this.data.settings.name = '';
         }
         if (this.options.theme === this.themeType.light) {
             this.options.yAxes.fontColor = '#666';
@@ -161,7 +155,7 @@ export class GraphPropertyComponent implements OnInit, AfterViewInit {
             });
         if (toset) {
             let idx = -1;
-            this.data.graphs.every(function (value, index, _arr) {
+            this.data.graphs.every(function(value, index, _arr) {
                 if (value.id === toset) {
                     idx = index;
                     return false;

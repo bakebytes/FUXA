@@ -1,6 +1,6 @@
 import { Component, Inject, OnInit, AfterViewInit, OnChanges, SimpleChanges, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { Utils } from '../../../../_helpers/utils';
-import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 import { GaugeOptions, GaugeType, } from '../../../../gui-helpers/ngx-gauge/gaugeOptions';
 import { NgxGaugeComponent } from '../../../../gui-helpers/ngx-gauge/ngx-gauge.component';
@@ -15,14 +15,14 @@ import { Define } from '../../../../_helpers/define';
     templateUrl: './bag-property.component.html',
     styleUrls: ['./bag-property.component.css']
 })
-export class BagPropertyComponent implements OnInit, AfterViewInit, OnChanges {
+export class BagPropertyComponent implements AfterViewInit {
 
-    @ViewChild("ngauge") ngauge: NgxGaugeComponent;
-	@ViewChild('flexhead') flexHead: FlexHeadComponent;
+    @ViewChild('ngauge', {static: false}) ngauge: NgxGaugeComponent;
+	@ViewChild('flexhead', {static: false}) flexHead: FlexHeadComponent;
 
     gauge = {
         value: 30
-    }
+    };
 
 	property: GaugeProperty;
     gaugeTypeEnum = GaugeType;
@@ -38,7 +38,7 @@ export class BagPropertyComponent implements OnInit, AfterViewInit, OnChanges {
     constructor(private cdRef: ChangeDetectorRef,
                 public dialog: MatDialog,
                 public dialogRef: MatDialogRef<BagPropertyComponent>,
-                @Inject(MAT_DIALOG_DATA) public data: any) { 
+                @Inject(MAT_DIALOG_DATA) public data: any) {
         this.optionsGauge = this.getDefaultOptions(GaugeType.Gauge);
         this.optionsDonut = this.getDefaultOptions(GaugeType.Donut);
         this.optionsZones = this.getDefaultOptions(GaugeType.Zones);
@@ -47,9 +47,6 @@ export class BagPropertyComponent implements OnInit, AfterViewInit, OnChanges {
         if (!this.property) {
 			this.property = new GaugeProperty();
         }
-    }
-
-    ngOnInit() { 
     }
 
     ngAfterViewInit() {
@@ -67,7 +64,7 @@ export class BagPropertyComponent implements OnInit, AfterViewInit, OnChanges {
                 }
             }
             this.onGaugeChange(this.gaugeType);
-            this.cdRef.detectChanges();    
+            this.cdRef.detectChanges();
         }, 500);
     }
 
@@ -94,9 +91,6 @@ export class BagPropertyComponent implements OnInit, AfterViewInit, OnChanges {
 			}
 		});
 	}
-
-    ngOnChanges(changes: SimpleChanges) {
-    }
 
     onGaugeChange(type: GaugeType) {
         if (type === GaugeType.Donut) {
@@ -169,7 +163,7 @@ export class BagPropertyComponent implements OnInit, AfterViewInit, OnChanges {
                     let v = parseFloat(tk);
                     if (!isNaN(v)) {
                         labels.push(v);
-                    }                    
+                    }
                 });
             }
             this.options.staticLabels = { labels: labels, font: this.options.staticFontSize + 'px Sans-serif', color: this.options.staticFontColor };
@@ -217,7 +211,7 @@ export class BagPropertyComponent implements OnInit, AfterViewInit, OnChanges {
         this.onGaugeChange(this.gaugeType);
     }
 
-    
+
     onChangeStaticZones() {
         this.options.staticZones = this.optcfg.staticZones;
         this.setGaugeOptions();

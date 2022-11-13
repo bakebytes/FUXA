@@ -1,20 +1,38 @@
 import { Component, OnInit, Inject } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
-
-import { Tag, TagDaq } from '../../_models/device';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { TagDaq } from '../../_models/device';
 
 @Component({
     selector: 'app-tag-options',
     templateUrl: './tag-options.component.html',
     styleUrls: ['./tag-options.component.css']
 })
-export class TagOptionsComponent implements OnInit {
+export class TagOptionsComponent {
 
-    tagDaq = new TagDaq(false, true, 60);
+    formGroup: FormGroup;
 
     constructor(
         public dialogRef: MatDialogRef<TagOptionsComponent>,
+        private fb: FormBuilder,
         @Inject(MAT_DIALOG_DATA) public data: any) {
+
+        this.formGroup = this.fb.group({
+            interval: [{value: 60, disabled: true}, [Validators.required, Validators.min(1)]],
+            changed: [{value: false, disabled: true}],
+            enabled: [false],
+        });
+
+        this.formGroup.controls.enabled.valueChanges.subscribe(enabled => {
+            if (enabled) {
+                this.formGroup.controls.interval.enable();
+                this.formGroup.controls.changed.enable();
+            } else {
+                this.formGroup.controls.interval.disable();
+                this.formGroup.controls.changed.disable();
+            }
+        });
+
         // check if edit a group
         if (this.data.tags.length > 0) {
             let enabled = { value: null, valid: true };
@@ -42,18 +60,15 @@ export class TagOptionsComponent implements OnInit {
                 }
             }
             if (enabled.valid && enabled.value !== null) {
-                this.tagDaq.enabled = enabled.value;
+                this.formGroup.patchValue({enabled: enabled.value});
             }
             if (changed.valid && changed.value !== null) {
-                this.tagDaq.changed = changed.value;
+                this.formGroup.patchValue({changed: changed.value});
             }
-            if (interval.valid && interval.value !== null) {
-                this.tagDaq.interval = interval.value;
+            if (interval.valid && interval.value) {
+                this.formGroup.patchValue({interval: interval.value});
             }
         }
-    }
-
-    ngOnInit() {
     }
 
     onNoClick(): void {
@@ -61,6 +76,11 @@ export class TagOptionsComponent implements OnInit {
     }
 
     onOkClick(): void {
-        this.dialogRef.close(this.tagDaq);
+        this.dialogRef.close(new TagDaq(
+            this.formGroup.value.enabled,
+            this.formGroup.value.changed,
+            this.formGroup.value.interval
+        ));
+
     }
 }

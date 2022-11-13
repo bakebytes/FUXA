@@ -1,5 +1,6 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { MatDialog, MatSort } from '@angular/material';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { MatSort } from '@angular/material/sort';
 import { MatTable, MatTableDataSource } from '@angular/material/table';
 import { TranslateService } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
@@ -14,7 +15,7 @@ import { ReportEditorComponent } from '../report-editor/report-editor.component'
     templateUrl: './report-list.component.html',
     styleUrls: ['./report-list.component.css']
 })
-export class ReportListComponent implements OnInit {
+export class ReportListComponent implements OnInit, AfterViewInit, OnDestroy {
 
     displayedColumns = ['select', 'name', 'receiver', 'scheduling', 'type', 'create', 'remove'];
     dataSource = new MatTableDataSource([]);
@@ -22,8 +23,8 @@ export class ReportListComponent implements OnInit {
     private subscriptionLoad: Subscription;
     private schedulingType = ReportSchedulingType;
 
-    @ViewChild(MatTable) table: MatTable<any>;
-    @ViewChild(MatSort) sort: MatSort;
+    @ViewChild(MatTable, {static: false}) table: MatTable<any>;
+    @ViewChild(MatSort, {static: false}) sort: MatSort;
 
     constructor(public dialog: MatDialog,
         private translateService: TranslateService,
@@ -37,7 +38,7 @@ export class ReportListComponent implements OnInit {
         });
 
         Object.keys(this.schedulingType).forEach(key => {
-            this.translateService.get(this.schedulingType[key]).subscribe((txt: string) => { this.schedulingType[key] = txt });
+            this.translateService.get(this.schedulingType[key]).subscribe((txt: string) => { this.schedulingType[key] = txt; });
         });
     }
 
@@ -100,6 +101,6 @@ export class ReportListComponent implements OnInit {
     }
 
     private loadReports() {
-        this.dataSource.data = this.projectService.getReports().sort((a:Report, b:Report) => a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
+        this.dataSource.data = this.projectService.getReports().sort((a: Report, b: Report) => a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
     }
 }

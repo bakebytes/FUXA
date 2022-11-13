@@ -304,8 +304,13 @@ function removeView(view) {
  * Set Device to local data
  * @param {*} device 
  */
-function setDevice(device) {
-    data.devices[device.id] = device;
+function setDevice(device, merge) {
+    if (merge && data.devices[device.id]) {
+        device.enabled = data.devices[device.id].enabled;
+        data.devices[device.id] = {...data.devices[device.id], ...device};
+    } else {
+        data.devices[device.id] = device;
+    }
 }
 
 /**

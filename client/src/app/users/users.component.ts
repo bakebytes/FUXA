@@ -1,6 +1,8 @@
+/* eslint-disable @angular-eslint/component-class-suffix */
 import { Component, Inject, OnInit, AfterViewInit, ViewChild, Input, Output, EventEmitter } from '@angular/core';
-import { MatTable, MatTableDataSource, MatSort, MatMenuTrigger } from '@angular/material';
-import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
+import { MatTable, MatTableDataSource } from '@angular/material/table';
+import { MatSort } from '@angular/material/sort';
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 import { SelOptionsComponent } from '../gui-helpers/sel-options/sel-options.component';
 
@@ -19,8 +21,8 @@ export class UsersComponent implements OnInit, AfterViewInit {
 
 	users: User[];
 
-	@ViewChild(MatTable) table: MatTable<any>;
-	@ViewChild(MatSort) sort: MatSort;
+	@ViewChild(MatTable, {static: false}) table: MatTable<any>;
+	@ViewChild(MatSort, {static: false}) sort: MatSort;
 
 	constructor(private dialog: MatDialog,
 		private userService: UserService) { }
@@ -75,13 +77,13 @@ export class UsersComponent implements OnInit, AfterViewInit {
 		muser.password = '';
 		let dialogRef = this.dialog.open(DialogUser, {
 			position: { top: '60px' },
-			data: { user: muser, current: current, users: this.users.map((u: User) => { return u.username }) }
+			data: { user: muser, current: current, users: this.users.map((u: User) => u.username) }
 		});
 		dialogRef.afterClosed().subscribe(result => {
 			if (result) {
 				if (!current) {
 					this.userService.removeUser(result).subscribe(result => {
-						this.users = this.users.filter(function (el) { return el.username !== muser.username; });
+						this.users = this.users.filter(function(el) { return el.username !== muser.username; });
 						this.bindToTable(this.users);
 					}, err => {
 					});
@@ -102,14 +104,15 @@ export class UsersComponent implements OnInit, AfterViewInit {
 }
 
 @Component({
-	selector: 'dialog-user',
+	selector: 'app-dialog-user',
 	templateUrl: './user.dialog.html',
 })
 export class DialogUser {
 	selectedGroups = [];
 	groups = UserGroups.Groups;
+	showPassword: boolean;
 
-	@ViewChild(SelOptionsComponent) seloptions: SelOptionsComponent;
+	@ViewChild(SelOptionsComponent, {static: false}) seloptions: SelOptionsComponent;
 
 	constructor(public dialogRef: MatDialogRef<DialogUser>,
 		@Inject(MAT_DIALOG_DATA) public data: any) {

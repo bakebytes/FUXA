@@ -3,9 +3,9 @@ export class Notification {
     id: string;
     name: string;
     receiver: string;
-    delay: number = 1;
-    interval: number = 0;
-    enabled: boolean = true;
+    delay = 1;
+    interval = 0;
+    enabled = true;
     text: string;
     type: string;
     subscriptions = {};
@@ -13,7 +13,7 @@ export class Notification {
 
     constructor(_id: string) {
         this.id = _id;
-    }    
+    }
 }
 
 export enum NotificationsType {

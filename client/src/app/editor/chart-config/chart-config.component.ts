@@ -1,5 +1,7 @@
+/* eslint-disable @angular-eslint/component-class-suffix */
 import { Component, OnInit, Inject, ViewChild } from '@angular/core';
-import { MatDialog, MatDialogRef, MAT_DIALOG_DATA, MatSelectionList } from '@angular/material';
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatSelectionList } from '@angular/material/list';
 
 import { TranslateService } from '@ngx-translate/core';
 import { ProjectService } from '../../_services/project.service';
@@ -18,7 +20,7 @@ import { EditNameComponent } from '../../gui-helpers/edit-name/edit-name.compone
 })
 export class ChartConfigComponent implements OnInit {
 
-    @ViewChild(MatSelectionList) selTags: MatSelectionList;
+    @ViewChild(MatSelectionList, {static: false}) selTags: MatSelectionList;
 
     selectedChart = <Chart>{ id: null, name: null, lines: [] };
     selectedDevice = { id: null, name: null, tags: []};
@@ -26,7 +28,7 @@ export class ChartConfigComponent implements OnInit {
     defaultColor = Utils.defaultColor;
     lineColor = Utils.lineColor;
 
-    lineInterpolationType = [{ text: 'chart.config-interpo-linear', value: 0 }, { text: 'chart.config-interpo-stepAfter', value: 1 }, 
+    lineInterpolationType = [{ text: 'chart.config-interpo-linear', value: 0 }, { text: 'chart.config-interpo-stepAfter', value: 1 },
                     { text: 'chart.config-interpo-stepBefore', value: 2 }, { text: 'chart.config-interpo-spline', value: 3 }];
 
     constructor(
@@ -39,7 +41,7 @@ export class ChartConfigComponent implements OnInit {
 
     ngOnInit() {
         for (let i = 0; i < this.lineInterpolationType.length; i++) {
-            this.translateService.get(this.lineInterpolationType[i].text).subscribe((txt: string) => { this.lineInterpolationType[i].text = txt });
+            this.translateService.get(this.lineInterpolationType[i].text).subscribe((txt: string) => { this.lineInterpolationType[i].text = txt; });
         }
     }
 
@@ -65,7 +67,7 @@ export class ChartConfigComponent implements OnInit {
 
     onRemoveChart(index: number) {
         let msg = '';
-        this.translateService.get('msg.chart-remove', { value: this.data.charts[index].name }).subscribe((txt: string) => { msg = txt });
+        this.translateService.get('msg.chart-remove', { value: this.data.charts[index].name }).subscribe((txt: string) => { msg = txt; });
         let dialogRef = this.dialog.open(ConfirmDialogComponent, {
             data: { msg: msg },
             position: { top: '60px' }
@@ -92,10 +94,10 @@ export class ChartConfigComponent implements OnInit {
         let title = 'dlg.item-title';
         let label = 'dlg.item-name';
         let error = 'dlg.item-name-error';
-        let exist = this.data.charts.map((c) => { if (!chart || chart.name !== c.name) return c.name });
-        this.translateService.get(title).subscribe((txt: string) => { title = txt });
-        this.translateService.get(label).subscribe((txt: string) => { label = txt });
-        this.translateService.get(error).subscribe((txt: string) => { error = txt });
+        let exist = this.data.charts.map((c) => { if (!chart || chart.name !== c.name) {return c.name;} });
+        this.translateService.get(title).subscribe((txt: string) => { title = txt; });
+        this.translateService.get(label).subscribe((txt: string) => { label = txt; });
+        this.translateService.get(error).subscribe((txt: string) => { error = txt; });
         let dialogRef = this.dialog.open(EditNameComponent, {
             position: { top: '60px' },
             data: { name: (chart) ? chart.name : '', title: title, label: label, exist: exist, error: error }
@@ -131,9 +133,9 @@ export class ChartConfigComponent implements OnInit {
                     let device = DevicesUtils.getDeviceFromTagId(this.data.devices, id);
                     let tag = DevicesUtils.getTagFromTagId([device], id);
                     if (tag) {
-                        let exist = chart.lines.find(line => line.id === tag.id)
+                        let exist = chart.lines.find(line => line.id === tag.id);
                         if (!exist) {
-                            const myCopiedObject: ChartLine = {id: tag.id, name: this.getTagLabel(tag), device: device.name, color: this.getNextColor(), 
+                            const myCopiedObject: ChartLine = {id: tag.id, name: this.getTagLabel(tag), device: device.name, color: this.getNextColor(),
                                 label: this.getTagLabel(tag), yaxis: 1 };
                             chart.lines.push(myCopiedObject);
                         }
@@ -146,7 +148,7 @@ export class ChartConfigComponent implements OnInit {
     editChartLine(line: ChartLine) {
         let dialogRef = this.dialog.open(DialogChartLine, {
             position: { top: '60px' },
-            data: <ChartLine>{ id: line.id, device: line.device, name: line.name, label: line.label, color: line.color, yaxis: line.yaxis, 
+            data: <ChartLine>{ id: line.id, device: line.device, name: line.name, label: line.label, color: line.color, yaxis: line.yaxis,
                 lineInterpolation: line.lineInterpolation, fill: line.fill, lineInterpolationType: this.lineInterpolationType }
         });
         dialogRef.afterClosed().subscribe((result: ChartLine) => {
@@ -227,7 +229,7 @@ export class DialogChartLine {
 
     constructor(
         public dialogRef: MatDialogRef<DialogChartLine>,
-        @Inject(MAT_DIALOG_DATA) public data: any) { 
+        @Inject(MAT_DIALOG_DATA) public data: any) {
     }
 
     onNoClick(): void {

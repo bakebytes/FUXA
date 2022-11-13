@@ -1,21 +1,20 @@
-﻿import { Component, Inject, OnInit, OnDestroy, AfterViewInit, ViewChild, ViewContainerRef, ComponentFactoryResolver, ElementRef } from '@angular/core';
+﻿/* eslint-disable @angular-eslint/component-class-suffix */
+import { Component, Inject, OnInit, OnDestroy, AfterViewInit, ViewChild, ViewContainerRef, ComponentFactoryResolver, ElementRef } from '@angular/core';
 import { ChangeDetectorRef } from '@angular/core';
-import { MatDialog, MatDialogRef, MAT_DIALOG_DATA, MatDrawer } from '@angular/material';
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatDrawer } from '@angular/material/sidenav';
 import { DomSanitizer } from '@angular/platform-browser';
-import { MatIconRegistry } from '@angular/material';
+import { MatIconRegistry } from '@angular/material/icon';
 import { Subscription } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 
 import { ProjectService, SaveMode } from '../_services/project.service';
-import { Hmi, View, GaugeSettings, SelElement, LayoutSettings, ViewType, CardWidget, CardWidgetType } from '../_models/hmi';
+import { Hmi, View, GaugeSettings, SelElement, LayoutSettings, ViewType, CardWidget, CardWidgetType, ISvgElement } from '../_models/hmi';
 import { WindowRef } from '../_helpers/windowref';
-import { Output } from '@angular/core/src/metadata/directives';
 import { GaugePropertyComponent, GaugeDialogType } from '../gauges/gauge-property/gauge-property.component';
-import { ChartPropertyComponent } from '../gauges/controls/html-chart/chart-property/chart-property.component';
-import { GraphPropertyComponent } from '../gauges/controls/html-graph/graph-property/graph-property.component';
 
 import { GaugesManager } from '../gauges/gauges.component';
-import { GaugeBaseComponent } from '../gauges/gauge-base/gauge-base.component'
+import { GaugeBaseComponent } from '../gauges/gauge-base/gauge-base.component';
 import { Utils } from '../_helpers/utils';
 import { ConfirmDialogComponent } from '../gui-helpers/confirm-dialog/confirm-dialog.component';
 import { Define } from '../_helpers/define';
@@ -36,29 +35,19 @@ import { HtmlSwitchPropertyComponent } from '../gauges/controls/html-switch/html
 import { GridsterItem } from 'angular-gridster2';
 import { CardConfigComponent } from './card-config/card-config.component';
 import { CardsViewComponent } from '../cards-view/cards-view.component';
+import { IElementPreview } from './svg-selector/svg-selector.component';
 
 declare var Gauge: any;
 
 declare var $: any;
-declare var svgEditor: any;
 declare var mypathseg: any;         ///< svg-editor component
-declare var initPathSeg: any;
 declare var mybrowser: any;
-declare var initBrowser: any;
 declare var mysvgutils: any;
-declare var initSvgutils: any;
 declare var myselect: any;
-declare var initSelect: any;
 declare var mydraw: any;
-declare var initDraw: any;
-declare var mylocal: any;
-declare var initLocale: any;
-declare var mycontextmenu: any;
 declare var initContextmenu: any;
 declare var mysvgcanvas: any;
-declare var initSvgCanvas: any;
 declare var mysvgeditor: any;
-declare var initSvgEditor: any;
 
 @Component({
     moduleId: module.id,
@@ -67,14 +56,15 @@ declare var initSvgEditor: any;
 })
 
 export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
-    // currentUser: User;
-    // users: User[] = [];
-    // @ViewChild('fillcolor') fillcolor: ElementRef;
-    @ViewChild('gaugepanel') gaugePanelComponent: GaugeBaseComponent;
-    @ViewChild('viewFileImportInput') viewFileImportInput: any;
-    @ViewChild('cardsview') cardsview: CardsViewComponent;
-    @ViewChild('sidePanel') sidePanel: MatDrawer;
+    @ViewChild('gaugepanel', {static: false}) gaugePanelComponent: GaugeBaseComponent;
+    @ViewChild('viewFileImportInput', {static: false}) viewFileImportInput: any;
+    @ViewChild('cardsview', {static: false}) cardsview: CardsViewComponent;
+    @ViewChild('sidePanel', {static: false}) sidePanel: MatDrawer;
+    @ViewChild('svgSelectorPanel', {static: false}) svgSelectorPanel: MatDrawer;
+    @ViewChild('svgpreview', {static: false}) svgPreview: ElementRef;
 
+    svgElementSelected: ISvgElement = null;
+    svgElements: ISvgElement[] = [];
     gaugeDialogType = GaugeDialogType;
     gaugeDialog = { type: null, data: null };
     reloadGaugeDialog: boolean;
@@ -91,7 +81,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
     hmi: Hmi = new Hmi();// = {_id: '', name: '', networktype: '', ipaddress: '', maskaddress: '' };
     currentMode = '';
     imagefile: string;
-    gridOn: boolean = false;
+    gridOn = false;
     isAnySelected = false;
     selectedElement: SelElement = new SelElement();
     panelsState = {
@@ -125,7 +115,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
         public dialog: MatDialog,
         private changeDetector: ChangeDetectorRef,
         private translateService: TranslateService,
-        private gaugesManager: GaugesManager,
+        public gaugesManager: GaugesManager,
         private viewContainerRef: ViewContainerRef,
         private resolver: ComponentFactoryResolver,
         private mdIconRegistry: MatIconRegistry, private sanitizer: DomSanitizer) {
@@ -206,7 +196,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
                 (selected) => {
                     this.isAnySelected = (selected);
                     this.onSelectedElement(selected);
-                    let ga: GaugeSettings = this.getGaugeSettings(selected);
+                    this.getGaugeSettings(selected);
                 },
                 (type, args) => {
                     this.onExtensionLoaded(args);
@@ -231,10 +221,12 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
                     setTimeout(() => {
                         this.setMode('select', false);
                     }, 700);
+                    this.checkSvgElementsMap(true);
                     // this.hmiService.addGauge(this.hmi, eleadded);
                 },
                 (eleremoved) => {
                     this.onRemoveElement(eleremoved);
+                    this.checkSvgElementsMap(true);
                 },
                 (eleresized) => {
                     if (eleresized && eleresized.id) {
@@ -244,11 +236,11 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
                 },
                 (copiedpasted) => {
                     if (copiedpasted && copiedpasted.copy && copiedpasted.past) {
-                        copiedpasted.copy = copiedpasted.copy.filter(function (e) { return e });
+                        copiedpasted.copy = copiedpasted.copy.filter(function(e) { return e; });
                         if (copiedpasted.copy.length == copiedpasted.past.length) {
                             for (let i = 0; i < copiedpasted.copy.length; i++) {
-                                let srctype = copiedpasted.copy[i].getAttribute("type");
-                                let srcid = copiedpasted.copy[i].getAttribute("id");
+                                let srctype = copiedpasted.copy[i].getAttribute('type');
+                                let srcid = copiedpasted.copy[i].getAttribute('id');
                                 if (srcid && srctype) {
                                     let gasrc: GaugeSettings = this.searchGaugeSettings({ id: srcid, type: srctype });
                                     let gadest: GaugeSettings = this.gaugesManager.createSettings(copiedpasted.past[i].id, gasrc.type);
@@ -273,6 +265,40 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     /**
+     * Search SVG elements in View, fill into select box and select the current svg element selected
+     * @param loadSvgElement
+     */
+    checkSvgElementsMap(loadSvgElement = false) {
+        if (loadSvgElement) {
+            this.svgElements = Array.from(document.querySelectorAll('g, text, line, rect, image, path, circle, ellipse'))
+                                    .filter((svg: any) => svg.attributes?.type?.value?.startsWith('svg-ext') ||
+                                                          (svg.id?.startsWith('svg_') && !svg.parentNode?.attributes?.type?.value?.startsWith('svg-ext')))
+                                    .map(ele => <ISvgElement>{id: ele.id, name: this.currentView.items[ele.id]?.name});
+        }
+        this.svgElementSelected = this.svgElements.find(se => se.id === this.selectedElement?.id);
+    }
+
+    /**
+     * Selected in select box will be selected in editor
+     */
+    onSvgElementSelected(value: ISvgElement) {
+        this.clearSelection();
+        this.winRef.nativeWindow.svgEditor.selectOnly([document.getElementById(value.id)], true);
+    }
+
+    onSvgElementPreview(value: IElementPreview) {//value: ISvgElement, preview: boolean) {
+        let elem = document.getElementById(value.element?.id);
+        let rect: DOMRect = elem.getBoundingClientRect();
+        if (elem && rect) {
+            this.svgPreview.nativeElement.style.width = `${rect.width}px`;
+            this.svgPreview.nativeElement.style.height = `${rect.height}px`;
+            this.svgPreview.nativeElement.style.top = `${rect.top}px`;
+            this.svgPreview.nativeElement.style.left = `${rect.left}px`;
+        }
+        this.svgPreview.nativeElement.style.display = (value.preview) ? 'flex' : 'none';
+    }
+
+    /**
      * Load the hmi resource and bind it
      */
     private loadHmi() {
@@ -284,7 +310,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
             this.addView();
             // this.selectView(this.hmi.views[0].name);
         } else {
-            let oldsel = localStorage.getItem("@frango.webeditor.currentview");
+            let oldsel = localStorage.getItem('@frango.webeditor.currentview');
             if (!oldsel && this.hmi.views.length) {
                 oldsel = this.hmi.views[0].name;
             }
@@ -357,7 +383,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
      * get gauge settings from current view items, if not exist create void settings from GaugesManager
      * @param ele gauge id
      */
-    private getGaugeSettings(ele) {
+    getGaugeSettings(ele) {
         if (ele && this.currentView) {
             if (this.currentView.items[ele.id]) {
                 return this.currentView.items[ele.id];
@@ -464,8 +490,8 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
         if (view) {
             this.clearEditor();
             if (this.editorMode !== EditorModeType.CARDS) {
-                let svgcontent: string = '';
-                let v = this.getView(view.name)
+                let svgcontent = '';
+                let v = this.getView(view.name);
                 if (v) {
                     svgcontent = v.svgcontent;
                 }
@@ -488,6 +514,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
                         this.checkGaugeAdded(ga);
                     }
                     this.winRef.nativeWindow.svgEditor.refreshCanvas();
+                    this.checkSvgElementsMap(true);
                 }, 500);
             } else if (this.cardsview) {
                 this.cardsview.view = view;
@@ -524,7 +551,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
             exist = exist.filter((n) => n !== item.card.data);
         }
         let cardType = Utils.getEnumKey(ViewType, ViewType.cards);
-        let views = this.hmi.views.filter((v) => v.type !== cardType && exist.indexOf(v.name) < 0).map((v) => { return v.name })
+        let views = this.hmi.views.filter((v) => v.type !== cardType && exist.indexOf(v.name) < 0).map((v) => v.name);
         let dialogRef = this.dialog.open(CardConfigComponent, {
             position: { top: '60px' },
             data: { item: JSON.parse(JSON.stringify(item)), views: views }
@@ -544,7 +571,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
 
     saveCards(dashboard) {
     }
-    // #region 
+    // #region
 
     //#region Svg-editor event and function interface
     /**
@@ -565,7 +592,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
      * @param mode mode to check
      */
     isModeActive(mode) {
-        return (this.currentMode === mode)
+        return (this.currentMode === mode);
     }
 
     /**
@@ -577,7 +604,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
         }
     }
 
-    /** 
+    /**
      * check if fill and stroke not the same color is, text and label set all to black
      */
     private checkFillAndStrokeColor() {
@@ -595,7 +622,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
         this.selectedElement = null;
         try {
             // to remove some strange effects
-            if (document.activeElement !== document.body) (document.activeElement as HTMLElement).blur();
+            if (document.activeElement !== document.body) {(document.activeElement as HTMLElement).blur();}
         } catch (e) { }
         if (elems) {
             if (elems.length <= 1) {
@@ -605,6 +632,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.checkGaugeInView(this.selectedElement);
             }
         }
+        this.checkSvgElementsMap(false);
         if (this.sidePanel.opened) {
             this.sidePanel.toggle();
         }
@@ -666,10 +694,10 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
     private setFillColor(event) {
         let color = event;
         if (color.charAt(0) === '#')
-            color = color.slice(1);
+            {color = color.slice(1);}
         let alfa = 100;
         if (this.winRef.nativeWindow.svgEditor) {
-            this.winRef.nativeWindow.svgEditor.setColor(color, alfa, "fill");
+            this.winRef.nativeWindow.svgEditor.setColor(color, alfa, 'fill');
         }
         // this.fillcolor;
     }
@@ -681,9 +709,9 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
     setStrokeColor(event) {
         let color = event;
         if (color.charAt(0) === '#')
-            color = color.slice(1);
+            {color = color.slice(1);}
         let alfa = 100;
-        this.winRef.nativeWindow.svgEditor.setColor(color, alfa, "stroke");
+        this.winRef.nativeWindow.svgEditor.setColor(color, alfa, 'stroke');
         // this.fillcolor;
     }
 
@@ -718,7 +746,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
      */
     onShowGrid() {
         this.gridOn = this.gridOn = !this.gridOn;
-        this.winRef.nativeWindow.svgEditor.clickExtension("view_grid");
+        this.winRef.nativeWindow.svgEditor.clickExtension('view_grid');
         this.winRef.nativeWindow.svgEditor.enableGridSnapping(this.gridOn);
     }
 
@@ -732,7 +760,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
             let self = this;
             if (this.imagefile.split('.').pop().toLowerCase() === 'svg') {
                 let reader = new FileReader();
-                reader.onloadend = function (e: any) {
+                reader.onloadend = function(e: any) {
                     if (self.winRef.nativeWindow.svgEditor.setSvgImageToAdd) {
                         self.winRef.nativeWindow.svgEditor.setSvgImageToAdd(e.target.result);
                     }
@@ -740,7 +768,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
                 };
                 reader.readAsText(event.target.files[0]);
             } else {
-                this.getBase64Image(event.target.files[0], function (imgdata) {
+                this.getBase64Image(event.target.files[0], function(imgdata) {
                     if (self.winRef.nativeWindow.svgEditor.setUrlImageToAdd) {
                         self.winRef.nativeWindow.svgEditor.setUrlImageToAdd(imgdata);
                     }
@@ -757,9 +785,9 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
      */
     private getBase64Image(file, callback) {
         var fr = new FileReader();
-        fr.onload = function () {
+        fr.onload = function() {
             callback(fr.result);
-        }
+        };
         fr.readAsDataURL(file);
     }
 
@@ -859,7 +887,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
 
     //#region View Events (Add/Rename/Delete/...)
     onAddDoc() {
-        let exist = this.hmi.views.map((v) => { return v.name });
+        let exist = this.hmi.views.map((v) => v.name);
         let dialogRef = this.dialog.open(DialogNewDoc, {
             position: { top: '60px' },
             data: { name: '', type: Utils.getEnumKey(ViewType, ViewType.svg), exist: exist }
@@ -877,7 +905,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
      */
     addView(name?: string, type?: ViewType): string {
         if (this.hmi.views) {
-            let nn = "View_";
+            let nn = 'View_';
             let idx = 1;
             for (idx = 1; idx < this.hmi.views.length + 2; idx++) {
                 let found = false;
@@ -888,7 +916,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
                     }
                 }
                 if (!found)
-                    break;
+                    {break;}
             }
             let v = new View();
             v.type = type;
@@ -918,7 +946,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
      */
     onCloneView(view: View) {
         if (view) {
-            let nn = "View_";
+            let nn = 'View_';
             let idx = 1;
             for (idx = 1; idx < this.hmi.views.length + 2; idx++) {
                 let found = false;
@@ -929,7 +957,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
                     }
                 }
                 if (!found)
-                    break;
+                    {break;}
             }
             let torename = { content: JSON.stringify(view), id: '' };
             // change all gauge ids
@@ -955,7 +983,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
      */
     onDeleteView(view) {
         let msg = '';
-        this.translateService.get('msg.view-remove', { value: view.name }).subscribe((txt: string) => { msg = txt });
+        this.translateService.get('msg.view-remove', { value: view.name }).subscribe((txt: string) => { msg = txt; });
         let dialogRef = this.dialog.open(ConfirmDialogComponent, {
             data: { msg: msg },
             position: { top: '60px' }
@@ -989,7 +1017,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
      * @param view View to rename
      */
     onRenameView(view) {
-        let exist = this.hmi.views.filter((v) => v.id !== view.id).map((v) => { return v.name });
+        let exist = this.hmi.views.filter((v) => v.id !== view.id).map((v) => v.name);
         let dialogRef = this.dialog.open(DialogDocName, {
             position: { top: '60px' },
             data: { name: view.name, exist: exist }
@@ -1015,9 +1043,9 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
 
         dialogRef.afterClosed().subscribe(result => {
             if (result && result.profile) {
-                if (result.profile.height) view.profile.height = parseInt(result.profile.height);
-                if (result.profile.width) view.profile.width = parseInt(result.profile.width);
-                if (result.profile.margin >= 0) view.profile.margin = parseInt(result.profile.margin);
+                if (result.profile.height) {view.profile.height = parseInt(result.profile.height);}
+                if (result.profile.width) {view.profile.width = parseInt(result.profile.width);}
+                if (result.profile.margin >= 0) {view.profile.margin = parseInt(result.profile.margin);}
                 view.profile.bkcolor = result.profile.bkcolor;
                 this.winRef.nativeWindow.svgEditor.setDocProperty(view.name, view.profile.width, view.profile.height, view.profile.bkcolor);
                 this.onSelectView(view);
@@ -1029,7 +1057,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
      * select the view, save current vieww before
      * @param view selected view to load resource
      */
-    private onSelectView(view) {
+    onSelectView(view) {
         if (this.currentView) {
             this.currentView.svgcontent = this.getContent();
             // this.hmi.views[this.currentView].svgcontent = this.winRef.nativeWindow.svgEditor.getSvgString();
@@ -1045,7 +1073,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
         } else {
             this.editorMode = EditorModeType.SVG;
         }
-        localStorage.setItem("@frango.webeditor.currentview", this.currentView.name);
+        localStorage.setItem('@frango.webeditor.currentview', this.currentView.name);
         this.loadView(this.currentView);
     }
 
@@ -1100,9 +1128,9 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.saveView(this.currentView);
             }
             // this.projectService.setProject(prj, true);
-        }
+        };
 
-        reader.onerror = function () {
+        reader.onerror = function() {
             let msg = 'Unable to read ' + input.files[0];
             // this.translateService.get('msg.project-load-error', {value: input.files[0]}).subscribe((txt: string) => { msg = txt });
             alert(msg);
@@ -1117,7 +1145,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
      * Load the left panels state copied in localstorage
      */
     private loadPanelState() {
-        let ps = localStorage.getItem("@frango.webeditor.panelsState");
+        let ps = localStorage.getItem('@frango.webeditor.panelsState');
         this.panelsState.enabled = true;
         if (ps) {
             this.panelsState = JSON.parse(ps);
@@ -1129,7 +1157,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
      */
     savePanelState() {
         if (this.panelsState.enabled) {
-            localStorage.setItem("@frango.webeditor.panelsState", JSON.stringify(this.panelsState));
+            localStorage.setItem('@frango.webeditor.panelsState', JSON.stringify(this.panelsState));
         }
     }
     //#endregion
@@ -1163,7 +1191,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
     onGaugeEditEx() {
         setTimeout(() => {
             this.gaugePanelComponent.onEdit();
-        }, 500)
+        }, 500);
     }
 
     isWithEvents(type) {
@@ -1194,7 +1222,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
         if (!tempsettings.name) {
             tempsettings.name = Utils.getNextName(GaugesManager.getPrefixGaugeName(settings.type), names);
         }
-        // settings.property = JSON.parse(settings.property);        
+        // settings.property = JSON.parse(settings.property);
         let dialogRef: any;
         if (dlgType === GaugeDialogType.Chart) {
             this.gaugeDialog.type = dlgType;
@@ -1299,6 +1327,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
                     callback(result.settings);
                     this.saveView(this.currentView);
                 }
+                this.checkSvgElementsMap(true);
             }
         });
     }
@@ -1314,19 +1343,19 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
     private getGaugeTitle(type) {
         let msg = '';
         if (type.startsWith(HtmlInputComponent.TypeTag)) {
-            this.translateService.get('editor.controls-input-settings').subscribe((txt: string) => { msg = txt });
+            this.translateService.get('editor.controls-input-settings').subscribe((txt: string) => { msg = txt; });
         } else if (type.startsWith(ValueComponent.TypeTag)) {
-            this.translateService.get('editor.controls-output-settings').subscribe((txt: string) => { msg = txt });
+            this.translateService.get('editor.controls-output-settings').subscribe((txt: string) => { msg = txt; });
         } else if (type.startsWith(HtmlButtonComponent.TypeTag)) {
-            this.translateService.get('editor.controls-button-settings').subscribe((txt: string) => { msg = txt });
+            this.translateService.get('editor.controls-button-settings').subscribe((txt: string) => { msg = txt; });
         } else if (type.startsWith(HtmlSelectComponent.TypeTag)) {
-            this.translateService.get('editor.controls-select-settings').subscribe((txt: string) => { msg = txt });
+            this.translateService.get('editor.controls-select-settings').subscribe((txt: string) => { msg = txt; });
         } else if (type.startsWith(GaugeProgressComponent.TypeTag)) {
-            this.translateService.get('editor.controls-progress-settings').subscribe((txt: string) => { msg = txt });
+            this.translateService.get('editor.controls-progress-settings').subscribe((txt: string) => { msg = txt; });
         } else if (type.startsWith(GaugeSemaphoreComponent.TypeTag)) {
-            this.translateService.get('editor.controls-semaphore-settings').subscribe((txt: string) => { msg = txt });
+            this.translateService.get('editor.controls-semaphore-settings').subscribe((txt: string) => { msg = txt; });
         } else {
-            this.translateService.get('editor.controls-shape-settings').subscribe((txt: string) => { msg = txt });
+            this.translateService.get('editor.controls-shape-settings').subscribe((txt: string) => { msg = txt; });
         }
         return msg;
     }
@@ -1347,8 +1376,8 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
                             if (self.winRef.nativeWindow.svgEditor.setSvgImageToAdd) {
                                 self.winRef.nativeWindow.svgEditor.setSvgImageToAdd(text);
                             }
-                            self.setMode('svg-image');                        
-                        })
+                            self.setMode('svg-image');
+                        });
                     }
                     // } else {
                     //     this.getBase64Image(result, function (imgdata) {
@@ -1386,7 +1415,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     cloneElement() {
-        this.winRef.nativeWindow.svgEditor.clickExtension("view_grid");
+        this.winRef.nativeWindow.svgEditor.clickExtension('view_grid');
     }
 
     flipSelected(fliptype: string) {
@@ -1401,9 +1430,9 @@ export class DialogNewDoc {
     docType = ViewType;
     constructor(public dialogRef: MatDialogRef<DialogNewDoc>,
         private translateService: TranslateService,
-        @Inject(MAT_DIALOG_DATA) public data: any) { 
+        @Inject(MAT_DIALOG_DATA) public data: any) {
         Object.keys(this.docType).forEach(key => {
-            this.translateService.get(this.docType[key]).subscribe((txt: string) => {this.docType[key] = txt});
+            this.translateService.get(this.docType[key]).subscribe((txt: string) => {this.docType[key] = txt;});
         });
     }
 
@@ -1412,8 +1441,8 @@ export class DialogNewDoc {
     }
 
     isValid(name): boolean {
-        if (!this.data.type) return false;
-        if (!this.data.name) return false;
+        if (!this.data.type) {return false;}
+        if (!this.data.name) {return false;}
         return (this.data.exist.find((n) => n === name)) ? false : true;
     }
 }
@@ -1435,7 +1464,7 @@ export class DialogDocProperty {
         public dialogRef: MatDialogRef<DialogDocProperty>,
         @Inject(MAT_DIALOG_DATA) public data: any) {
         for (let i = 0; i < this.propSizeType.length; i++) {
-            this.translateService.get(this.propSizeType[i].text).subscribe((txt: string) => { this.propSizeType[i].text = txt });
+            this.translateService.get(this.propSizeType[i].text).subscribe((txt: string) => { this.propSizeType[i].text = txt; });
         }
     }
 

@@ -1,5 +1,5 @@
 import { Component, OnInit, Inject } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 import { Script, ScriptScheduling } from '../../_models/script';
 
@@ -8,20 +8,17 @@ import { Script, ScriptScheduling } from '../../_models/script';
     templateUrl: './script-scheduling.component.html',
     styleUrls: ['./script-scheduling.component.css']
 })
-export class ScriptSchedulingComponent implements OnInit {
+export class ScriptSchedulingComponent {
 
     scheduling = <ScriptScheduling> { interval: 0 };
 
     constructor(
         public dialogRef: MatDialogRef<ScriptSchedulingComponent>,
         @Inject(MAT_DIALOG_DATA) public data: SchedulingData) {
-            if (this.data.scheduling) { 
+            if (this.data.scheduling) {
                 this.scheduling = JSON.parse(JSON.stringify(this.data.scheduling));
             }
         }
-
-    ngOnInit() {
-    }
 
     onNoClick(): void {
         this.dialogRef.close();

@@ -1,11 +1,9 @@
+/* eslint-disable @angular-eslint/component-class-suffix */
 import { Component, OnInit, AfterViewInit, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material';
-import { MatTable, MatTableDataSource, MatPaginator, MatSort, MatMenuTrigger } from '@angular/material';
-import { initDomAdapter } from '@angular/platform-browser/src/browser';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatTableDataSource } from '@angular/material/table';
 import { TableType, TableColumn, TableRow, TableCell, TableCellType } from '../../../../_models/hmi';
-import { map, filter } from 'rxjs/operators';
 
-import { Device } from '../../../../_models/device';
 import { ProjectService } from '../../../../_services/project.service';
 import { Utils } from '../../../../_helpers/utils';
 
@@ -14,7 +12,7 @@ import { Utils } from '../../../../_helpers/utils';
     templateUrl: './table-customizer.component.html',
     styleUrls: ['./table-customizer.component.css']
 })
-export class TableCustomizerComponent implements OnInit, AfterViewInit {
+export class TableCustomizerComponent implements OnInit {
 
     tableType = TableType;
     displayedColumns = [];
@@ -29,9 +27,6 @@ export class TableCustomizerComponent implements OnInit, AfterViewInit {
 
     ngOnInit() {
         this.loadData();
-    }
-
-    ngAfterViewInit() {
     }
 
     private loadData() {
@@ -66,30 +61,30 @@ export class TableCustomizerComponent implements OnInit, AfterViewInit {
 
     onEditColumn(columnId?: string) {
         let colIndex = this.data.columns.findIndex(c => c.id === columnId);
-        let cell = new TableColumn(Utils.getShortGUID('c_'), TableCellType.label); 
+        let cell = new TableColumn(Utils.getShortGUID('c_'), TableCellType.label);
         if (colIndex >= 0) {
             cell = this.data.columns[colIndex];
         }
         let dialogRef = this.dialog.open(DialogTableCell, {
             data: <ITableCell> {
                 table: this.data.type,
-                type: CellType.column, 
+                type: CellType.column,
                 cell: JSON.parse(JSON.stringify(cell))
             },
             position: { top: '60px' }
         });
 
-        dialogRef.afterClosed().subscribe((result: ITableCell) => {    
+        dialogRef.afterClosed().subscribe((result: ITableCell) => {
             if (result) {
-                let colIndex = this.data.columns.findIndex(c => c.id === (<TableColumn>result.cell).id); 
+                let colIndex = this.data.columns.findIndex(c => c.id === (<TableColumn>result.cell).id);
                 if (colIndex >= 0) {
                     this.data.columns[colIndex] = <TableColumn>result.cell;
                 } else {
                     this.data.columns.push(<TableColumn>result.cell);
                 }
                 this.loadData();
-            } 
-        });   
+            }
+        });
     }
 
     onEditCell(row, columnId: string) {
@@ -100,20 +95,20 @@ export class TableCustomizerComponent implements OnInit, AfterViewInit {
             cell = new TableCell(columnId, TableCellType.label);
         }
         let dialogRef = this.dialog.open(DialogTableCell, {
-            data: <ITableCell> { 
+            data: <ITableCell> {
                 table: this.data.type,
-                type: CellType.row, 
+                type: CellType.row,
                 cell: JSON.parse(JSON.stringify(cell))
             },
             position: { top: '60px' }
         });
 
-        dialogRef.afterClosed().subscribe((result: ITableCell) => {    
+        dialogRef.afterClosed().subscribe((result: ITableCell) => {
             if (result) {
                 this.data.rows[rowIndex].cells[colIndex] = <TableCell>result.cell;
                 this.loadData();
-            } 
-        });   
+            }
+        });
     }
 
     onRemoveColumn(column: string) {
@@ -146,7 +141,7 @@ export class TableCustomizerComponent implements OnInit, AfterViewInit {
         if (cell) {
             if (cell.type === TableCellType.label) {
                 return cell.label || '';
-            } else if (cell.type === TableCellType.timestamp) {                
+            } else if (cell.type === TableCellType.timestamp) {
                 return cell.valueFormat ? cell.valueFormat : '';
             } else if (cell.type === TableCellType.variable) {
                 return (cell.label || '') + ((cell.valueFormat) ? ` (${cell.valueFormat})` : '');
@@ -170,7 +165,7 @@ export class TableCustomizerComponent implements OnInit, AfterViewInit {
                     row.cells.push(new TableCell(this.data.columns[i].id, TableCellType.label, ''));
                 }
             } else if (row.cells.length > this.data.columns.length) {
-                let columnIds = this.data.columns.map(column => { return column.id });
+                let columnIds = this.data.columns.map(column => column.id);
                 let cells = row.cells.filter(cell => columnIds.indexOf(cell.id) >= 0);
                 row.cells = cells;
             }
@@ -192,8 +187,8 @@ export class DialogTableCell {
     constructor(
         private projectService: ProjectService,
         public dialogRef: MatDialogRef<DialogTableCell>,
-        @Inject(MAT_DIALOG_DATA) public data: ITableCell) { 
-            this.devicesValues.devices = Object.values(this.projectService.getDevices())
+        @Inject(MAT_DIALOG_DATA) public data: ITableCell) {
+            this.devicesValues.devices = Object.values(this.projectService.getDevices());
         }
 
     onNoClick(): void {
@@ -229,15 +224,15 @@ export class DialogTableCell {
 }
 
 export interface ITableCustom {
-    columns: TableColumn[],
-    rows: TableRow[],
-    type: TableType,
+    columns: TableColumn[];
+    rows: TableRow[];
+    type: TableType;
 }
 
 export interface ITableCell {
-    type: CellType,
-    cell: TableCell,
-    table: TableType, 
+    type: CellType;
+    cell: TableCell;
+    table: TableType;
 }
 
 export enum CellType {

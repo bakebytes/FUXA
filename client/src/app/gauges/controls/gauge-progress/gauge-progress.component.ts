@@ -1,5 +1,5 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { GaugeBaseComponent } from '../../gauge-base/gauge-base.component'
+import { GaugeBaseComponent } from '../../gauge-base/gauge-base.component';
 import { GaugeSettings, Variable, GaugeRangeProperty, GaugeStatus, WindowLink, Event, GaugeProperty } from '../../../_models/hmi';
 import { Utils } from '../../../_helpers/utils';
 import { GaugeDialogType } from '../../gauge-property/gauge-property.component';
@@ -9,7 +9,7 @@ import { GaugeDialogType } from '../../gauge-property/gauge-property.component';
     templateUrl: './gauge-progress.component.html',
     styleUrls: ['./gauge-progress.component.css']
 })
-export class GaugeProgressComponent extends GaugeBaseComponent implements OnInit {
+export class GaugeProgressComponent extends GaugeBaseComponent {
 
     @Input() data: any;
 
@@ -25,9 +25,6 @@ export class GaugeProgressComponent extends GaugeBaseComponent implements OnInit
 
     constructor() {
         super();
-    }
-
-    ngOnInit() {
     }
 
     static getSignals(pro: any) {
@@ -53,8 +50,8 @@ export class GaugeProgressComponent extends GaugeBaseComponent implements OnInit
                 let yBase = parseFloat(rectBase.getAttribute('y'));
                 let rect = Utils.searchTreeStartWith(svgele.node, this.prefixB);
                 if (rectBase && rect) {
-                    if (val > gap.max) val = gap.max;
-                    if (val < gap.min) val = gap.min;
+                    if (val > gap.max) {val = gap.max;}
+                    if (val < gap.min) {val = gap.min;}
                     let k = (heightBase - 0) / (gap.max - gap.min);
                     let vtoy = k * (val - gap.min);
                     rect.setAttribute('y', yBase + heightBase - vtoy);

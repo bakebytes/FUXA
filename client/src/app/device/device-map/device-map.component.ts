@@ -1,7 +1,9 @@
 import { Component, OnInit, OnDestroy, AfterViewInit, Output, EventEmitter, ElementRef, Input, ViewChild } from '@angular/core';
-import { Subscription } from "rxjs";
-import { MatDialog } from '@angular/material';
-import { MatTable, MatTableDataSource, MatPaginator, MatSort } from '@angular/material';
+import { Subscription } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
+import { MatTable, MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatSort } from '@angular/material/sort';
 import { TranslateService } from '@ngx-translate/core';
 
 import { DevicePropertyComponent } from './../device-property/device-property.component';
@@ -33,9 +35,9 @@ export class DeviceMapComponent implements OnInit, OnDestroy, AfterViewInit {
     dataSource = new MatTableDataSource([]);
     tableWidth = 1200;
 
-    @ViewChild(MatTable) table: MatTable<any>;
-    @ViewChild(MatSort) sort: MatSort;
-    @ViewChild(MatPaginator) paginator: MatPaginator;
+    @ViewChild(MatTable, {static: false}) table: MatTable<any>;
+    @ViewChild(MatSort, {static: false}) sort: MatSort;
+    @ViewChild(MatPaginator, {static: false}) paginator: MatPaginator;
 
     flowBorder = 5;
     flowWidth = 160;
@@ -60,7 +62,7 @@ export class DeviceMapComponent implements OnInit, OnDestroy, AfterViewInit {
     plugins = [];
 
     devicesStatus = {};
-    dirty: boolean = false;
+    dirty = false;
     domArea: any;
 
     constructor(private dialog: MatDialog,
@@ -79,7 +81,7 @@ export class DeviceMapComponent implements OnInit, OnDestroy, AfterViewInit {
             this.loadAvailableType();
         });
         Object.keys(this.deviceStatusType).forEach(key => {
-            this.translateService.get(this.deviceStatusType[key]).subscribe((txt: string) => { this.deviceStatusType[key] = txt });
+            this.translateService.get(this.deviceStatusType[key]).subscribe((txt: string) => { this.deviceStatusType[key] = txt; });
         });
     }
 
@@ -391,7 +393,7 @@ export class DeviceMapComponent implements OnInit, OnDestroy, AfterViewInit {
         let result = '';
         if (device.property) {
             if (device.type === DeviceType.OPCUA) {
-                result = 'OPC-UA'
+                result = 'OPC-UA';
             } else if (device.type === DeviceType.SiemensS7) {
                 result = 'Port: ';
                 if (device.property.port) {
@@ -460,7 +462,7 @@ export class DeviceMapComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     editDevice(device: Device, toremove: boolean) {
-        let exist = Object.values(this.devices).filter((d: Device) => d.id !== device.id).map((d: Device) => { return d.name });
+        let exist = Object.values(this.devices).filter((d: Device) => d.id !== device.id).map((d: Device) => d.name);
         exist.push('server');
         let tempdevice = JSON.parse(JSON.stringify(device));
         let dialogRef = this.dialog.open(DevicePropertyComponent, {

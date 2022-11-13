@@ -1,5 +1,5 @@
 import { Component, OnInit, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { AlarmsType } from '../../_models/alarm';
 import { Notification, NotificationsType } from '../../_models/notification';
@@ -24,13 +24,13 @@ export class NotificationPropertyComponent implements OnInit {
 
     constructor(public dialogRef: MatDialogRef<NotificationPropertyComponent>,
         private translateService: TranslateService,
-        @Inject(MAT_DIALOG_DATA) public data: any) { 
+        @Inject(MAT_DIALOG_DATA) public data: any) {
             this.notification = this.data.notification;
     }
 
     ngOnInit() {
         Object.keys(this.notificationsType).forEach(key => {
-            this.translateService.get(this.notificationsType[key]).subscribe((txt: string) => { this.notificationsType[key] = txt });
+            this.translateService.get(this.notificationsType[key]).subscribe((txt: string) => { this.notificationsType[key] = txt; });
         });
     }
 

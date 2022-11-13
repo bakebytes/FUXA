@@ -11,16 +11,13 @@ import { PropertyType } from '../gauge-property/flex-input/flex-input.component'
     templateUrl: './gauge-base.component.html',
     styleUrls: ['./gauge-base.component.css']
 })
-export class GaugeBaseComponent implements OnInit {
+export class GaugeBaseComponent {
 
     @Input() data: any;
     @Input() settings: GaugeSettings;
     @Output() edit: EventEmitter<any> = new EventEmitter();
 
     constructor() { }
-
-    ngOnInit() {
-    }
 
     onEdit() {
         this.edit.emit(this.settings);
@@ -30,7 +27,7 @@ export class GaugeBaseComponent implements OnInit {
         var pattern = /([ml])\s*(-?\d*\.?\d+)\s*,\s*(-?\d*\.?\d+)/ig,
             coords = [];
 
-        relativePath.replace(pattern, function (match, command, x, y) {
+        relativePath.replace(pattern, function(match, command, x, y) {
             var prev;
 
             x = parseFloat(x);
@@ -78,7 +75,7 @@ export class GaugeBaseComponent implements OnInit {
             if (pro.ranges && pro.ranges.length > 0) {
                 if (pro.ranges[0]['fractionDigitsId'] && !Utils.isNullOrUndefined(gaugeStatus.variablesValue[pro.ranges[0]['fractionDigitsId']])) {
                     pro.ranges[0]['fractionDigits'] = gaugeStatus.variablesValue[pro.ranges[0]['fractionDigitsId']];
-                } 
+                }
                 if (pro.ranges[0]['fractionDigits']) {
                     return pro.ranges[0]['fractionDigits'];
                 }
@@ -105,7 +102,7 @@ export class GaugeBaseComponent implements OnInit {
         gaugeStatus.actionRef = actionRef;
     }
 
-    static checkActionBlink(element: any, act: GaugeAction, gaugeStatus: GaugeStatus, toEnable: boolean, dom: boolean, propertyColor?:GaugePropertyColor) {
+    static checkActionBlink(element: any, act: GaugeAction, gaugeStatus: GaugeStatus, toEnable: boolean, dom: boolean, propertyColor?: GaugePropertyColor) {
         if (!gaugeStatus.actionRef) {
             gaugeStatus.actionRef = new GaugeActionStatus(act.type);
         }
@@ -116,8 +113,8 @@ export class GaugeBaseComponent implements OnInit {
             // save action (dummy) id and colors to restore on break
             try {
                 const actId = GaugeBaseComponent.getBlinkActionId(act);
-                if (dom) gaugeStatus.actionRef.spool = { bk: element.style.backgroundColor, clr: element.style.color, actId: actId };
-                else gaugeStatus.actionRef.spool = { bk: element.node.getAttribute('fill'), clr: element.node.getAttribute('stroke'), actId: actId };
+                if (dom) {gaugeStatus.actionRef.spool = { bk: element.style.backgroundColor, clr: element.style.color, actId: actId };}
+                else {gaugeStatus.actionRef.spool = { bk: element.node.getAttribute('fill'), clr: element.node.getAttribute('stroke'), actId: actId };}
             } catch (err) {
                 console.error(err);
             }
@@ -155,8 +152,8 @@ export class GaugeBaseComponent implements OnInit {
                     }
                     // check to overwrite with property color
                     if (propertyColor) {
-                        if (propertyColor.fill) gaugeStatus.actionRef.spool.bk = propertyColor.fill;
-                        if (propertyColor.stroke) gaugeStatus.actionRef.spool.clr = propertyColor.stroke;
+                        if (propertyColor.fill) {gaugeStatus.actionRef.spool.bk = propertyColor.fill;}
+                        if (propertyColor.stroke) {gaugeStatus.actionRef.spool.clr = propertyColor.stroke;}
                     }
                     if (dom) {
                         element.style.backgroundColor = gaugeStatus.actionRef.spool.bk;
@@ -166,7 +163,7 @@ export class GaugeBaseComponent implements OnInit {
                         element.node.setAttribute('stroke', gaugeStatus.actionRef.spool.clr);
                     }
                 }
-            } catch (err) { 
+            } catch (err) {
                 console.error(err);
             }
         }

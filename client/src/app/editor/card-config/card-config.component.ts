@@ -1,5 +1,5 @@
 import { Component, OnInit, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
 
 import { CardWidgetType, CardWidget } from '../../_models/hmi';
@@ -22,13 +22,13 @@ export class CardConfigComponent implements OnInit {
 
     constructor(private translateService: TranslateService,
         public dialogRef: MatDialogRef<CardConfigComponent>,
-        @Inject(MAT_DIALOG_DATA) public data: any) { 
+        @Inject(MAT_DIALOG_DATA) public data: any) {
         this.card = this.data.item.card;
         }
 
     ngOnInit() {
         Object.keys(this.cardType).forEach(key => {
-            this.translateService.get(this.cardType[key]).subscribe((txt: string) => { this.cardType[key] = txt });
+            this.translateService.get(this.cardType[key]).subscribe((txt: string) => { this.cardType[key] = txt; });
         });
     }
 

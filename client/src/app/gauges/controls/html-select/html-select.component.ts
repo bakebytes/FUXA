@@ -1,5 +1,5 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { GaugeBaseComponent } from '../../gauge-base/gauge-base.component'
+import { GaugeBaseComponent } from '../../gauge-base/gauge-base.component';
 import { GaugeSettings, Variable, GaugeStatus, GaugeAction, Event, GaugeActionsType } from '../../../_models/hmi';
 import { Utils } from '../../../_helpers/utils';
 import { GaugeDialogType } from '../../gauge-property/gauge-property.component';
@@ -11,7 +11,7 @@ declare var SVG: any;
     templateUrl: './html-select.component.html',
     styleUrls: ['./html-select.component.css']
 })
-export class HtmlSelectComponent extends GaugeBaseComponent implements OnInit {
+export class HtmlSelectComponent extends GaugeBaseComponent {
 
     @Input() data: any;
 
@@ -23,9 +23,6 @@ export class HtmlSelectComponent extends GaugeBaseComponent implements OnInit {
 
     constructor() {
         super();
-    }
-
-    ngOnInit() {
     }
 
     static getSignals(pro: any) {
@@ -76,6 +73,14 @@ export class HtmlSelectComponent extends GaugeBaseComponent implements OnInit {
                     val = parseFloat(val.toFixed(5));
                 }
                 select.value = val;
+
+                // Set text and background color based on settings
+                let range = ga.property.ranges.find(e => e.min == val);
+                if (range){
+                    select.style.background = range.color;
+                    select.style.color = range.stroke;
+                }
+
                 // check actions
                 if (ga.property.actions) {
                     ga.property.actions.forEach(act => {
@@ -87,38 +92,38 @@ export class HtmlSelectComponent extends GaugeBaseComponent implements OnInit {
             }
         } catch (err) {
             console.error(err);
-        }            
+        }
     }
 
     static initElement(ga: GaugeSettings, isview: boolean = false) {
         let ele = document.getElementById(ga.id);
         if (ele) {
-            let select = Utils.searchTreeStartWith(ele, this.prefix);            
+            let select = Utils.searchTreeStartWith(ele, this.prefix);
             if (select) {
                 if (ga.property) {
                     if (ga.property.readonly) {
                         select.disabled = true;
-                        select.style['appearance'] = "none";
-                        select.style['border-width'] = "0px";
+                        select.style['appearance'] = 'none';
+                        select.style['border-width'] = '0px';
                     } else {
-                        select.style['appearance'] = "menulist";
+                        select.style['appearance'] = 'menulist';
                     }
                     let align = select.style['text-align'];
                     if (align) {
                         select.style['text-align-last'] = align;
                     }
-                        
+
                 }
-                select.innerHTML = "";
+                select.innerHTML = '';
                 if (!isview) {
-                    let option = document.createElement("option", );
+                    let option = document.createElement('option', );
                     option.disabled = true;
                     option.selected = true;//'<option value="" selected disabled hidden>Choose here</option>';
-                    option.innerHTML = "Choose...";
+                    option.innerHTML = 'Choose...';
                     select.appendChild(option);
                 } else {
                     ga.property.ranges.forEach(element => {
-                        let option = document.createElement("option");
+                        let option = document.createElement('option');
                         option.value = element.min;
                         if (element.text) {
                             option.text = element.text;

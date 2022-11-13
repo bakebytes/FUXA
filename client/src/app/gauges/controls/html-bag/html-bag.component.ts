@@ -11,16 +11,14 @@ import { NgxGaugeComponent } from '../../../gui-helpers/ngx-gauge/ngx-gauge.comp
     templateUrl: './html-bag.component.html',
     styleUrls: ['./html-bag.component.css']
 })
-export class HtmlBagComponent extends GaugeBaseComponent implements OnInit {
-    static TypeTag = "svg-ext-html_bag";
-    static LabelTag = "HtmlBag";
-    static prefixD = "D-BAG_";
+export class HtmlBagComponent extends GaugeBaseComponent {
+    static TypeTag = 'svg-ext-html_bag';
+    static LabelTag = 'HtmlBag';
+    static prefixD = 'D-BAG_';
 
     constructor(private resolver: ComponentFactoryResolver) {
         super();
     }
-
-    ngOnInit() { }
 
     static getSignals(pro: any) {
         let res: string[] = [];
@@ -68,7 +66,7 @@ export class HtmlBagComponent extends GaugeBaseComponent implements OnInit {
         let ele = document.getElementById(gab.id);
         if (ele) {
             let htmlBag = Utils.searchTreeStartWith(ele, this.prefixD);
-            if (htmlBag) {        
+            if (htmlBag) {
                 const factory = resolver.resolveComponentFactory(NgxGaugeComponent);
                 const componentRef = viewContainerRef.createComponent(factory);
                 htmlBag.innerHTML = '';

@@ -12,7 +12,7 @@ export class AuthService {
 	private currentUser: UserProfile;
 	private endPointConfig: string = EndPointApi.getURL();
 
-	constructor(private http: HttpClient) { 
+	constructor(private http: HttpClient) {
 		let user = JSON.parse(localStorage.getItem('currentUser'));
 		if (user) {
 		  this.currentUser = user;
@@ -26,7 +26,7 @@ export class AuthService {
 				return this.http.post(this.endPointConfig + '/api/signin', { username: username, password: password }).subscribe((result: any) => {
 					if (result) {
 						this.currentUser = <UserProfile>result.data;
-						this.saveUserToken(this.currentUser)
+						this.saveUserToken(this.currentUser);
 					}
 					observer.next();
 				}, err => {
@@ -86,7 +86,6 @@ export class AuthService {
 	// to check by page refresh
 	private saveUserToken(user: UserProfile) {
 		localStorage.setItem('currentUser', JSON.stringify(user));
-		// document.cookie = `token=${user.token}`;
 	}
 
 	private removeUser() {

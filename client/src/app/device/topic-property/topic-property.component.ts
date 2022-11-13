@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, Inject, AfterViewInit, ViewChild } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA, MatTabGroup, MatTab } from '@angular/material';
-import { Subscription } from "rxjs";
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatTabGroup, MatTab } from '@angular/material/tabs';
+import { Subscription } from 'rxjs';
 
 import { HmiService } from '../../_services/hmi.service';
 import { TranslateService } from '@ngx-translate/core';
@@ -12,11 +13,11 @@ import { Tag, TAG_PREFIX } from '../../_models/device';
     templateUrl: './topic-property.component.html',
     styleUrls: ['./topic-property.component.css']
 })
-export class TopicPropertyComponent implements OnInit, AfterViewInit, OnDestroy {
+export class TopicPropertyComponent implements OnInit, OnDestroy {
 
-    @ViewChild('grptabs') grptabs: MatTabGroup;
-    @ViewChild('tabsub') tabsub: MatTab;
-    @ViewChild('tabpub') tabpub: MatTab;
+    @ViewChild('grptabs', {static: true}) grptabs: MatTabGroup;
+    @ViewChild('tabsub', {static: true}) tabsub: MatTab;
+    @ViewChild('tabpub', {static: true}) tabpub: MatTab;
 
     private subscriptionBrowse: Subscription;
 
@@ -72,7 +73,7 @@ export class TopicPropertyComponent implements OnInit, AfterViewInit, OnDestroy 
         });
 
         Object.keys(this.itemType).forEach(key => {
-            this.translateService.get(this.itemType[key]).subscribe((txt: string) => { this.itemType[key] = txt });
+            this.translateService.get(this.itemType[key]).subscribe((txt: string) => { this.itemType[key] = txt; });
         });
 
         // check if edit the topic
@@ -87,7 +88,7 @@ export class TopicPropertyComponent implements OnInit, AfterViewInit, OnDestroy 
                     this.editMode = true;
                     this.selectTopic({ name: tag.name, key: tag.address, value: { content: tag.value }, subs: tag.options.subs });
                 } else {
-                    // publish topic 
+                    // publish topic
                     this.grptabs.selectedIndex = 1;
                     this.tabsub.disabled = true;
                     this.publishTopicPath = tag.address;
@@ -102,10 +103,6 @@ export class TopicPropertyComponent implements OnInit, AfterViewInit, OnDestroy 
         }
         this.loadSelectedSubTopic();
         this.stringifyPublishItem();
-    }
-
-    ngAfterViewInit() {
-
     }
 
     ngOnDestroy() {
@@ -132,7 +129,7 @@ export class TopicPropertyComponent implements OnInit, AfterViewInit, OnDestroy 
         this.discoveryWait = true;
 		this.discoveryTimer = setTimeout(() => {
             this.discoveryWait = false;
-		}, 10000);        
+		}, 10000);
         this.hmiService.askDeviceBrowse(this.data.device.id, source);
     }
 
@@ -195,29 +192,29 @@ export class TopicPropertyComponent implements OnInit, AfterViewInit, OnDestroy 
 
     onAddToSubscribe() {
         if (this.topicContent && this.topicContent.length && this.invokeSubscribe) {
-            // let items = [];
+            let topicsToAdd = [];
             for (let i = 0; i < this.topicContent.length; i++) {
                 if (this.topicContent[i].checked) {
-                    // items.push(this.topicContent[i].key);
-                    let tag = new Tag(Utils.getGUID(TAG_PREFIX));
+                    let topic = new Tag(Utils.getGUID(TAG_PREFIX));
                     if (this.data.topic) {
-                        tag = new Tag(this.data.topic.id);
+                        topic = new Tag(this.data.topic.id);
                     }
-                    tag.type = this.topicSelectedSubType;
-                    tag.address = this.selectedTopic.key;
-                    tag.memaddress = this.topicContent[i].key;
-                    tag.options = { subs: this.topicContent.map((tcnt) => { return tcnt.key }) };
+                    topic.type = this.topicSelectedSubType;
+                    topic.address = this.selectedTopic.key;
+                    topic.memaddress = this.topicContent[i].key;
+                    topic.options = { subs: this.topicContent.map((tcnt) => tcnt.key) };
                     if (this.topicContent[i].name) {
-                        tag.name = this.topicContent[i].name;
+                        topic.name = this.topicContent[i].name;
                     } else {
-                        tag.name = this.selectedTopic.key;
-                        if (tag.type === 'json') {
-                            tag.name += '[' + tag.memaddress + ']';
+                        topic.name = this.selectedTopic.key;
+                        if (topic.type === 'json') {
+                            topic.name += '[' + topic.memaddress + ']';
                         }
                     }
-                    this.invokeSubscribe(this.data.topic, [tag]);
+                    topicsToAdd.push(topic);
                 }
             }
+            this.invokeSubscribe(this.data.topic, topicsToAdd);
         }
     }
     //#endregion
@@ -303,9 +300,9 @@ export class TopicPropertyComponent implements OnInit, AfterViewInit, OnDestroy 
                     let keys = item.key.split('.');
                     let robj = obj;
                     for (let y = 0; y < keys.length; y++) {
-                        if (!robj[keys[y]]) { 
+                        if (!robj[keys[y]]) {
                             robj[keys[y]] = {};
-                        } 
+                        }
                         if (y >= keys.length - 1) {
                             robj[keys[y]] = ivalue;
                         }

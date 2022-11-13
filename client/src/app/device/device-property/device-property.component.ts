@@ -1,6 +1,7 @@
 import { Component, OnInit, Inject, OnDestroy, ViewChild } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA, MatExpansionPanel } from '@angular/material';
-import { Subscription } from "rxjs";
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatExpansionPanel } from '@angular/material/expansion';
+import { Subscription } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 
 import { HmiService } from '../../_services/hmi.service';
@@ -17,15 +18,16 @@ import { Utils } from '../../_helpers/utils';
 export class DevicePropertyComponent implements OnInit, OnDestroy {
 
 	// @Input() name: any;
-	@ViewChild(MatExpansionPanel) panelProperty: MatExpansionPanel;
+	@ViewChild(MatExpansionPanel, {static: false}) panelProperty: MatExpansionPanel;
 	securityRadio: any;
 	mode: any;
 	deviceType: any = {};
+	showPassword: boolean;
 
-	pollingPlcType = [{text: '200 ms', value: 200}, {text: '500 ms', value: 500}, {text: '700 ms', value: 700}, {text: '1 sec', value: 1000}, 
-					{text: '1.5 sec', value: 1500}, {text: '2 sec', value: 2000}, { text: '3 sec', value: 3000}, 
+	pollingPlcType = [{text: '200 ms', value: 200}, {text: '500 ms', value: 500}, {text: '700 ms', value: 700}, {text: '1 sec', value: 1000},
+					{text: '1.5 sec', value: 1500}, {text: '2 sec', value: 2000}, { text: '3 sec', value: 3000},
 					{text: '4 sec', value: 4000}, {text: '5 sec', value: 5000}];
-	pollingWebApiType = [{text: '1 sec', value: 1000}, {text: '2 sec', value: 2000}, {text: '3 sec', value: 3000}, { text: '5 sec', value: 5000}, 
+	pollingWebApiType = [{text: '1 sec', value: 1000}, {text: '2 sec', value: 2000}, {text: '3 sec', value: 3000}, { text: '5 sec', value: 5000},
 						{text: '10 sec', value: 10000}, {text: '30 sec', value: 30000}, {text: '1 min', value: 60000}, {text: '2 min', value: 60000 * 2},
 						{text: '5 min', value: 60000 * 5}, {text: '10 min', value: 60000 * 10}, {text: '30 min', value: 60000 * 30}, {text: '60 min', value: 60000 * 60}];
 
@@ -58,7 +60,7 @@ export class DevicePropertyComponent implements OnInit, OnDestroy {
         private translateService: TranslateService,
         private appService: AppService,
 		public dialogRef: MatDialogRef<DevicePropertyComponent>,
-		@Inject(MAT_DIALOG_DATA) public data: any) { 
+		@Inject(MAT_DIALOG_DATA) public data: any) {
             this.projectService = data.projectService;
         }
 
@@ -96,7 +98,7 @@ export class DevicePropertyComponent implements OnInit, OnDestroy {
 							this.securityMode.push({value: sec, text: SecurityPolicy.Basic128Rsa15.toString() + ' - ' + mode});
 						} else if (sec.securityPolicy.indexOf(secPol.Basic128) !== -1) {
 							this.securityMode.push({value: sec, text: SecurityPolicy.Basic128.toString() + ' - ' + mode});
-						} else if (sec.securityPolicy.indexOf(secPol.Basic192Rsa15) !== -1) {							
+						} else if (sec.securityPolicy.indexOf(secPol.Basic192Rsa15) !== -1) {
 							this.securityMode.push({value: sec, text: SecurityPolicy.Basic192Rsa15.toString() + ' - ' + mode});
 						} else if (sec.securityPolicy.indexOf(secPol.Basic192) !== -1) {
 							this.securityMode.push({value: sec, text: SecurityPolicy.Basic192.toString() + ' - ' + mode});
@@ -121,9 +123,9 @@ export class DevicePropertyComponent implements OnInit, OnDestroy {
 				}
 			} else if (res.type === DeviceType.BACnet) {
 			}
-			 
+
 			this.propertyLoading = false;
-		});		
+		});
 		// check security
 		if (this.data.device.id && (this.data.device.type === DeviceType.OPCUA || this.data.device.type === DeviceType.MQTTclient)) {
 			this.projectService.getDeviceSecurity(this.data.device.id).subscribe(result => {
@@ -272,17 +274,17 @@ export class DevicePropertyComponent implements OnInit, OnDestroy {
     keyDownStopPropagation(event) {
         event.stopPropagation();
     }
-	
+
 	private securityModeToString(mode): string {
 		let secMode = MessageSecurityMode;
 		let result = '';
 		if (mode === secMode.NONE) {
-			this.translateService.get('device.security-none').subscribe((txt: string) => { result = txt });
+			this.translateService.get('device.security-none').subscribe((txt: string) => { result = txt; });
 		} else if (mode === secMode.SIGN) {
-			this.translateService.get('device.security-sign').subscribe((txt: string) => { result = txt });
+			this.translateService.get('device.security-sign').subscribe((txt: string) => { result = txt; });
 		} else if (mode === secMode.SIGNANDENCRYPT) {
-			this.translateService.get('device.security-signandencrypt').subscribe((txt: string) => { result = txt });
-		} 
+			this.translateService.get('device.security-signandencrypt').subscribe((txt: string) => { result = txt; });
+		}
 		return result;
 	}
 }

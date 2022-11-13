@@ -1,12 +1,12 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
-import { View } from "../../../_models/hmi";
+import { View } from '../../../_models/hmi';
 
 @Component({
     selector: 'flex-variable-map',
     templateUrl: './flex-variable-map.component.html',
     styleUrls: ['./flex-variable-map.component.css']
 })
-export class FlexVariableMapComponent implements OnInit, OnChanges {
+export class FlexVariableMapComponent implements OnInit {
     @Input() view: View;
     @Input() data: any;
     @Input() value: any;
@@ -20,11 +20,8 @@ export class FlexVariableMapComponent implements OnInit, OnChanges {
         if (!this.value) {
             this.value = {};
         }
-        this.value.from = this.value.from || {}
-        this.value.to = this.value.to || {}
-    }
-
-    ngOnChanges(changes: SimpleChanges) {
+        this.value.from = this.value.from || {};
+        this.value.to = this.value.to || {};
     }
 
     onValueChange() {

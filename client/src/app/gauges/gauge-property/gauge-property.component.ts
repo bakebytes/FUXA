@@ -1,5 +1,6 @@
-import { Component, Inject, Input, OnInit, ViewChild } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material';
+/* eslint-disable @angular-eslint/component-class-suffix */
+import { Component, Inject, Input, AfterViewInit, ViewChild } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 
 import { SelOptionsComponent } from '../../gui-helpers/sel-options/sel-options.component';
 
@@ -16,12 +17,12 @@ import { PropertyType } from './flex-input/flex-input.component';
     templateUrl: './gauge-property.component.html',
     styleUrls: ['./gauge-property.component.css']
 })
-export class GaugePropertyComponent implements OnInit {
+export class GaugePropertyComponent implements AfterViewInit {
 
     @Input() name: any;
-    @ViewChild('flexhead') flexHead: FlexHeadComponent;
-    @ViewChild('flexevent') flexEvent: FlexEventComponent;
-    @ViewChild('flexaction') flexAction: FlexActionComponent;
+    @ViewChild('flexhead', {static: false}) flexHead: FlexHeadComponent;
+    @ViewChild('flexevent', {static: false}) flexEvent: FlexEventComponent;
+    @ViewChild('flexaction', {static: false}) flexAction: FlexActionComponent;
 
     slideView = true;
     slideActionView = true;
@@ -36,11 +37,8 @@ export class GaugePropertyComponent implements OnInit {
     scripts: Script[];
 
     constructor(public dialog: MatDialog,
-        public dialogRef: MatDialogRef<GaugePropertyComponent>,
-        @Inject(MAT_DIALOG_DATA) public data: any) {
-    }
-
-    ngOnInit() {
+                public dialogRef: MatDialogRef<GaugePropertyComponent>,
+                @Inject(MAT_DIALOG_DATA) public data: any) {
         this.dialogType = this.data.dlgType;
         this.eventsSupported = this.data.withEvents;
         this.actionsSupported = this.data.withActions;
@@ -51,9 +49,10 @@ export class GaugePropertyComponent implements OnInit {
         if (!this.property) {
             this.property = new GaugeProperty();
         }
+    }
 
+    ngAfterViewInit() {
         this.defaultValue = this.data.default;
-
         if (this.dialogType === GaugeDialogType.Input) {
             this.flexHead.withProperty = PropertyType.input;
         } else if (this.dialogType === GaugeDialogType.ValueAndUnit) {
@@ -117,7 +116,7 @@ export class GaugePropertyComponent implements OnInit {
     }
 
     isToolboxToShow() {
-        if (this.dialogType === GaugeDialogType.RangeWithAlarm || this.dialogType === GaugeDialogType.Range || this.dialogType === GaugeDialogType.Step || 
+        if (this.dialogType === GaugeDialogType.RangeWithAlarm || this.dialogType === GaugeDialogType.Range || this.dialogType === GaugeDialogType.Step ||
             this.dialogType === GaugeDialogType.RangeAndText) {
             return true;
         }
@@ -191,12 +190,11 @@ export enum GaugeDialogType {
     templateUrl: './gauge-permission.dialog.html',
 })
 export class DialogGaugePermission {
-    // defaultColor = Utils.defaultColor;
     selectedGroups = [];
     extensionGroups = [];
     groups = UserGroups.Groups;
 
-    @ViewChild(SelOptionsComponent) seloptions: SelOptionsComponent;
+    @ViewChild(SelOptionsComponent, {static: false}) seloptions: SelOptionsComponent;
 
     constructor(
         public dialogRef: MatDialogRef<DialogGaugePermission>,

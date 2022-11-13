@@ -1,6 +1,6 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
 import { ReplaySubject, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -13,7 +13,7 @@ import { Chart } from '../../../_models/chart';
     templateUrl: './report-item-chart.component.html',
     styleUrls: ['./report-item-chart.component.scss']
 })
-export class ReportItemChartComponent implements OnInit {
+export class ReportItemChartComponent implements OnInit, OnDestroy {
 
     public chartCtrl: FormControl = new FormControl();
     public chartFilterCtrl: FormControl = new FormControl();
@@ -24,19 +24,19 @@ export class ReportItemChartComponent implements OnInit {
 
     private _onDestroy = new Subject<void>();
 
-    constructor(        
+    constructor(
         public dialogRef: MatDialogRef<ReportItemChartComponent>,
         private translateService: TranslateService,
         private projectService: ProjectService,
-        @Inject(MAT_DIALOG_DATA) public data: ReportItemChart) { 
+        @Inject(MAT_DIALOG_DATA) public data: ReportItemChart) {
             this.charts = this.projectService.getCharts();
         }
 
     ngOnInit() {
         Object.keys(this.dateRangeType).forEach(key => {
-            this.translateService.get(this.dateRangeType[key]).subscribe((txt: string) => { this.dateRangeType[key] = txt });
+            this.translateService.get(this.dateRangeType[key]).subscribe((txt: string) => { this.dateRangeType[key] = txt; });
         });
-        
+
         this.loadChart();
         let chart = null;
         if (this.data.chart) {
@@ -81,7 +81,7 @@ export class ReportItemChartComponent implements OnInit {
             });
         if (toset) {
             let idx = -1;
-            this.charts.every(function (value, index, _arr) {
+            this.charts.every(function(value, index, _arr) {
                 if (value.id === toset) {
                     idx = index;
                     return false;

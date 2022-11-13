@@ -1,5 +1,5 @@
 import { Component, OnInit, AfterViewInit, OnDestroy, ViewChild, ViewContainerRef, ChangeDetectorRef  } from '@angular/core';
-import { Subscription } from "rxjs";
+import { Subscription } from 'rxjs';
 
 import { ProjectService } from '../_services/project.service';
 import { AppService } from '../_services/app.service';
@@ -17,10 +17,10 @@ declare var Raphael: any;
     styleUrls: ['lab.component.css']
 })
 
-export class LabComponent implements OnInit, AfterViewInit, OnDestroy {
+export class LabComponent implements AfterViewInit, OnDestroy {
 
-    @ViewChild('messagecontainer', { read: ViewContainerRef }) entry: ViewContainerRef;
-    @ViewChild('tester') tester: TesterComponent;
+    @ViewChild('messagecontainer', { read: ViewContainerRef, static: false }) entry: ViewContainerRef;
+    @ViewChild('tester', {static: false}) tester: TesterComponent;
 
     currentView: View = new View();
     hmi: Hmi = new Hmi();
@@ -33,13 +33,9 @@ export class LabComponent implements OnInit, AfterViewInit, OnDestroy {
 
     constructor(private projectService: ProjectService,
         private appService: AppService,
-        private gaugesManager: GaugesManager,
-        private changeDetector: ChangeDetectorRef,        
+        public gaugesManager: GaugesManager,
+        private changeDetector: ChangeDetectorRef,
         private testerService: TesterService) {
-    }
-
-    ngOnInit() {
-
     }
 
     ngAfterViewInit() {
@@ -85,7 +81,7 @@ export class LabComponent implements OnInit, AfterViewInit, OnDestroy {
         if (this.hmi && this.hmi.views && this.hmi.views.length > 0) {
             this.currentView = this.hmi.views[0];
             this.labView = this.hmi.views[0];
-            let oldsel = localStorage.getItem("@frango.webeditor.currentview");
+            let oldsel = localStorage.getItem('@frango.webeditor.currentview');
             if (oldsel) {
                 for (let i = 0; i < this.hmi.views.length; i++) {
                     if (this.hmi.views[i].name === oldsel) {
