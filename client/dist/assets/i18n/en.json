@@ -320,6 +320,10 @@
     "table.property-layout": "Layout",
     "table.property-filter": "Filter",
     "table.property-paginator": "Paginator",
+    "table.property-paginator-items-per-page": "items per page",
+    "table.property-paginator-next-page": "next page",
+    "table.property-paginator-prev-page": "previous page",
+    "table.property-paginator-of-label": "of",
     "table.property-daterange": "Date Range",
     "table.property-gridline": "Show Grid",
     "table.property-type-data": "Real-Time Data",
@@ -554,7 +558,10 @@
     "editor.tools-dividevertical-title": "Align two or more components in a stack (Padding between components)",
     "editor.tools-dividehorizontal-title": "Align two or more components in a row (Padding between components)",
     "editor.tools-ungroup-title": "Ungroup Elements [G]",
-    "editor.tools-hyperlink-title": "Make hyperlink",
+    "editor.tools-hyperlink-title": "Make Hyperlink",
+    "editor.tools-svg-selector": "Item list selector",
+
+    "svg.selector.property-title": "View item list",
 
     "tutorial.editor-keyboard-shortcuts": "Editor Keyboard Shortcuts",
 
@@ -941,7 +948,7 @@
     "notifications.list-subscriptions": "Subscribed Alarm Types",
     "notification.property-title": "Notification Settings",
     "notification.property-name": "Name",
-    "notification.property-receiver": "Receivers (Mail address ';')",
+    "notification.property-receiver": "Receiver",
     "notification.property-type": "Type",
     "notification.property-delay": "Delay (min.)",
     "notification.property-interval": "Interval (min.)",
@@ -1023,7 +1030,7 @@
     "report.content-addchart": "Add Chart",
     "report.content-type-text": "Text",
     "report.content-type-tagstable": "Tags Table",
-    "report.content-type-alarmshistory": "Alarms History",    
+    "report.content-type-alarmshistory": "Alarms History",
     "report.content-type-chart": "Chart",
     "report.content-fontsizeitem": "Font Size",
     "report.content-alignitem": "Text Alignment",
@@ -1211,5 +1218,6 @@
     "msg.alarms-clear-success": "All alarms have been cancelled!",
     "msg.import-devices-error": "Import devices failed!",
     "msg.report-build-forced": "Send to build Report successful",
-    "msg.report-build-error": "Send to build Report failed!"
+    "msg.report-build-error": "Send to build Report failed!",
+    "msg.device-tags-request-result": "Load {{value}} of {{current}}"
 }
