@@ -85,7 +85,7 @@ function getNodesValues(tagsid, fromts, tots, options) {
                     let calcValues = [];
                     for (let idx = 0 ; idx < values.length; idx++) {
                         if (options.functions[idx]) {
-                            calcValues.push(calculator.getFunctionValues(values[idx], fromts, tots, options.functions[idx], options.interval));
+                            calcValues.push(calculator.getFunctionValues(values[idx], fromts, tots, options.functions[idx], options.interval, options.formats[idx]));
                         } else {
                             calcValues.push(calculator.getFunctionValues(values[idx], fromts, tots));
                         }
@@ -119,9 +119,13 @@ function getNodesValues(tagsid, fromts, tots, options) {
 
 function checkRetention() {
     return new Promise(async function (resolve, reject) {
-        if (settings.daqstore && _getDbType() === DaqStoreTypeEnum.SQlite) {
+        if (settings.daqstore && _getDbType() === DaqStoreTypeEnum.SQlite && settings.daqstore.retention !== 'none') {
             try {
-                SqliteDB.checkRetention(_getRetentionLimit(settings.daqstore.retention), settings.dbDir, (err) => {
+                SqliteDB.checkRetention(_getRetentionLimit(settings.daqstore.retention), settings.dbDir, 
+                (fileDeleted) => {
+                    logger.info(`daqstorage.checkRetention file ${fileDeleted} removed`);
+                },
+                (err) => {
                     logger.error(`daqstorage.checkRetention remove file failed! ${err}`);
                 });
             } catch (err) {
@@ -155,7 +159,7 @@ var DaqStoreTypeEnum = {
 }
 
 function _getValue(value) {
-    if (value == Number.MAX_VALUE || value == Number.MIN_VALUE) {
+    if (value == Number.MAX_VALUE || value == Number.MIN_VALUE || value == null) {
         return '';
     }
     return value.toString();

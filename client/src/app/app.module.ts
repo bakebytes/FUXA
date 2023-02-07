@@ -1,6 +1,6 @@
 // the start/root module that tells Angular how to assemble the application.
 
-import { NgModule, Provider } from '@angular/core';
+import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
@@ -162,6 +162,7 @@ import { ReportItemChartComponent } from './reports/report-editor/report-item-ch
 import { ScriptModeComponent } from './scripts/script-mode/script-mode.component';
 import { DeviceWebapiPropertyDialogComponent } from './device/device-map/device-webapi-property-dialog/device-webapi-property-dialog.component';
 import { SvgSelectorComponent } from './editor/svg-selector/svg-selector.component';
+import { FrameworkModule } from './framework/framework.module';
 
 export function createTranslateLoader(http: HttpClient) {
     return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -319,6 +320,7 @@ export function createTranslateLoader(http: HttpClient) {
         ChartsModule,
         CodemirrorModule,
         NgxDaterangepickerMd.forRoot(),
+        FrameworkModule
     ],
     providers: [
         // providersResourceService,

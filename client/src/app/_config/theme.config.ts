@@ -43,6 +43,7 @@ export const THEMES = {
     dark: {
         headerBackground: '#333333',
         headerColor: 'rgba(255,255,255,1)',
+        tableHeaderColor: 'rgba(255,255,255,0.7)',
         headerBorder: '#252526',
         toolboxBackground: '#252526',
         toolboxColor: '#FFFFFF',
@@ -72,6 +73,7 @@ export const THEMES = {
         formBorder: 'rgba(39,39,39,0.42)',
         setupSeparatorColor: '#808080',
         workPanelBackground: '#424242',
+        workPanelExpandBackground: '#292A2D',
         mapBorderColor: '#333333',
         formExtBackground: '#37373D',
         formInputExtBackground: '#424242',

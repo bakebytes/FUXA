@@ -9,12 +9,11 @@ import { Utils } from '../../_helpers/utils';
 import { ReportItemTextComponent } from './report-item-text/report-item-text.component';
 import { ReportItemTableComponent } from './report-item-table/report-item-table.component';
 import { ReportItemAlarmsComponent } from './report-item-alarms/report-item-alarms.component';
-import { utils } from 'protractor';
 import { AlarmPropertyType, AlarmsType } from '../../_models/alarm';
 import { ReportItemChartComponent } from './report-item-chart/report-item-chart.component';
 import { ResourcesService } from '../../_services/resources.service';
 import { forkJoin, Observable, of } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
 @Component({
@@ -260,7 +259,7 @@ export class ReportEditorComponent implements OnInit, AfterViewInit {
 
     static getTableContent(item: ReportItemTable) {
         let content = { layout: 'lightHorizontalLines', fontSize: item.size }; // optional
-        let header = item.columns.map<any>(col => ({ text: col.tag.label || col.tag.name, bold: true, style: [{ alignment: col.align }] }));
+        let header = item.columns.map<any>(col => ({ text: col.label || col.tag.label || col.tag.name, bold: true, style: [{ alignment: col.align }] }));
         let values = item.columns.map(col => col.tag.address || '...');
         content['table'] = {
             // headers are automatically repeated if the table spans over multiple pages

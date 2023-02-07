@@ -6,7 +6,7 @@
 const utils = require('../../utils');
 const deviceUtils = require('../device-utils');
 
- function FuxaServer(_data, _logger, _events) {
+function FuxaServer(_data, _logger, _events) {
 
     var data = JSON.parse(JSON.stringify(_data)); // Current Device data { id, name, tags, enabled, ... }
     var logger = _logger;
@@ -17,6 +17,7 @@ const deviceUtils = require('../device-utils');
     var tagsMap = {};                   // Map of tag id
     var overloading = 0;                // Overloading counter to mange the break connection
     var tocheck = false;                // Flag that define if there are tags to check by polling
+    var connectionTags = [];            // Tags of connection status of devices
     var type;
 
     /**
@@ -62,6 +63,7 @@ const deviceUtils = require('../device-utils');
                         this.addDaq(varsValueChanged, data.name);
                     }
                 }
+                _checkConnectionStatus();
             } catch (err) {
                 logger.error(`'${data.name}' polling error: ${err}`);
             }
@@ -77,10 +79,15 @@ const deviceUtils = require('../device-utils');
         data = JSON.parse(JSON.stringify(_data));
         tagsMap = {};
         var count = Object.keys(data.tags).length;
+        connectionTags = [];
         for (var id in data.tags) {
             tagsMap[id] = data.tags[id];
             if (data.tags[id].init) {
                 data.tags[id].value = _parseValue(data.tags[id].init);
+            }
+            if (data.tags[id].sysType === TagSystemTypeEnum.deviceConnectionStatus) {
+                data.tags[id].timestamp = Date.now();
+                connectionTags.push(data.tags[id]);
             }
         }
         tocheck = !utils.isEmptyObject(data.tags);
@@ -116,8 +123,7 @@ const deviceUtils = require('../device-utils');
      */
     this.getTagProperty = function (id) {
         if (data.tags[id]) {
-            let prop = { id: id, name: data.tags[id].name, type: data.tags[id].type };
-            return prop;
+            return { id: id, name: data.tags[id].name, type: data.tags[id].type, format: data.tags[id].format };
         } else {
             return null;
         }
@@ -136,6 +142,19 @@ const deviceUtils = require('../device-utils');
     }
 
     /**
+     * Set the connection status to tag of device sttus
+     * @param {*} deviceId 
+     * @param {*} status 
+     */
+    this.setConnectionStatus = function(deviceId, status) {
+        var tag = connectionTags.find(tag => tag.memaddress === deviceId);
+        if (tag) {
+            tag.value = status;
+            tag.timestamp = Date.now();
+        }
+    }
+
+    /**
      * Return connected with itself
      */
     this.isConnected = function () {
@@ -149,6 +168,14 @@ const deviceUtils = require('../device-utils');
         this.addDaq = fnc;                         // Add the DAQ value to db history
     }
     this.addDaq = null;      
+
+    /**
+     * Return the timestamp of last read tag operation on polling
+     * @returns 
+     */
+     this.lastReadTimestamp = () => {
+        return lastTimestampValue;
+    }
 
     /**
      * Cheack and parse the value return converted value
@@ -186,8 +213,11 @@ const deviceUtils = require('../device-utils');
         const timestamp = new Date().getTime();
         var result = {};
         for (var id in data.tags) {
-            if (this.addDaq && !utils.isNullOrUndefined(data.tags[id].value) && deviceUtils.tagDaqToSave(data.tags[id], timestamp)) {
-                result[id] = data.tags[id];
+            if (!utils.isNullOrUndefined(data.tags[id].value)) {
+                data.tags[id].value = deviceUtils.tagValueCompose(data.tags[id].value, data.tags[id]);
+                if (this.addDaq && deviceUtils.tagDaqToSave(data.tags[id], timestamp)) {
+                    result[id] = data.tags[id];
+                }
             }
             data.tags[id].changed = false;
             varsValue[id] = data.tags[id];
@@ -221,6 +251,16 @@ const deviceUtils = require('../device-utils');
         overloading = 0;
         return true;
     }
+
+    var _checkConnectionStatus = function () {
+        var dt = Date.now() - 60000;
+        connectionTags.forEach(tag => {
+            if (tag.value && tag.timestamp < dt) {
+                tag.value = 0;
+            }
+        });
+    }
+
 }
 
 module.exports = {
@@ -229,4 +269,8 @@ module.exports = {
     create: function (data, logger, events) {
         return new FuxaServer(data, logger, events);
     }
+}
+
+var TagSystemTypeEnum  = {
+    deviceConnectionStatus: 1,
 }

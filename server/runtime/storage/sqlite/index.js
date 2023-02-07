@@ -409,7 +409,12 @@ function DaqNode(_settings, _log, _id) {
     function _checkToArchiveDBfile(dbfile) {
         if (dbfile.indexOf('-journal') !== -1) {
             // delete pending db journal
-            fs.unlinkSync(dbfile);
+            try {
+                fs.unlinkSync(dbfile);
+                logger.info(`daqstorage.check-to-archive-db-file '${dbfile}' pending db journal deleted!`, true);
+            } catch (e) { 
+                console.error(e);
+            }
         } else {
             _bindDaqData(dbfile).then(result => {
                 logger.info(`daqstorage.check-to-archive-db-file '${dbfile}'`, true);
@@ -424,7 +429,9 @@ function DaqNode(_settings, _log, _id) {
                             try {
                                 fs.unlinkSync(dbfile);
                                 logger.info(`daqstorage.check-to-archive-db-file '${dbfile}' database deleted!`, true);
-                            } catch (e) { }
+                            } catch (e) { 
+                                console.error(e);
+                            }
                         }
                     });
                 }).catch(function (err) {
@@ -458,7 +465,11 @@ function DaqNode(_settings, _log, _id) {
             fs.mkdirSync(archive);
         }
         var dbfilenew = path.join(archive, path.basename(dbfile, path.extname(dbfile))) + '_' + suffix + path.extname(dbfile);
-        fs.renameSync(dbfile, dbfilenew);
+        try {
+            fs.renameSync(dbfile, dbfilenew);
+        } catch (err) {
+            console.error(err);
+        }
         return dbfilenew;
     }
 
@@ -488,7 +499,12 @@ function DaqNode(_settings, _log, _id) {
     }
 
     function _resetDB(file) {
-        fs.unlinkSync(file);
+        try {
+            fs.unlinkSync(file);
+            logger.info(`daqstorage._resetDB '${file}' file of database deleted!`, true);
+        } catch (err) {
+            console.error(err);
+        }
     }
 
     function _loadMap() {
@@ -609,18 +625,25 @@ function DaqNode(_settings, _log, _id) {
 /**
  * Check and remove old data
  */
-function checkRetention(dtlimit, dbDir, callbackError) {
+function checkRetention(dtlimit, dbDir, callbackRemoved, callbackError) {
     var archiveDir = path.resolve(dbDir, archive_folder);
     if (fs.existsSync(archiveDir)) {
         var files = fs.readdirSync(archiveDir);
         files.forEach(file => {
             const fromTo = _suffixToTimestamp(file);
             if (fromTo && fromTo.from < dtlimit.getTime()) {
-                fs.unlink(path.join(archiveDir, file), (err) => {
-                    if (err && callbackError) {
-                        callbackError(`daqstorage.checkRetention remove file ${file} failed! ${err}`);
+                try {
+                    fs.unlink(path.join(archiveDir, file), (err) => {
+                        if (err && callbackError) {
+                            callbackError(`daqstorage.checkRetention remove file ${file} failed! ${err}`);
+                        }
+                    });
+                    if (callbackRemoved) {
+                        callbackRemoved(file);
                     }
-                });
+                } catch (error) {
+                    console.error(error);
+                 }
             }
         });
     }

@@ -1,19 +1,17 @@
 
-import { Injectable, Output, EventEmitter, Inject, Optional } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Injectable, Output, EventEmitter } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../environments/environment';
 import { ProjectData, ProjectDataCmdType, UploadFile } from '../_models/project';
-import { Hmi, View, LayoutSettings, DaqQuery } from '../_models/hmi';
+import { View, LayoutSettings, DaqQuery } from '../_models/hmi';
 import { Chart } from '../_models/chart';
 import { Graph } from '../_models/graph';
 import { Alarm, AlarmQuery } from '../_models/alarm';
 import { Notification } from '../_models/notification';
 import { Script, ScriptMode } from '../_models/script';
 import { Text } from '../_models/text';
-import { Device, DeviceType, DeviceNetProperty, DEVICE_PREFIX, DevicesUtils, Tag } from '../_models/device';
-import { EndPointApi } from '../_helpers/endpointapi';
+import { Device, DeviceType, DeviceNetProperty, DEVICE_PREFIX, DevicesUtils, Tag, FuxaServer, TagSystemType, TAG_PREFIX, ServerTagType } from '../_models/device';
 import { ToastrService } from 'ngx-toastr';
 import { TranslateService } from '@ngx-translate/core';
 import { ResourceStorageService } from './rcgi/resource-storage.service';
@@ -885,8 +883,8 @@ export class ProjectService {
     setNewProject() {
         this.projectData = new ProjectData();
         let server = new Device(Utils.getGUID(DEVICE_PREFIX));
-        server.name = 'FUXA';
-        server.id = '0';
+        server.name = FuxaServer.name;
+        server.id = FuxaServer.id;
         server.type = DeviceType.FuxaServer;
         server.enabled = true;
         server.property = new DeviceNetProperty();
@@ -956,6 +954,28 @@ export class ProjectService {
             }
         }
         return null;
+    }
+
+    /**
+     * Check to add or remove system Tags, example connection status to add in device FUXA server
+     */
+    checkSystemTags() {
+        let devices = Object.values(this.projectData.devices).filter((device: Device) => device.id !== FuxaServer.id);
+        let fuxaServer = <Device>this.projectData.devices[FuxaServer.id];
+        devices.forEach((device: Device) => {
+            if (!Object.values(fuxaServer.tags).find((tag: Tag) => tag.sysType === TagSystemType.deviceConnectionStatus && tag.memaddress === device.id)) {
+                let tag = new Tag(Utils.getGUID(TAG_PREFIX));
+                tag.name = device.name + ' Connection Status';
+                tag.label = device.name + ' Connection Status';
+                tag.type = ServerTagType.number;
+                tag.memaddress = device.id;
+                tag.sysType = TagSystemType.deviceConnectionStatus;
+                tag.init = tag.value = '';
+                fuxaServer.tags[tag.id] = tag;
+            }
+        });
+        this.setDeviceTags(fuxaServer);
+        return this.getDevices();
     }
 
     /**

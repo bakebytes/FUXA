@@ -23,8 +23,8 @@ export class CommandService {
         return new Observable((observer) => {
             if (environment.serverEnabled) {
                 let header = new HttpHeaders({ 'Content-Type': 'application/json' });
-                let params = { report: report };
-                this.http.post<any>(this.endPointConfig + '/api/buildreport', { headers: header, params: params }).subscribe(result => {
+                let params = { cmd: CommanType.reportBuild, report: report };
+                this.http.post<any>(this.endPointConfig + '/api/command', { headers: header, params: params }).subscribe(result => {
                     observer.next();
                     var msg = '';
                     this.translateService.get('msg.report-build-forced').subscribe((txt: string) => { msg = txt; });
@@ -40,6 +40,15 @@ export class CommandService {
         });
     }
 
+    getReportFile(reportName: string): Observable<Blob> {
+        let header = new HttpHeaders({ 'Content-Type': 'application/pdf' });
+        let params = {
+            cmd: CommanType.reportDownload,
+            name: reportName,
+        };
+        return this.http.get(this.endPointConfig + '/api/download', { headers: header, params: params, responseType: 'blob' });
+    }
+
     private notifyError(err: any) {
         var msg = '';
         this.translateService.get('msg.report-build-error').subscribe((txt: string) => { msg = txt; });
@@ -50,3 +59,9 @@ export class CommandService {
         });
     }
 }
+
+export enum CommanType {
+    reportBuild = 'REPORT-BUILD',
+    reportDelete = 'REPORT-DELETE',
+    reportDownload = 'REPORT-DOWNLOAD'
+};

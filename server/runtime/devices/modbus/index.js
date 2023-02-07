@@ -206,6 +206,7 @@ function MODBUSclient(_data, _logger, _events) {
                     }
                 }
                 memItemsMap[id] = memory[memaddr].Items[offset];
+                memItemsMap[id].format = data.tags[id].format;
                 stepsMap[parseInt(data.tags[id].memaddress) + offset] =  { size: datatypes[data.tags[id].type].WordLen, offset: offset };
             } catch (err) {
                 logger.error(`'${data.name}' load error! ${err}`);
@@ -272,7 +273,7 @@ function MODBUSclient(_data, _logger, _events) {
      */
     this.getTagProperty = function (id) {
         if (memItemsMap[id]) {
-            return { id: id, name: id, type: memItemsMap[id].type };
+            return { id: id, name: id, type: memItemsMap[id].type, format: memItemsMap[id].format };
         } else {
             return null;
         }
@@ -282,20 +283,37 @@ function MODBUSclient(_data, _logger, _events) {
      * Set the Tag value
      * Read the current Tag object, write the value in object and send to SPS 
      */
-    this.setValue = function (sigid, value) {
+    this.setValue = async function (sigid, value) {
         if (data.tags[sigid]) {
             var memaddr = data.tags[sigid].memaddress;
             var offset = parseInt(data.tags[sigid].address) - 1;   // because settings address from 1 to 65536 but communication start from 0
+            value = deviceUtils.tagRawCalculator(value, data.tags[sigid]);
             var val = datatypes[data.tags[sigid].type].formatter(convertValue(value, data.tags[sigid].divisor, true));
-            _writeMemory(parseInt(memaddr), offset, val).then(result => {
-                logger.info(`'${data.name}' setValue(${sigid}, ${val})`, true);
-            }, reason => {
-                if (reason && reason.stack) {
-                    logger.error(`'${data.name}' _writeMemory error! ${reason.stack}`);
-                } else {
-                    logger.error(`'${data.name}' _writeMemory error! ${reason}`);
+            if (type === ModbusTypes.RTU) {
+                const start = Date.now();
+                let now = start;
+                while ((now - start) < 3000 && working) {  // wait max 3 seconds
+                    now = Date.now();
+                    await delay(20);
                 }
-            });
+                _checkWorking(true);
+            }
+            try {
+                await _writeMemory(parseInt(memaddr), offset, val).then(result => {
+                    logger.info(`'${data.name}' setValue(${sigid}, ${val})`, true);
+                }, reason => {
+                    if (reason && reason.stack) {
+                        logger.error(`'${data.name}' _writeMemory error! ${reason.stack}`);
+                    } else {
+                        logger.error(`'${data.name}' _writeMemory error! ${reason}`);
+                    }
+                });
+                if (type === ModbusTypes.RTU) {
+                    _checkWorking(false);
+                }
+            } catch (err) {
+                console.log(err);
+            }
         }
     }
 
@@ -315,6 +333,14 @@ function MODBUSclient(_data, _logger, _events) {
     }
 
     this.addDaq = null;      
+
+    /**
+     * Return the timestamp of last read tag operation on polling
+     * @returns 
+     */
+     this.lastReadTimestamp = () => {
+        return lastTimestampValue;
+    }
 
     /**
      * Connect with RTU or TCP
@@ -361,8 +387,8 @@ function MODBUSclient(_data, _logger, _events) {
                             let bitoffset = Math.trunc((v.offset - start) / 8);
                             let bit = (v.offset - start) % 8;
                             let value = datatypes[v.type].parser(res.buffer, bitoffset, bit);
-                            v.changed = value !== v.value;
-                            v.value = value;
+                            v.changed = value !== v.rawValue;
+                            v.rawValue = value;
                         });
                     }
                     resolve(vars);
@@ -376,8 +402,8 @@ function MODBUSclient(_data, _logger, _events) {
                             let bitoffset = Math.trunc((v.offset - start) / 8);
                             let bit = (v.offset - start) % 8;
                             let value = datatypes[v.type].parser(res.buffer, bitoffset, bit);
-                            v.changed = value !== v.value;
-                            v.value = value;
+                            v.changed = value !== v.rawValue;
+                            v.rawValue = value;
                         });
                     }
                     resolve(vars);
@@ -392,8 +418,8 @@ function MODBUSclient(_data, _logger, _events) {
                                 let byteoffset = (v.offset - start) * 2;
                                 let buffer = Buffer.from(res.buffer.slice(byteoffset, byteoffset + datatypes[v.type].bytes))
                                 let value = datatypes[v.type].parser(buffer);
-                                v.changed = value !== v.value;
-                                v.value = value;
+                                v.changed = value !== v.rawValue;
+                                v.rawValue = value;
                             } catch (err) {
                                 console.error(err);
                             }
@@ -410,8 +436,8 @@ function MODBUSclient(_data, _logger, _events) {
                             let byteoffset = (v.offset - start) * 2;
                             let buffer = Buffer.from(res.buffer.slice(byteoffset, byteoffset + datatypes[v.type].bytes))
                             let value = datatypes[v.type].parser(buffer);
-                            v.changed = value !== v.value;
-                            v.value = value;
+                            v.changed = value !== v.rawValue;
+                            v.rawValue = value;
                         });
                     }
                     resolve(vars);
@@ -484,14 +510,28 @@ function MODBUSclient(_data, _logger, _events) {
                 const changed = items[itemidx].changed;
                 if (items[itemidx] instanceof MemoryItem) {
                     let type = items[itemidx].type;
-                    let value = items[itemidx].value;
+                    let rawValue = items[itemidx].rawValue;
                     let tags = items[itemidx].Tags;
                     tags.forEach(tag => {
-                        tempTags[tag.id] = { id: tag.id, value: convertValue(value, tag.divisor), type: type, daq: tag.daq, changed: changed };
+                        tempTags[tag.id] = { 
+                            id: tag.id,
+                            rawValue: convertValue(rawValue, tag.divisor),
+                            type: type,
+                            daq: tag.daq,
+                            changed: changed,
+                            tagref: tag
+                        };
                         someval = true;
                     });
                 } else {
-                    tempTags[items[itemidx].id] = { id: items[itemidx].id, value: items[itemidx].value, type: items[itemidx].type, daq: items[itemidx].daq, changed: changed };
+                    tempTags[items[itemidx].id] = {
+                        id: items[itemidx].id,
+                        rawValue: items[itemidx].rawValue,
+                        type: items[itemidx].type,
+                        daq: items[itemidx].daq,
+                        changed: changed,
+                        tagref: items[itemidx]
+                    };
                     someval = true;
                 }
             }
@@ -500,8 +540,11 @@ function MODBUSclient(_data, _logger, _events) {
             const timestamp = new Date().getTime();
             var result = {};
             for (var id in tempTags) {
-                if (this.addDaq && !utils.isNullOrUndefined(tempTags[id].value) && deviceUtils.tagDaqToSave(tempTags[id], timestamp)) {
-                    result[id] = tempTags[id];
+                if (!utils.isNullOrUndefined(tempTags[id].rawValue)) {
+                    tempTags[id].value = deviceUtils.tagValueCompose(tempTags[id].rawValue, tempTags[id].tagref);
+                    if (this.addDaq && deviceUtils.tagDaqToSave(tempTags[id], timestamp)) {
+                        result[id] = tempTags[id];
+                    }
                 }
                 varsValue[id] = tempTags[id];
                 varsValue[id].changed = false;
@@ -535,9 +578,11 @@ function MODBUSclient(_data, _logger, _events) {
     var _checkWorking = function (check) {
         if (check && working) {
             overloading++;
-            logger.warn(`'${data.name}' working (connection || polling) overload! ${overloading}`);
             // !The driver don't give the break connection
             if (overloading >= 3) {
+                if (type !== ModbusTypes.RTU) {
+                    logger.warn(`'${data.name}' working (connection || polling) overload! ${overloading}`);
+                }
                 client.close();
             } else {
                 return false;

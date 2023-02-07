@@ -1,5 +1,4 @@
-import { Tag, Device } from './device';
-import { extend } from 'webdriver-js-extender';
+import { Tag } from './device';
 
 export class Hmi {
     /** Layout for navigation menu, header bar, ...  */
@@ -118,6 +117,7 @@ export enum ZoomModeType {
 export enum InputModeType {
     false = 'item.inputmode-disabled',
     true = 'item.inputmode-enabled',
+    keyboard = 'item.inputmode-keyboard',
 }
 
 export enum HeaderBarModeType {

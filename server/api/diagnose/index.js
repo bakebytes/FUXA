@@ -89,6 +89,33 @@ module.exports = {
         });
 
         /**
+         * GET Server report folder content
+         */
+        diagnoseApp.get('/api/reportsdir', secureFnc, function (req, res) {
+            var groups = checkGroupsFnc(req);
+            if (res.statusCode === 403) {
+                runtime.logger.error("api get reportdir: Tocken Expired");
+            } else {
+                try {
+                    var reportPath = runtime.settings.reportsDir;
+                    if (!fs.existsSync(reportPath)) {
+                        reportPath = path.join(process.cwd(), runtime.settings.reportsDir);
+                    }
+                    var reportFiles = fs.readdirSync(reportPath);
+                    reportFiles = reportFiles.filter(file => file.startsWith(req.query.name + '_'));
+                    res.json(reportFiles);
+                } catch (err) {
+                    if (err.code) {
+                        res.status(400).json({ error: err.code, message: err.message });
+                    } else {
+                        res.status(400).json({ error: "unexpected_error", message: err.toString() });
+                    }
+                    runtime.logger.error("api get reportdir: " + err.message);
+                }
+            }
+        });
+
+        /**
          * POST testmail
          * Test SMTP send mail
          */
@@ -97,19 +124,24 @@ module.exports = {
             if (res.statusCode === 403) {
                 runtime.logger.error("api post sendmail: Tocken Expired");
             } else {
-                if (req.body.params.smtp && !req.body.params.smtp.password && runtime.settings.smtp && runtime.settings.smtp.password) {
-                    req.body.params.smtp.password = runtime.settings.smtp.password;
-                }                
-                runtime.notificatorMgr.sendMail(req.body.params.msg, req.body.params.smtp).then(function() {
-                    res.end();
-                }).catch(function(err) {
-                    if (err.code) {
-                        res.status(400).json({error:err.code, message: err.message});
-                    } else {
-                        res.status(400).json({error:"unexpected_error", message:err.toString()});
-                    }
-                    runtime.logger.error("api post sendmail: " + err.message);
-                });
+                try {
+                    if (req.body.params.smtp && !req.body.params.smtp.password && runtime.settings.smtp && runtime.settings.smtp.password) {
+                        req.body.params.smtp.password = runtime.settings.smtp.password;
+                    }                
+                    runtime.notificatorMgr.sendMail(req.body.params.msg, req.body.params.smtp).then(function() {
+                        res.end();
+                    }).catch(function(err) {
+                        if (err.code) {
+                            res.status(400).json({error:err.code, message: err.message});
+                        } else {
+                            res.status(400).json({error:"unexpected_error", message:err.toString()});
+                        }
+                        runtime.logger.error("api post sendmail: " + err.message);
+                    });
+                } catch (error) {
+                    res.status(400).json({error:"unexpected_error", message:error.toString()});
+                    runtime.logger.error("api port sendmail: " + error.message);
+                }
             }
         });
 

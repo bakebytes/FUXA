@@ -128,6 +128,14 @@ function HTTPclient(_data, _logger, _events) {
     this.addDaq = null;                             // Callback to add the DAQ value to db history
 
     /**
+     * Return the timestamp of last read tag operation on polling
+     * @returns 
+     */
+     this.lastReadTimestamp = () => {
+        return lastTimestampValue;
+    }
+
+    /**
      * Load Tags to read by polling
      */
     this.load = function (_data) {
@@ -173,7 +181,8 @@ function HTTPclient(_data, _logger, _events) {
     this.setValue = function (tagId, value) {
         if (apiProperty.ownFlag && data.tags[tagId]) {
             if (apiProperty.postTags) {
-                data.tags[tagId].value = _parseValue(data.tags[tagId].type, value);
+                value = _parseValue(data.tags[tagId].type, value);
+                data.tags[tagId].value = deviceUtils.tagRawCalculator(value, data.tags[tagId]);
                 axios.post(apiProperty.getTags, [{id: tagId, value: data.tags[tagId].value}]).then(res => {
                     lastTimestampRequest = new Date().getTime();
                     logger.info(`setValue '${data.tags[tagId].name}' to ${value})`, true);
@@ -200,8 +209,7 @@ function HTTPclient(_data, _logger, _events) {
      */
     this.getTagProperty = function (id) {
         if (data.tags[id]) {
-            let prop = { id: id, name: data.tags[id].name, type: data.tags[id].type };
-            return prop;
+            return { id: id, name: data.tags[id].name, type: data.tags[id].type, format: data.tags[id].format };
         } else {
             return null;
         }
@@ -277,8 +285,11 @@ function HTTPclient(_data, _logger, _events) {
                     }
                     requestItemsMap[id] = [reqdata[i]];
                     reqdata[i].changed = varsValue[id] && reqdata[i].value !== varsValue[id].value;
-                    if (this.addDaq && !utils.isNullOrUndefined(reqdata[i].value) && deviceUtils.tagDaqToSave(reqdata[i], timestamp)) {
-                        changed[id] = reqdata[i];
+                    if (!utils.isNullOrUndefined(reqdata[i].value)) {
+                        reqdata[i].value = deviceUtils.tagValueCompose(reqdata[i].value, data.tags[id]);
+                        if (this.addDaq && deviceUtils.tagDaqToSave(reqdata[i], timestamp)) {
+                            changed[id] = reqdata[i];
+                        }
                     }
                     reqdata[i].changed = false;
                     varsValue[id] = reqdata[i];
@@ -296,7 +307,13 @@ function HTTPclient(_data, _logger, _events) {
                         var tag = requestItemsMap[key][index];
                         if (tag) {
                             someval = true;
-                            result[tag.id] = { id: tag.id, value: (tag.memaddress) ? items[tag.memaddress] : items[key], type: items[key].type, daq: tag.daq };
+                            result[tag.id] = {
+                                id: tag.id,
+                                value: (tag.memaddress) ? items[tag.memaddress] : items[key],
+                                type: items[key].type,
+                                daq: tag.daq,
+                                tagref: tag
+                            };
                         }
                     }
                 }
@@ -304,9 +321,12 @@ function HTTPclient(_data, _logger, _events) {
             if (someval) {
                 for (var id in result) {
                     result[id].changed = varsValue[id] && result[id].value !== varsValue[id].value;
-                    if (this.addDaq && !utils.isNullOrUndefined(result[id].value) && deviceUtils.tagDaqToSave(result[id], timestamp)) {
-                        changed[id] = result[id];
-                    }                    
+                    if (!utils.isNullOrUndefined(result[id].value)) {
+                        result[id].value = deviceUtils.tagValueCompose(result[id].value, result[id].tagref);
+                        if (this.addDaq && deviceUtils.tagDaqToSave(result[id], timestamp)) {
+                            changed[id] = result[id];
+                        }
+                    }               
                     result[id].changed = false;
                     varsValue[id] = result[id];
                 }

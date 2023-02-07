@@ -47,6 +47,10 @@ export class PipeComponent {
         return GaugeDialogType.Pipe;
     }
 
+    static isBitmaskSupported(): boolean {
+        return true;
+    }
+
     static processValue(ga: GaugeSettings, svgele: any, sig: Variable, gaugeStatus: GaugeStatus) {
         try {
             if (svgele.node) {
@@ -75,7 +79,8 @@ export class PipeComponent {
     }
 
     static processAction(act: GaugeAction, svgele: any, value: any, gaugeStatus: GaugeStatus) {
-        if (act.range.min <= value && act.range.max >= value) {
+        let actValue = GaugeBaseComponent.checkBitmask(act.bitmask, value);
+        if (act.range.min <= actValue && act.range.max >= actValue) {
             var element = SVG.adopt(svgele.node);
             PipeComponent.runMyAction(element, act.type, gaugeStatus);
         }

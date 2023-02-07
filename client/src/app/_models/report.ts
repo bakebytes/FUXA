@@ -69,6 +69,7 @@ export interface ReportItemTable extends ReportItem {
 export interface ReportTableColumn {
     type: ReportTableColumnType;
     tag: Tag;
+    label: string;
     align: string;
     width: string;
     function: ReportFunctionType;
@@ -110,6 +111,9 @@ export enum ReportDateRangeType {
 }
 
 export enum ReportIntervalType {
+    min5 = 'report.item-interval-min5',
+    min10 = 'report.item-interval-min10',
+    min30 = 'report.item-interval-min30',
     hour = 'report.item-interval-hour',
     day = 'report.item-interval-day',
 }

@@ -9,9 +9,8 @@ import { TranslateService } from '@ngx-translate/core';
 import { DevicePropertyComponent } from './../device-property/device-property.component';
 import { ProjectService } from '../../_services/project.service';
 import { PluginService } from '../../_services/plugin.service';
-import { Device, DeviceType, DeviceNetProperty, DEVICE_PREFIX, DeviceViewModeType, DeviceConnectionStatusType, DeviceWebApiProperty } from './../../_models/device';
+import { Device, DeviceType, DeviceNetProperty, DEVICE_PREFIX, DeviceViewModeType, DeviceConnectionStatusType } from './../../_models/device';
 import { Utils } from '../../_helpers/utils';
-import { Plugin } from '../../_models/plugin';
 import { AppService } from '../../_services/app.service';
 import { DeviceWebapiPropertyDialogComponent } from './device-webapi-property-dialog/device-webapi-property-dialog.component';
 
@@ -122,14 +121,11 @@ export class DeviceMapComponent implements OnInit, OnDestroy, AfterViewInit {
         if (prj && prj.server) {
             this.server = this.devices[prj.server.id];
         }
-        this.dataSource.data = Object.values(this.devices);
+        this.loadDevices();
     }
 
-    checkLayout() {
-        if (this.devices) {
-            if (this.plcs().length && this.flows().length) {
-            }
-        }
+    loadDevices() {
+        this.devices = this.projectService.checkSystemTags();
         this.dataSource.data = Object.values(this.devices);
     }
 
@@ -167,6 +163,7 @@ export class DeviceMapComponent implements OnInit, OnDestroy, AfterViewInit {
 
     removeDevice(device: Device) {
         delete this.devices[device.id];
+        this.loadDevices();
     }
 
     private getWindowWidth() {
@@ -506,7 +503,7 @@ export class DeviceMapComponent implements OnInit, OnDestroy, AfterViewInit {
                     this.projectService.setDevice(device, olddevice, result.security);
                 }
             }
-            this.checkLayout();
+            this.loadDevices();
         });
     }
 

@@ -4,6 +4,7 @@
 'use strict';
 const iothub = require('azure-iothub').Client;
 const { EventHubConsumerClient } = require("@azure/event-hubs");
+const deviceUtils = require('../device-utils');
 
 function AzIoTclient(_data, _logger, _events) {
     var data = _data;                   // Current data
@@ -90,7 +91,7 @@ function AzIoTclient(_data, _logger, _events) {
                     continue;
                 }
                 var id = topicsMap[point["pointName"]][0].id;
-                data.tags[id].value = point["value"];
+                data.tags[id].rawValue = point["value"];
                 data.tags[id].timestamp = new Date().getTime();
                 data.tags[id].changed = true;
             }
@@ -172,6 +173,14 @@ function AzIoTclient(_data, _logger, _events) {
     this.addDaq = null;
 
     /**
+     * Return the timestamp of last read tag operation on polling
+     * @returns 
+     */
+    this.lastReadTimestamp = () => {
+        return lastTimestampValue;
+    }
+
+    /**
      * Load Topics attribute and map tags to publish
      */
     this.load = function (_data) {
@@ -250,7 +259,7 @@ function AzIoTclient(_data, _logger, _events) {
                     },
                     responseTimeoutInSeconds: 15 // set response timeout as 15 seconds
                   };
-                updateValue = value
+                updateValue = deviceUtils.tagRawCalculator(value, data.tags[tagid]);
             }
             iotHubCli.invokeDeviceMethod(options.deviceId, options.moduleId, methodParams, function (err, result) {
               if (err) {
@@ -279,7 +288,7 @@ function AzIoTclient(_data, _logger, _events) {
      */
     this.getTagProperty = function (topic) {
         if (data.tags[topic]) {
-            let prop = { id: topic, name: data.tags[topic].name, type: data.tags[topic].type };
+            let prop = { id: topic, name: data.tags[topic].name, type: data.tags[topic].type, format: data.tags[topic].format  };
             return prop;
         } else {
             return null;
@@ -346,6 +355,7 @@ function AzIoTclient(_data, _logger, _events) {
         var result = {};
         for (var id in data.tags) {
             if (data.tags[id].changed) {
+                data.tags[id].value = deviceUtils.tagValueCompose(data.tags[id].rawValue, data.tags[id]);
                 data.tags[id].changed = false;
                 result[id] = data.tags[id];
             }

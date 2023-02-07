@@ -1,5 +1,7 @@
 import { Utils } from '../_helpers/utils';
 
+export const FuxaServer = {id: '0', name: 'FUXA' };
+
 export class Device {
     /** Device id, GUID */
     id: string;
@@ -56,12 +58,16 @@ export class Tag {
     access: string;
     /** Options, used for WebAPI and MQTT */
     options: any;
-    /** not used yet */
-    format: any;
+    /** Digits format of value, number of digits to appear after the decimal point */
+    format: number;
     /** Daq settings */
     daq: TagDaq;
     /** Init value */
     init: string;
+    /** Value scaling properties */
+    scale: TagScale;
+    /** System Tag used in FUXA Server, example device status connection */
+    sysType: TagSystemType;
 
     constructor(_id: string) {
         this.id = _id;
@@ -82,6 +88,7 @@ export class Tag {
             enabled: 'Daq enabled storage',
             interval: 'min storage interval (without change value)'
         },
+        format: 'Number of digits to appear after the decimal point'
     };
 }
 
@@ -498,4 +505,22 @@ export enum ServerTagType {
     number = 'number',
     boolean = 'boolean',
     string = 'string'
+}
+
+
+export class TagScale {
+    mode: TagScaleModeType;
+    rawLow: number;
+    rawHigh: number;
+    scaledLow: number;
+    scaledHigh: number;
+}
+
+export enum TagScaleModeType {
+    undefined = 'device.tag-scale-mode-undefined',
+    linear = 'device.tag-scale-mode-linear',
+}
+
+export enum TagSystemType {
+    deviceConnectionStatus = 1,
 }

@@ -11,7 +11,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { ToastrService } from 'ngx-toastr';
 
 import { TagPropertyComponent } from './../tag-property/tag-property.component';
-import { TagOptionsComponent } from './../tag-options/tag-options.component';
+import { ITagOption, TagOptionsComponent } from './../tag-options/tag-options.component';
 import { TopicPropertyComponent } from './../topic-property/topic-property.component';
 import { Tag, Device, DeviceType, TAG_PREFIX } from '../../_models/device';
 import { ProjectService } from '../../_services/project.service';
@@ -72,13 +72,8 @@ export class DeviceListComponent implements OnInit, AfterViewInit {
     }
 
     ngAfterViewInit() {
-        // this.mapTags();
-        // if (this.deviceSelected) {
-        //     this.bindToTable(this.deviceSelected.tags);
-        // }
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
-        // this.table.renderRows();
     }
 
     mapTags() {
@@ -331,10 +326,12 @@ export class DeviceListComponent implements OnInit, AfterViewInit {
             data: { device: this.deviceSelected, tags: tags },
             position: { top: '60px' }
         });
-        dialogRef.afterClosed().subscribe(result => {
-            if (result) {
+        dialogRef.afterClosed().subscribe((tagOption: ITagOption) => {
+            if (tagOption) {
                 for (let i = 0; i < tags.length; i++) {
-                    tags[i].daq = result;
+                    tags[i].daq = tagOption.daq;
+                    tags[i].format = tagOption.format;
+                    tags[i].scale = tagOption.scale;
                 }
                 this.projectService.setDeviceTags(this.deviceSelected);
             }

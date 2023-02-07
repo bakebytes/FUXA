@@ -164,11 +164,22 @@ var utils = module.exports = {
         return `${dd}/${mm}/${yyyy} ${HH}:${MM}:${SS}`;
     },
 
-    isNumber: function(n) {
-        if (!isNaN(n) && typeof n === 'number') {
+    isNumber: function(n, v = {value: null}) {
+        if (typeof n === 'number') {
+            v.value = n;
+            return true;
+        } else {
+            var num = Number(n);
+            if (isNaN(num)) {
+                return false;
+            }
+            num = parseFloat(n);
+            if (isNaN(num)) {
+                return false;
+            }
+            v.value = num;
             return true;
         }
-        return false;
     },
 
     isFloat: function (n) {

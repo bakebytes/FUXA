@@ -38,12 +38,12 @@ export class AppSettingsComponent implements OnInit {
     ngOnInit() {
         this.settings = JSON.parse(JSON.stringify(this.settingsService.getSettings()));
         for (let i = 0; i < this.languageType.length; i++) {
-            this.translateService.get(this.languageType[i].text).subscribe((txt: string) => { this.languageType[i].text = txt });
+            this.translateService.get(this.languageType[i].text).subscribe((txt: string) => { this.languageType[i].text = txt; });
         }
         for (let i = 0; i < this.authType.length; i++) {
-            this.translateService.get(this.authType[i].text).subscribe((txt: string) => { this.authType[i].text = txt });
+            this.translateService.get(this.authType[i].text).subscribe((txt: string) => { this.authType[i].text = txt; });
         }
-        this.translateService.get('dlg.app-auth-tooltip').subscribe((txt: string) => { this.authenticationTooltip = txt });
+        this.translateService.get('dlg.app-auth-tooltip').subscribe((txt: string) => { this.authenticationTooltip = txt; });
 
         if (this.settings.secureEnabled) {
             this.authentication = this.settings.tokenExpiresIn;
@@ -84,7 +84,7 @@ export class AppSettingsComponent implements OnInit {
         this.diagnoseService.sendMail(msg, this.settings.smtp).subscribe(() => {
             this.smtpTesting = false;
             var msg = '';
-            this.translateService.get('msg.sendmail-success').subscribe((txt: string) => { msg = txt });
+            this.translateService.get('msg.sendmail-success').subscribe((txt: string) => { msg = txt; });
             this.toastr.success(msg);
         }, error => {
             this.smtpTesting = false;
@@ -92,7 +92,7 @@ export class AppSettingsComponent implements OnInit {
                 this.notifyError(error.message);
             } else {
                 var msg = '';
-                this.translateService.get('msg.sendmail-error').subscribe((txt: string) => { msg = txt });
+                this.translateService.get('msg.sendmail-error').subscribe((txt: string) => { msg = txt; });
                 this.notifyError(msg);
             }
         });

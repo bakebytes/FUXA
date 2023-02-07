@@ -162,7 +162,11 @@ function BACNETclient(_data, _logger, _events) {
                                         if (data.values[0].value && data.values[0].value.type === bacnet.enum.ApplicationTag.ERROR) {
                                             errors.push({ address: address, value: data.values[0].value.value, type:  data.objectId.type });    
                                         } else {
-                                            result.push({ address: address, value: data.values[0].value[0].value, type:  data.objectId.type });    
+                                            result.push({ 
+                                                address: address,
+                                                rawValue: data.values[0].value[0].value,
+                                                type: data.objectId.type
+                                            });    
                                         }
                                     }
                                 });
@@ -243,8 +247,7 @@ function BACNETclient(_data, _logger, _events) {
      */
     this.getTagProperty = function (id) {
         if (data.tags[id]) {
-            let prop = { id: id, name: data.tags[id].name, type: data.tags[id].type };
-            return prop;
+            return { id: id, name: data.tags[id].name, type: data.tags[id].type, format: data.tags[id].format};
         } else {
             return null;
         }
@@ -253,11 +256,12 @@ function BACNETclient(_data, _logger, _events) {
     /**
      * Set Tag value, used to set value from frontend
      */
-    this.setValue = function (sigid, value) {
-        if (data.tags[sigid]) {
-            var obj = _extractId(data.tags[sigid].address);
+    this.setValue = function (tagId, value) {
+        if (data.tags[tagId]) {
+            var obj = _extractId(data.tags[tagId].address);
+            value = deviceUtils.tagRawCalculator(value, data.tags[tagId]);
             _writeProperty(obj, value).then(result => {
-                logger.info(`'${data.name}' setValue(${sigid}, ${result})`, true);
+                logger.info(`'${data.name}' setValue(${tagId}, ${result})`, true);
             }, reason => {
                 if (reason && reason.stack) {
                     logger.error(`'${data.name}' _writeProperty error! ${reason.stack}`);
@@ -282,6 +286,14 @@ function BACNETclient(_data, _logger, _events) {
         this.addDaq = fnc;                          // Add the DAQ value to db history
     }
     this.addDaq = null;                             // Callback to add the DAQ value to db history
+
+    /**
+     * Return the timestamp of last read tag operation on polling
+     * @returns 
+     */
+     this.lastReadTimestamp = () => {
+        return lastTimestampValue;
+    }
 
     /**
      * Connect the client to device
@@ -405,11 +417,13 @@ function BACNETclient(_data, _logger, _events) {
                     Promise.all(readfnc).then(results => {
                         if (results) {
                             for (var index in results) {
-                                var object = _getObject(objects, results[index].type, results[index].instance);
-                                if (object) {
-                                    object.id = _formatId(object.type, object.instance);
-                                    object.name = results[index].value;
-                                    object.class = _getObjectClass(object.type);
+                                if (results[index]) {
+                                    var object = _getObject(objects, results[index].type, results[index].instance);
+                                    if (object) {
+                                        object.id = _formatId(object.type, object.instance);
+                                        object.name = results[index].value;
+                                        object.class = _getObjectClass(object.type);
+                                    }
                                 }
                             }
                         }
@@ -499,7 +513,7 @@ function BACNETclient(_data, _logger, _events) {
      */
     var _getObject = function (objs, type, instance) {
         for (var index in objs) {
-            if (objs[index].type === type && objs[index].instance === instance) {
+            if (objs[index] && objs[index].type === type && objs[index].instance === instance) {
                 return objs[index];
             }
         }
@@ -558,25 +572,31 @@ function BACNETclient(_data, _logger, _events) {
      * Update the Tags values read
      * @param {*} vars 
      */
-    var _updateVarsValue = function (vars) {
+    var _updateVarsValue = (vars) => {
         const timestamp = new Date().getTime();
         var someval = false;
         var changed = {};
         for (var index in vars) {
             var address = vars[index].address;
             if (requestItemsMap[address]) {
-                for (var index in requestItemsMap[address]) {
-                    var tag = requestItemsMap[address][index];
-                    if (!varsValue[tag.id]) {
-                        varsValue[tag.id].changed = varsValue[tag.id].value !== vars[index].value;
-                        varsValue[tag.id].value = vars[index].value;
-                        if (this.addDaq && !utils.isNullOrUndefined(varsValue[tag.id].value) && deviceUtils.tagDaqToSave(varsValue[id], timestamp)) {
-                            changed[tag.id] = { id: tag.id, value: vars[index].value, type: vars[index].type, daq: tag.daq };
+                for (var idx in requestItemsMap[address]) {
+                    var tag = requestItemsMap[address][idx];
+                    if (!varsValue[tag.id] || varsValue[tag.id].value !== vars[index].value) {
+                        changed[tag.id] = { id: tag.id, value: vars[index].value, type: vars[index].type, daq: tag.daq };
+                        varsValue[tag.id] = changed[tag.id];    
+                    } 
+                    varsValue[tag.id].changed = varsValue[tag.id].rawValue !== vars[index].rawValue;
+                    if (!utils.isNullOrUndefined(vars[index].rawValue)) {
+                        varsValue[tag.id].rawValue = vars[index].rawValue;
+                        varsValue[tag.id].value = deviceUtils.tagValueCompose(vars[index].rawValue, varsValue[tag.id]);
+                        vars[index].value = varsValue[tag.id].value;
+                        if (this.addDaq && deviceUtils.tagDaqToSave(varsValue[tag.id], timestamp)) {
+                            changed[tag.id] = { id: tag.id, value: varsValue[tag.id].value, type: vars[index].type, daq: tag.daq };
                             varsValue[tag.id] = changed[tag.id];
                         }
-                        varsValue[tag.id].changed = false;
-                        someval = true;
                     }
+                    varsValue[tag.id].changed = false;
+                    someval = true;
                 }
             }
         }

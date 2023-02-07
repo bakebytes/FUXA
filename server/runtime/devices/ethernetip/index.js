@@ -193,8 +193,7 @@ function EthernetIPclient(_data, _logger, _events) {
      */
     this.getTagProperty = function (tagid) {
         if (data.tags[tagid]) {
-            let prop = { id: tagid, name: data.tags[tagid].name, type: data.tags[tagid].type };
-            return prop;
+            return { id: tagid, name: data.tags[tagid].name, type: data.tags[tagid].type, format: data.tags[tagid].format };
         } else {
             return null;
         }
@@ -204,13 +203,14 @@ function EthernetIPclient(_data, _logger, _events) {
      * Set the Tag value to device
      * take the address from
      */
-    this.setValue = function (tagid, value) {
-        if (data.tags[tagid]) {
-            conn.writeItems([data.tags[tagid].address], [parseFloat(value)], (error) => {
+    this.setValue = function (tagId, value) {
+        if (data.tags[tagId]) {
+            let valueToSend = deviceUtils.tagRawCalculator(value, data.tags[tagId]);
+            conn.writeItems([data.tags[tagId].address], [parseFloat(valueToSend)], (error) => {
                 if (error) {
-                    logger.error(`'${data.tags[tagid].name}' setValue error! ${error}`);
+                    logger.error(`'${data.tags[tagId].name}' setValue error! ${error}`);
                 } else {
-                    logger.info(`'${data.tags[tagid].name}' setValue(${tagid}, ${value})`, true);
+                    logger.info(`'${data.tags[tagId].name}' setValue(${tagId}, ${valueToSend})`, true);
                 }
             });
         }
@@ -230,6 +230,14 @@ function EthernetIPclient(_data, _logger, _events) {
         this.addDaq = fnc;                         // Add the DAQ value to db history
     }
     this.addDaq = null;
+
+    /**
+     * Return the timestamp of last read tag operation on polling
+     * @returns 
+     */
+     this.lastReadTimestamp = () => {
+        return lastTimestampValue;
+    }
 
     /**
      * Clear local Items value by set all to null
@@ -265,12 +273,13 @@ function EthernetIPclient(_data, _logger, _events) {
         const timestamp = new Date().getTime();
         var changed = {};
         Object.keys(itemsMap).forEach(key => {
-            if (vars[key]) {
+            if (!utils.isNullOrUndefined(vars[key])) {
                 var id = itemsMap[key].id;
                 var valueChanged = itemsMap[key].value !== vars[key];
-                itemsMap[key].value = vars[key];
+                itemsMap[key].rawValue = vars[key];
+                itemsMap[key].value = deviceUtils.tagValueCompose(vars[key], itemsMap[key]);
                 varsValue[id] = { id: id, value: itemsMap[key].value, type: itemsMap[key].type, daq: itemsMap[key].daq, changed: valueChanged };
-                if (this.addDaq && !utils.isNullOrUndefined(varsValue[id].value) && deviceUtils.tagDaqToSave(varsValue[id], timestamp)) {
+                if (this.addDaq && deviceUtils.tagDaqToSave(varsValue[id], timestamp)) {
                     changed[id] = varsValue[id];
                 }
                 varsValue[id].changed = false;
