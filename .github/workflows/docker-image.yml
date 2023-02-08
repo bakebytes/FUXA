@@ -2,7 +2,7 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ bakebytes ]
+    branches: [ bakebytes, dev ]
 
 env:
   REGISTRY: ghcr.io
