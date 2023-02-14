@@ -9,6 +9,7 @@ var activeDevices = {};             // Actives Devices list
 var runtime;                        // Access to application resource like logger/settings
 var wokingStatus;                   // Current status (start/stop) to know if is working
 
+const FuxaServerId = '0';
 /**
  * Init by set the access to application resource
  * @param {*} _runtime 
@@ -147,6 +148,7 @@ function loadDevice(device) {
             runtime.logger.info(`'${device.name}' created`);
             activeDevices[device.id] = tdev;
             activeDevices[device.id].bindGetProperty(runtime.project.getDeviceProperty);
+            activeDevices[device.id].bindUpdateConnectionStatus(setDeviceConnectionStatus);
         } else {
             if (!Device.isInternal(device)) {
                 runtime.logger.warn('try to create ' + device.name + ' but plugin is missing!');
@@ -255,6 +257,21 @@ function getDeviceValue(deviceid, sigid) {
 }
 
 /**
+ * Get the Tag value format from the tag id
+ * used from Report
+ * @param {*} sigid 
+ */
+function getTagFormat(sigid) {
+    for (var id in activeDevices) {
+        var tag = activeDevices[id].getTagProperty(sigid);
+        if (tag) {
+            return tag.format;
+        }
+    }
+    return null;
+}
+
+/**
  * Return if manager is working (started or stopped)
  */
 function isWoking() {
@@ -271,6 +288,15 @@ function setDeviceValue(deviceid, sigid, value, fnc) {
     if (activeDevices[deviceid]) {
         activeDevices[deviceid].setValue(sigid, value, fnc);
     }
+}
+
+/**
+ * Set connection device status to server tag
+ * @param {*} deviceId 
+ * @param {*} status 
+ */
+function setDeviceConnectionStatus(deviceId, status) {
+    activeDevices[FuxaServerId].setDeviceConnectionStatus(deviceId, status);
 }
 
 /**
@@ -367,5 +393,6 @@ var devices = module.exports = {
     getDeviceTagsResult: getDeviceTagsResult,
     isWoking: isWoking,
     getSupportedProperty: getSupportedProperty,
-    getRequestResult: getRequestResult
+    getRequestResult: getRequestResult,
+    getTagFormat: getTagFormat
 }
