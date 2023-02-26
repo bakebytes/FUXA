@@ -21,7 +21,6 @@ function verifyToken (req, res, next) {
     if (req.cookies) {
         token =  req.cookies['token'];
     }
-    token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE4MTYyMzkwMjIsInVzZXIiOnsiaWQiOiJwaXBwbyIsIm5hbWUiOiJwaXBwbyIsInJvbGUiOnsiaWQiOiJhYXNkZiIsIm5hbWUiOiJPcGVyYXRvciIsInBlcm1pc3Npb24iOlsiREFTSEJPQVJEX1NDQURBX1ZJRVdFUiIsIkRBU0hCT0FSRF9TQ0FEQV9FRElUT1IiXX19fQ.Flyz2H6x6zn2aEq8EUhKdtLGw1PPIugN3lWMPPLVHOE";
     if (token) {
         jwt.verify(token, secretCode, (err, decoded) => {
             if (err) {
