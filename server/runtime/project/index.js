@@ -886,6 +886,10 @@ function _mergeDefaultConfig() {
                             logger.error(`BB_EQUIP_${deviceIndex} property error ${err}`);
                             continue;
                         }
+                        var storedDevice = null;
+                        if (data.devices) {
+                            storedDevice = Object.values(data.devices).find(dev => dev.name === device.name);
+                        }
                         var deviceToAdd = { ...device, ...{ type: DeviceType.MQTTclient}};
                         deviceToAdd.polling = device.polling || 1000;
                         deviceToAdd.tags = {};
@@ -894,6 +898,10 @@ function _mergeDefaultConfig() {
                         if (Array.isArray(device.tags)) {
                             for (var y = 0; y < device.tags.length; y++) {
                                 var tag = device.tags[y];
+                                var storedTag = null;
+                                if (storedDevice && storedDevice.tags) {
+                                    storedTag = Object.values(storedDevice.tags).find(t => t.id === tag.id);
+                                }
                                 if (!tag.id || tagIds.indexOf(tag.id) !== -1) {
                                     logger.error(`BB_EQUIP_${deviceIndex} ${device.name} Error: tag ID is not defined or already exist ${tag.id}`);
                                     continue;
@@ -907,6 +915,14 @@ function _mergeDefaultConfig() {
                                     if (tag.memaddress) tagToAdd.memaddress = tag.memaddress;
                                     if (tag.divisor) tagToAdd.divisor = tag.divisor;
                                     if (tag.options) tagToAdd.options = tag.options;
+                                    if (storedTag) {
+                                        if (storedTag.format && !tag.options) {
+                                            tagToAdd.format = storedTag.format;
+                                        }
+                                        if (storedTag.daq && !tag.daq) {
+                                            tagToAdd.daq = storedTag.daq;
+                                        }
+                                    }
                                     deviceToAdd.tags[tagToAdd.id] = tagToAdd;
                                 } catch (terr) {
                                     logger.error(`BB_EQUIP_${deviceIndex} ${device.name} Error: tag defination ${tag.id} ${terr}`);
