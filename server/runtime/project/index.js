@@ -916,11 +916,14 @@ function _mergeDefaultConfig() {
                                     if (tag.divisor) tagToAdd.divisor = tag.divisor;
                                     if (tag.options) tagToAdd.options = tag.options;
                                     if (storedTag) {
-                                        if (storedTag.format && !tag.options) {
+                                        if (storedTag.format && !tag.format) {
                                             tagToAdd.format = storedTag.format;
                                         }
                                         if (storedTag.daq && !tag.daq) {
                                             tagToAdd.daq = storedTag.daq;
+                                        }
+                                        if (storedTag.scale && !tag.scale) {
+                                            tagToAdd.scale = storedTag.scale;
                                         }
                                     }
                                     deviceToAdd.tags[tagToAdd.id] = tagToAdd;
