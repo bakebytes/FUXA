@@ -36,6 +36,9 @@
 
     "dlg.layout-title": "Layout Settings",
     "dlg.layout-general": "General",
+    "dlg.layout-lbl-auto-resize": "Auto resize",
+    "dlg.layout-lbl-logo": "Logo",
+    "dlg.layout-lbl-icon": "Icon",
     "dlg.layout-lbl-sview": "Window displayed at Start",
     "dlg.layout-lbl-login-start": "Show Login on Start",
     "dlg.layout-lbl-zoom": "Allow Window Zoom",
@@ -1221,6 +1224,7 @@
     "msg.report-property-missing-value": "There are incorrect or missing values!",
 
     "msg.home-welcome": "Wait...go to editor, map the devices, design your visualization and bind the devices variables",
+    "msg.server-connection-failed": "SERVER CONNECTION FAILED!",
     "msg.project-load-error": "Unable to read '{{value}}'",
     "msg.project": "You want to save the Project change?",
     "msg.tags-remove-all": "Would you like to remove all Tags?",

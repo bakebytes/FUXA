@@ -35,7 +35,7 @@
                         <ngx-gauge [options]="options" #ngauge [value]="gauge.value"></ngx-gauge>
                     </div>
                 </div>
-                <div class="toolbox-det" *ngIf="gaugeType!=gaugeTypeEnum.Donut">
+                <div class="toolbox-det" *ngIf="gaugeType !== gaugeTypeEnum.Donut">
                     <div class="field-row">
                         <div class="my-form-field" style="padding-left: 12px">
                             <span>{{'bag.property-ticks' | translate}}</span>

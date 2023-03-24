@@ -14,7 +14,6 @@
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
             "progress": true,
-            "extractCss": true,
             "outputPath": "dist",
             "index": "src/index.html",
             "main": "src/main.ts",
@@ -32,6 +31,22 @@
             "scripts": [
               "node_modules/uplot/dist/uPlot.iife.min.js",
               "src/assets/lib/uplot/placement.min.js"
+            ],
+            "aot": false,
+            "vendorChunk": true,
+            "extractLicenses": false,
+            "buildOptimizer": false,
+            "sourceMap": true,
+            "optimization": false,
+            "namedChunks": true,
+            "allowedCommonJsDependencies": [
+                "chart.js",
+                "socket.io-client",
+                "chartjs-plugin-datalabels",
+                "panzoom",
+                "codemirror/addon/lint/lint",
+                "codemirror/mode/javascript/javascript",
+                "codemirror/mode/markdown/markdown"
             ]
           },
           "configurations": {
@@ -45,7 +60,6 @@
               "optimization": true,
               "outputHashing": "all",
               "sourceMap": false,
-              "extractCss": true,
               "namedChunks": false,
               "aot": true,
               "extractLicenses": true,
@@ -62,7 +76,6 @@
               "optimization": true,
               "outputHashing": "all",
               "sourceMap": false,
-              "extractCss": true,
               "namedChunks": false,
               "aot": true,
               "extractLicenses": true,
@@ -87,12 +100,11 @@
               "optimization": true,
               "outputHashing": "all",
               "sourceMap": false,
-              "extractCss": true,
               "namedChunks": false,
               "aot": true,
               "extractLicenses": true,
               "vendorChunk": false,
-              "buildOptimizer": true              
+              "buildOptimizer": true
             },
             "clientdebug": {
               "fileReplacements": [
@@ -102,7 +114,8 @@
                 }
               ]           
             }
-          }
+          },
+          "defaultConfiguration": ""
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
@@ -130,6 +143,7 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
+            "sourceMap": false,
             "main": "src/test.ts",
             "polyfills": "src/polyfills.ts",
             "tsConfig": "src/tsconfig.spec.json",
