@@ -926,6 +926,7 @@ function _mergeDefaultConfig() {
                                         if (storedTag.scale && !tag.scale) {
                                             tagToAdd.scale = storedTag.scale;
                                         }
+                                        logger.info(`${tagToAdd.id} => ${tagToAdd.format}, ${tagToAdd.daq}, ${tagToAdd.scale}`);
                                     }
                                     deviceToAdd.tags[tagToAdd.id] = tagToAdd;
                                 } catch (terr) {
