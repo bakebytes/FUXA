@@ -907,6 +907,7 @@ function _mergeDefaultConfig() {
                                     continue;
                                 }
                                 try {
+                                    logger.info(storedTag);
                                     var tagToAdd = new Tag(tag.id);
                                     if (tag.name) tagToAdd.name = tag.name;
                                     if (tag.label) tagToAdd.label = tag.label;
