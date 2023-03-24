@@ -916,7 +916,7 @@ function _mergeDefaultConfig() {
                                     if (tag.divisor) tagToAdd.divisor = tag.divisor;
                                     if (tag.options) tagToAdd.options = tag.options;
                                     if (storedTag) {
-                                        logger.info(`${storedTag.format}=${tag.format}`);
+                                        logger.info(`${storedTag.id} => ${storedTag.format}=${tag.format}, ${storedTag.daq}=${tag.daq}, ${storedTag.scale}=${tag.scale}`);
                                         if (storedTag.format && !tag.format) {
                                             tagToAdd.format = storedTag.format;
                                         }
