@@ -916,17 +916,16 @@ function _mergeDefaultConfig() {
                                     if (tag.divisor) tagToAdd.divisor = tag.divisor;
                                     if (tag.options) tagToAdd.options = tag.options;
                                     if (storedTag) {
-                                        logger.info(`${storedTag.id} => ${storedTag.format}=${tag.format}, ${storedTag.daq}=${tag.daq}, ${storedTag.scale}=${tag.scale}`);
-                                        if (storedTag.format && !tag.format) {
+                                        if (!utils.isNullOrUndefined(storedTag.format)) {
                                             tagToAdd.format = storedTag.format;
                                         }
-                                        if (storedTag.daq && !tag.daq) {
+                                        if (storedTag.daq) {
                                             tagToAdd.daq = storedTag.daq;
                                         }
-                                        if (storedTag.scale && !tag.scale) {
+                                        if (storedTag.scale) {
                                             tagToAdd.scale = storedTag.scale;
                                         }
-                                        logger.info(`${tagToAdd.id} => ${tagToAdd.format}, ${tagToAdd.daq}, ${tagToAdd.scale}`);
+                                        // logger.info(`${tagToAdd.id} => ${tagToAdd.format}, ${tagToAdd.daq}, ${tagToAdd.scale}`);
                                     }
                                     deviceToAdd.tags[tagToAdd.id] = tagToAdd;
                                 } catch (terr) {
