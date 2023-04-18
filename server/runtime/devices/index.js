@@ -124,6 +124,10 @@ function load() {
             devices.loadDevice(tempdevices[id]);
         }
     }
+    // check server device
+    if (!tempdevices[FuxaServerId]) {
+        devices.loadDevice({ id: '0', name: 'BakeBytes Server', type: 'FuxaServer', property: {}, tags: {}, enabled: true });
+    }
     // log remove device not used
     for (var id in activeDevices) {
         if (Object.keys(tempdevices).indexOf(id) < 0) {
